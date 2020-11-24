@@ -16,7 +16,7 @@ void microbit_setup()
     uart_param_config(BBC_UART_NUM, &uart_config);
 
     //Set UART pins to the BBC Microbit (UART2)
-    uart_set_pin(BBC_UART_NUM, MICROBIT_TX, MICROBIT_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(BBC_UART_NUM, MICROBIT_RX, MICROBIT_TX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     //Install UART driver, and get the queue (buffer size = 2048)
     uart_driver_install(BBC_UART_NUM, UARTMESSAGELENGTH * 8 * 2, UARTMESSAGELENGTH * 8 * 2, 50, &Microbit_Receive_Queue, 0);

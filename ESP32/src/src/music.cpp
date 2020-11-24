@@ -8,14 +8,14 @@ TaskHandle_t MusicTask;
 TaskHandle_t MusicBusyTask;
 
 volatile int BusyPin;
-const uint8_t commandPause = 50;
+const int commandPause = 50;
 
 void music_setup()
 {
-    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_TX, DFPLAYER_RX);
+    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
 
     //Configure serial port pins and busy pin
-    pinMode( DFPLAYER_BUSY, INPUT);
+    pinMode(DFPLAYER_BUSY, INPUT);
     DFPlayer.begin(Serial1, 750);
 
     BusyPin = digitalRead(DFPLAYER_BUSY);
@@ -111,17 +111,17 @@ void music_task(void *pvParameters)
         parts = processQueueMessage(X.c_str(), "MUSIC");
 
         Serial.print("action:");
-        Serial.print(parts.identifier);
+        Serial.println(parts.identifier);
 
         if (strcmp(parts.identifier, "Z1") == 0)
         {
             auto volume = atol(parts.value1);
             volume = constrain(volume, 0, 30);
 
-            delay(50);
+            delay(commandPause);
             DFPlayer.volume(volume);
 
-            delay(50);
+            delay(commandPause);
             currentVolume = DFPlayer.currentVolume();
 
             //TODO: See if this itoa is needed
@@ -149,6 +149,9 @@ void music_task(void *pvParameters)
         {
             auto trackNum = atol(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
+
+            Serial.print("DFPlayer.play:");
+            Serial.println(trackNum);
 
             delay(commandPause);
             DFPlayer.play(trackNum);

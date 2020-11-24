@@ -116,7 +116,7 @@ std::vector<std::string> parseUART(const std::string &strStringToSplit,
         if (keepEmpty || !strTemp.empty())
         {
             //only do this if we have a command
-            if (strTemp.length() > 2)
+            if (strTemp.length() > 1)
             {
                 // Serial.print(">>");
                 // Serial.println(strTemp.c_str());
