@@ -1,4 +1,4 @@
-# Ada' Super Computer (SN3)
+# Ada' Super Computer (SN4)
 
-This is the third version of Ada's Super Computer to be built on a PCB board.
+This is the fourth version of Ada's Super Computer to be built on a PCB board.
 
