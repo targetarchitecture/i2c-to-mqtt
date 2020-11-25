@@ -26,10 +26,11 @@ void movement_setup()
     }
 
     //don't need to call pwm.begin as this reinitialise the i2c
+    //pwm.begin
     pwm.reset();
-    pwm.setPWMFreq(50); // Analog servos run at ~50 Hz updates
     pwm.setOscillatorFrequency(27000000);
-
+    pwm.setPWMFreq(50); // Analog servos run at ~50 Hz updates
+    
     xSemaphoreGive(i2cSemaphore);
 
     delay(10);
@@ -86,7 +87,7 @@ void movement_task(void *pvParameters)
         //TODO: see if need this copy of msg
         std::string X = msg;
 
-        parts = processQueueMessage(X.c_str(), "MUSIC");
+        parts = processQueueMessage(X.c_str(), "MOVEMENT");
 
         Serial.print("action:");
         Serial.print(parts.identifier);
@@ -245,14 +246,22 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
 
 void setServoPWM(const int16_t pin, const int16_t PWM)
 {
-    Serial.println("setServoPWM");
+    // Serial.println("setServoPWM");
+
+    servos[pin].PWM = PWM;
 
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    pwm.setPWM(pin, 0, servos[pin].PWM);
+    pwm.setPWM(pin, 0, PWM);
 
     xSemaphoreGive(i2cSemaphore);
+
+    Serial.print("setServoPWM on pin ");
+    Serial.print(pin);
+    Serial.print(" PWM  ");
+    Serial.print(PWM);
+    Serial.println("");
 }
 
 void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse)
@@ -270,6 +279,7 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
     servos[pin].PWM = mapAngles(servos[pin].setDegree, 0, 180, servos[pin].minPulse, servos[pin].maxPulse);
 
     //wait for the i2c semaphore flag to become available
+
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     pwm.setPWM(pin, 0, servos[pin].PWM);
