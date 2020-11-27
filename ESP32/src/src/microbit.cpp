@@ -122,12 +122,11 @@ void microbit_transmit_task(void *pvParameters)
 {
     for (;;)
     {
-        char msg[MAXBBCMESSAGELENGTH] = {0};
+        char msg[MAXBBCMESSAGELENGTH + 1] = {0};
 
         if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
         {
-            //append CRLF to the end so the microbit knows the end of the line
-            //strcat(msg, "\r\n");
+            //append # to the end so the microbit knows the end of the line
             strcat(msg, "#");
 
             int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));

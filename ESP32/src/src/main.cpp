@@ -1,5 +1,5 @@
 /* 
-Rainbow Sparkle Unicorn - SN3
+Rainbow Sparkle Unicorn - SN4
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -76,8 +76,7 @@ void setup()
 
   DAC_setup();
 
-  //On SN3 the ADC pin is wrong and has been moved on SN4
-  //ADC_setup();
+  ADC_setup();
 
   light_setup();
 
@@ -198,7 +197,7 @@ messageParts processQueueMessage(std::string msg, std::string from)
   // Serial.print("value6:");
   // Serial.println(mParts.value6);
   // Serial.print("value7:");
-  // Serial.println(mParts.valuey);
+  // Serial.println(mParts.value7);
   // Serial.print("fullMessage:");
   // Serial.println(mParts.fullMessage);
 

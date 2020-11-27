@@ -46,7 +46,7 @@ void encoders_deal_with_messge(char msg[MAXMESSAGELENGTH])
     {
         encoder2Enabled = false;
     }
-    else if (strcmp(msg, "W1,1") == 0)
+    else if (strcmp(msg, "W2,1") == 0)
     {
         encoder2Enabled = true;
     }
@@ -102,7 +102,15 @@ void encoders_task(void *pvParameter)
             }
         }
 
-        delay(500);
+        if (encoder1Enabled == false && encoder2Enabled == false)
+        {
+            //take your time to do nothing
+            delay(1000);
+        }
+        else
+        {
+            delay(500);
+        }
     }
 
     vTaskDelete(NULL);

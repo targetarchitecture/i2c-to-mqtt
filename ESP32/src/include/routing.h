@@ -11,6 +11,7 @@ std::vector<std::string> parseUART(const std::string &strStringToSplit,
                                    const std::string &strDelimiter,
                                    const bool keepEmpty);
 extern void encoders_deal_with_messge(char msg[MAXMESSAGELENGTH]);
+extern void ADC_deal_with_messge(char msg[MAXMESSAGELENGTH]);
 
 extern QueueHandle_t DAC_Queue;
 extern QueueHandle_t Music_Queue;

@@ -85,6 +85,11 @@ void routing_task(void *pvParameters)
 
                 xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
             }
+            else if (cmd[0] == 'U')
+            {
+                //ADC encoders
+                ADC_deal_with_messge(cmd);
+            }
         }
     }
 
