@@ -30,7 +30,9 @@ void movement_setup()
     pwm.reset();
     pwm.setOscillatorFrequency(27000000);
     pwm.setPWMFreq(50); // Analog servos run at ~50 Hz updates
-    
+
+    checkI2Cerrors("movement");
+
     xSemaphoreGive(i2cSemaphore);
 
     delay(10);
@@ -65,12 +67,14 @@ void movement_setup()
 void movement_task(void *pvParameters)
 {
     messageParts parts;
-    UBaseType_t uxHighWaterMark;
+    //UBaseType_t uxHighWaterMark;
 
     /* Inspect our own high water mark on entering the task. */
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("movement_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("movement_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -81,18 +85,18 @@ void movement_task(void *pvParameters)
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Movement_Queue:");
-        Serial.println(msg);
+        // Serial.print("Movement_Queue:");
+        // Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
 
         parts = processQueueMessage(X.c_str(), "MOVEMENT");
 
-        Serial.print("action:");
-        Serial.print(parts.identifier);
-        Serial.print(" @ ");
-        Serial.println(millis());
+        // Serial.print("action:");
+        // Serial.print(parts.identifier);
+        // Serial.print(" @ ");
+        // Serial.println(millis());
 
         if (strcmp(parts.identifier, "V1") == 0)
         {
@@ -157,7 +161,6 @@ void movement_task(void *pvParameters)
 
 void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse)
 {
-
     //set variables
     servos[pin].isMoving = true;
     servos[pin]._change = 32;
@@ -175,7 +178,7 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
 
     servos[pin].interuptEasing = false;
 
-    Serial.println("setServoEase");
+    //Serial.println("setServoEase");
 
     //uxTaskGetStackHighWaterMark = 9750
     if (pin == 0)
@@ -255,18 +258,20 @@ void setServoPWM(const int16_t pin, const int16_t PWM)
 
     pwm.setPWM(pin, 0, PWM);
 
+    checkI2Cerrors("movement (setServoPWM)");
+
     xSemaphoreGive(i2cSemaphore);
 
-    Serial.print("setServoPWM on pin ");
-    Serial.print(pin);
-    Serial.print(" PWM  ");
-    Serial.print(PWM);
-    Serial.println("");
+    // Serial.print("setServoPWM on pin ");
+    // Serial.print(pin);
+    // Serial.print(" PWM  ");
+    // Serial.print(PWM);
+    // Serial.println("");
 }
 
 void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse)
 {
-    Serial.println("setServoAngle");
+    //Serial.println("setServoAngle");
 
     // call stop servo to stop the servo
     stopServo(pin);
@@ -284,12 +289,14 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
 
     pwm.setPWM(pin, 0, servos[pin].PWM);
 
+    checkI2Cerrors("movement (setServoAngle)");
+
     xSemaphoreGive(i2cSemaphore);
 }
 
 void stopServo(const int16_t pin)
 {
-    Serial.println("stopServo");
+    //Serial.println("stopServo");
 
     // set the stopEasing value to the stop the task
     servos[pin].interuptEasing = true;
@@ -322,7 +329,7 @@ void ServoEasingTask(void *pvParameter)
     double easedPosition = 0;
     double t = 0;
 
-    Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", servos[0]._change, fromDegreeMapped, toDegreeMapped, servos[0].fromDegree, servos[0].toDegree);
+    //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", servos[0]._change, fromDegreeMapped, toDegreeMapped, servos[0].fromDegree, servos[0].toDegree);
 
     for (int i = 0; i <= servos[pin]._duration * 20; i++)
     {
@@ -360,13 +367,15 @@ void ServoEasingTask(void *pvParameter)
 
         pwm.setPWM(pin, 0, servos[pin].PWM);
 
+        checkI2Cerrors("movement (ServoEasingTask)");
+
         xSemaphoreGive(i2cSemaphore);
 
         //check for marker to stop easing
         if (servos[pin].interuptEasing == true)
         {
-            Serial.print("Request to leave easing task: ");
-            Serial.println(millis());
+            // Serial.print("Request to leave easing task: ");
+            // Serial.println(millis());
 
             break;
         }
@@ -374,7 +383,7 @@ void ServoEasingTask(void *pvParameter)
         delay(50);
     }
 
-    //TODO: Add event to BBC microbit queue
+    //Add event to BBC microbit queue
     char msgtosend[MAXBBCMESSAGELENGTH];
 
     if (servos[pin].interuptEasing == false)
@@ -387,10 +396,10 @@ void ServoEasingTask(void *pvParameter)
     }
     sendToMicrobit(msgtosend);
 
-    Serial.print("completed in: ");
-    Serial.print(millis() - startTime);
-    Serial.print(" @ ");
-    Serial.println(millis());
+    // Serial.print("completed in: ");
+    // Serial.print(millis() - startTime);
+    // Serial.print(" @ ");
+    // Serial.println(millis());
 
     servos[pin].isMoving = false;
     servos[pin].interuptEasing = false;

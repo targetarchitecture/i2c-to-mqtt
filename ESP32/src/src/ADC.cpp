@@ -28,13 +28,15 @@ void ADC_setup()
 
 void ADC_task(void *pvParameters)
 {
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
-    long newADC1value;
-    long newADC2value;
+Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
+
+    long newADC1value= 10000;
+    long newADC2value=10000;
 
     for (;;)
     {
@@ -86,7 +88,7 @@ void ADC_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void ADC_deal_with_messge(char msg[MAXMESSAGELENGTH])
+void ADC_deal_with_message(char msg[MAXMESSAGELENGTH])
 {
     if (strcmp(msg, "U1,0") == 0)
     {

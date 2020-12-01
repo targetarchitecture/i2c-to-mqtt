@@ -8,7 +8,7 @@ void routing_setup()
     xTaskCreate(
         routing_task,                 /* Task function. */
         "Routing Task",               /* name of task. */
-        configMINIMAL_STACK_SIZE * 2, /* Stack size of task */
+        configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
         NULL,                         /* parameter of the task */
         2,                            /* priority of the task */
         &RoutingTask);                /* Task handle to keep track of created task */
@@ -19,10 +19,12 @@ void routing_task(void *pvParameters)
     //char firstCharacter;
 
     /* Inspect our own high water mark on entering the task. */
-    BaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("routing_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // BaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -37,13 +39,13 @@ void routing_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Message_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Command_Queue:");
-        Serial.println(msg);
+        Serial.printf ("Command_Queue: %s\n",msg);
+        //Serial.println(msg);
 
         auto X = parseUART(msg, " ", false);
 
-        Serial.print("parseUART:");
-        Serial.println(X.size());
+        // Serial.print("parseUART:");
+        // Serial.println(X.size());
 
         for (int i = 0; i < X.size(); i++)
         {
@@ -77,7 +79,7 @@ void routing_task(void *pvParameters)
             else if (cmd[0] == 'W')
             {
                 //rotary encoders
-                encoders_deal_with_messge(cmd);
+                encoders_deal_with_message(cmd);
             }
             else if (cmd[0] == 'V')
             {
@@ -88,7 +90,12 @@ void routing_task(void *pvParameters)
             else if (cmd[0] == 'U')
             {
                 //ADC encoders
-                ADC_deal_with_messge(cmd);
+                ADC_deal_with_message(cmd);
+            }
+            else if (cmd[0] == 'T')
+            {
+                //MQTT messaging
+                xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
             }
         }
     }

@@ -17,4 +17,6 @@ void microbit_transmit_task(void *pvParameters);
 void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 void microbit_receive_task(void *pvParameters);
 
+extern void checkI2Cerrors(const char *area);
+
 #endif

@@ -31,6 +31,8 @@ void setServoPWM(const int16_t pin, const int16_t PWM);
 void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse);
 void movement_setup();
 void movement_task(void *pvParameter);
+
+extern void checkI2Cerrors(const char *area);
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void POST(uint8_t flashes);
 

@@ -42,12 +42,14 @@ void music_setup()
 void music_busy_task(void *pvParameters)
 {
     /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
     int NewBusyPin;
+
+    Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -56,8 +58,8 @@ void music_busy_task(void *pvParameters)
 
         if (BusyPin != NewBusyPin)
         {
-            Serial.print("DFPlayer Busy:");
-            Serial.println(NewBusyPin);
+            // Serial.print("DFPlayer Busy:");
+            // Serial.println(NewBusyPin);
 
             //TODO: Can this be improved?
             char msgtosend[MAXBBCMESSAGELENGTH];
@@ -86,10 +88,12 @@ void music_task(void *pvParameters)
     int16_t currentTrack;
 
     /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("music_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("music_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+       Serial.printf("Music task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -102,16 +106,16 @@ void music_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Music_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Music_Queue:");
-        Serial.println(msg);
+        // Serial.print("Music_Queue:");
+        // Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
 
         parts = processQueueMessage(X.c_str(), "MUSIC");
 
-        Serial.print("action:");
-        Serial.println(parts.identifier);
+        // Serial.print("action:");
+        // Serial.println(parts.identifier);
 
         if (strcmp(parts.identifier, "Z1") == 0)
         {
@@ -146,8 +150,8 @@ void music_task(void *pvParameters)
             auto trackNum = atol(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
 
-            Serial.print("DFPlayer.play:");
-            Serial.println(trackNum);
+            // Serial.print("DFPlayer.play:");
+            // Serial.println(trackNum);
 
             delay(commandPause);
             DFPlayer.play(trackNum);

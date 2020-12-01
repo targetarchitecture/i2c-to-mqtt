@@ -15,6 +15,14 @@ struct messageParts
     char value5[MAXMESSAGEFRAGMENTSIZE];
     char value6[MAXMESSAGEFRAGMENTSIZE];
     char value7[MAXMESSAGEFRAGMENTSIZE];
+
+    // std::string str1;
+    // std::string str2;
+    // std::string str3;
+    // std::string str4;
+    // std::string str5;
+    // std::string str6;
+    // std::string str7;
 };
 
 #endif

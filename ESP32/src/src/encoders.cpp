@@ -32,7 +32,7 @@ void encoders_setup()
     xTaskCreate(&encoders_task, "encoders_task", 2048, NULL, 1, &EncodersTask);
 }
 
-void encoders_deal_with_messge(char msg[MAXMESSAGELENGTH])
+void encoders_deal_with_message(char msg[MAXMESSAGELENGTH])
 {
     if (strcmp(msg, "W1,0") == 0)
     {
@@ -54,10 +54,10 @@ void encoders_deal_with_messge(char msg[MAXMESSAGELENGTH])
 
 void encoders_task(void *pvParameter)
 {
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("encoders_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("encoders_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
     int32_t newEncoder1Count = 0;
     int32_t newEncoder2Count = 0;

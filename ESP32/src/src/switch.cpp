@@ -5,14 +5,14 @@
 SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
-byte pinState[15] = {HIGH};
+int pinState[15]; // {HIGH};
 
 void switch_setup()
 {
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    if (!switches.begin(0x3F))
+    if (!switches.begin(0x3E))
     {
         Serial.println("SX1509 for switching not found");
 
@@ -20,7 +20,7 @@ void switch_setup()
     }
 
     // Use the internal 2MHz oscillator.
-    switches.clock(INTERNAL_CLOCK_2MHZ);
+    //switches.clock(INTERNAL_CLOCK_2MHZ,4);  //TODO: Review the ,4 I've just added
     switches.debounceTime(32); //64
 
     for (size_t i = 0; i < 16; i++)
@@ -31,6 +31,8 @@ void switch_setup()
         //Serial.print("debouncePin:");
         //Serial.println(i);
     }
+
+    checkI2Cerrors("switch");
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
@@ -47,23 +49,25 @@ void switch_setup()
 void switch_task(void *pvParameters)
 {
     //TODO: Ask Google if this is the best place to declare variables in an endless task
-    byte newPinState[15] = {HIGH};
+    int newPinState[16]; // {HIGH};
 
     for (size_t i = 0; i < 16; i++)
     {
         //set the pin states to HIGH as PULLUP is set
-        pinState[i] = HIGH;
-        newPinState[i] = HIGH;
+        pinState[i] = 1;    //HIGH;
+        newPinState[i] = 1; // HIGH;
     }
 
     //TODO: see if this improves the inital flood of readings
     delay(100);
 
     /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("switch_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+       Serial.printf("Switch task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -78,10 +82,21 @@ void switch_task(void *pvParameters)
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
+          checkI2Cerrors("switch (switch_task start)");
+
         for (size_t i = 0; i < 16; i++)
         {
-            newPinState[i] = switches.digitalRead(i);
+            if (switches.digitalRead(i) == LOW)
+            {
+                newPinState[i] = 0;
+            }
+            else //if (switches.digitalRead(i) == HIGH)
+            {
+                newPinState[i] = 1;
+            }
         }
+
+        checkI2Cerrors("switch (switch_task end)");
 
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
@@ -91,23 +106,23 @@ void switch_task(void *pvParameters)
             //check for differance
             if (pinState[i] != newPinState[i])
             {
-                Serial.printf("Readings (%d): %d,%d \n", i, pinState[i], newPinState[i]);
+                //Serial.printf("Readings (%i): %i,%i \n", i, pinState[i], newPinState[i]);
 
                 char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "E%d,%d", i + 1, newPinState[i]);
-
-                Serial.print("msgtosend:");
-                Serial.println(msgtosend);
+                sprintf(msgtosend, "E%i,%i", i, newPinState[i]);
 
                 sendToMicrobit(msgtosend);
+
+                // Serial.print("msgtosend:");
+                // Serial.println(msgtosend);
 
                 pinState[i] = newPinState[i];
             }
         }
 
-        //TODO: On SN4 change this to wait for interupt
+        //TODO: On SN5 change this to wait for interupt
         // put a delay so it isn't overwhelming
-        delay(50);
+        delay(100);
     }
 
     vTaskDelete(NULL);

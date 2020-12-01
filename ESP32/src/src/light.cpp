@@ -20,7 +20,7 @@ void light_setup()
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    if (!lights.begin(0x3E))
+    if (!lights.begin(0x3F))
     {
         Serial.println("SX1509 for lighting not found");
 
@@ -29,6 +29,8 @@ void light_setup()
 
     // Use the internal 2MHz oscillator.
     lights.clock(INTERNAL_CLOCK_2MHZ, 4);
+
+    checkI2Cerrors("light");
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
@@ -50,10 +52,12 @@ void light_task(void *pvParameters)
     // int16_t currentTrack;
 
     /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("light_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("light_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+      Serial.printf("Light task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -66,18 +70,18 @@ void light_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Light_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Light_Queue:");
-        Serial.println(msg);
+        // Serial.print("Light_Queue:");
+        // Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
 
         parts = processQueueMessage(X.c_str(), "LIGHT");
 
-        Serial.print("action:");
-        Serial.print(parts.identifier);
-        Serial.print(" @ ");
-        Serial.println(millis());
+        // Serial.print("action:");
+        // Serial.print(parts.identifier);
+        // Serial.print(" @ ");
+        // Serial.println(millis());
 
         /*
         The breathable pins are 4, 5, 6, 7, 12, 13, 14, 15 only. If tRise and
@@ -99,6 +103,8 @@ void light_task(void *pvParameters)
 
             lights.pinMode(pin, OUTPUT);  // Set LED pin to OUTPUT
             lights.blink(pin, tOn, tOff); // Blink the LED pin -- ~1000 ms LOW, ~500 ms HIGH:
+
+            checkI2Cerrors("light Y1");
 
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
@@ -122,6 +128,8 @@ void light_task(void *pvParameters)
 
             lights.pinMode(pin, ANALOG_OUTPUT);         // To breathe an LED, make sure you set it as an ANALOG_OUTPUT, so we can PWM the pin
             lights.breathe(pin, tOn, tOff, rise, fall); // Breathe an LED: 1000ms LOW, 500ms HIGH, 500ms to rise from low to high, 250ms to fall from high to low
+
+            checkI2Cerrors("light Y2");
 
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
@@ -148,6 +156,8 @@ void light_task(void *pvParameters)
 
                 lights.pinMode(pin, OUTPUT);    // Set LED pin to OUTPUT
                 lights.digitalWrite(pin, HIGH); //set to ON for Ada!
+
+                checkI2Cerrors("light Y3");
 
                 //give back the i2c flag for the next task
                 xSemaphoreGive(i2cSemaphore);
@@ -182,6 +192,8 @@ void stopLight(long pin)
     {
         lights.setupBlink(pin, 0, 0);
     }
+
+    checkI2Cerrors("light (stoplight)");
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);

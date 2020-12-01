@@ -30,6 +30,8 @@ void microbit_setup()
 
 void microbit_receive_task(void *pvParameters)
 {
+Serial.printf("Microbit RX task is on core %i\n", xPortGetCoreID());
+
     uart_event_t event;
     uint8_t *dtmp = (uint8_t *)malloc(UARTMESSAGELENGTH * 8);
 
@@ -108,8 +110,8 @@ void microbit_receive_task(void *pvParameters)
 
 void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 {
-    Serial.print("sendToMicrobit [msg]:");
-    Serial.println(msg);
+    //Serial.print("sendToMicrobit [msg]:");
+    //Serial.println(msg);
 
     //the queue needs to work with a copy
     char queuedMsg[MAXBBCMESSAGELENGTH];
@@ -120,6 +122,9 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 
 void microbit_transmit_task(void *pvParameters)
 {
+    Serial.printf("Microbit TX task is on core %i\n", xPortGetCoreID());
+
+
     for (;;)
     {
         char msg[MAXBBCMESSAGELENGTH + 1] = {0};
@@ -131,14 +136,10 @@ void microbit_transmit_task(void *pvParameters)
 
             int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
 
-            Serial.print("completed BBC TX:");
-            Serial.print(msg);
-            Serial.print(" @ ");
-            Serial.print(bytes);
-            Serial.print(" @ ");
-            Serial.print(strlen(msg));
-            Serial.print(" @ ");
-            Serial.println(millis());
+            Serial.printf("completed BBC TX: %s @ %i @ %i @ %i\n", msg, bytes, strlen(msg), millis());
+
+            //Added on 1/12/20 to try to stop flooding
+            delay(10);
         }
     }
 
