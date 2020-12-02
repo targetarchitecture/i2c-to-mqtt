@@ -22,21 +22,21 @@ void music_setup()
 
     //Serial.println("music_setup");
 
-    xTaskCreate(
-        music_task,   /* Task function. */
-        "Music Task", /* name of task. */
-        12000,        /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
-        NULL,         /* parameter of the task */
-        1,            /* priority of the task */
-        &MusicTask);  /* Task handle to keep track of created task */
+    xTaskCreatePinnedToCore(
+        music_task,                    /* Task function. */
+        "Music Task",                  /* name of task. */
+        12000,                         /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
+        NULL,                          /* parameter of the task */
+        1,                             /* priority of the task */
+        &MusicTask, 1); /* Task handle to keep track of created task */
 
-    xTaskCreate(
-        music_busy_task,   /* Task function. */
-        "Music Busy Task", /* name of task. */
-        2048,              /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
-        NULL,              /* parameter of the task */
-        1,                 /* priority of the task */
-        &MusicBusyTask);   /* Task handle to keep track of created task */
+    xTaskCreatePinnedToCore(
+        music_busy_task,                   /* Task function. */
+        "Music Busy Task",                 /* name of task. */
+        2048,                              /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
+        NULL,                              /* parameter of the task */
+        1,                                 /* priority of the task */
+        &MusicBusyTask, 1); /* Task handle to keep track of created task */
 }
 
 void music_busy_task(void *pvParameters)
@@ -93,7 +93,7 @@ void music_task(void *pvParameters)
     // Serial.print("music_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-       Serial.printf("Music task is on core %i\n", xPortGetCoreID());
+    Serial.printf("Music task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {

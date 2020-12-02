@@ -17,13 +17,13 @@ void ADC_setup()
     ADC1_VALUE = map(analogRead(ADC1), 0, 4095, 0, 100);
     ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
 
-    xTaskCreate(
-        ADC_task,   /* Task function. */
-        "ADC Task", /* name of task. */
-        3500,       /* Stack size of task (uxTaskGetStackHighWaterMark = 3208)*/
-        NULL,       /* parameter of the task */
-        1,          /* priority of the task */
-        &ADCTask);  /* Task handle to keep track of created task */
+    xTaskCreatePinnedToCore(
+        ADC_task,                    /* Task function. */
+        "ADC Task",                  /* name of task. */
+        3500,                        /* Stack size of task (uxTaskGetStackHighWaterMark = 3208)*/
+        NULL,                        /* parameter of the task */
+        1,                           /* priority of the task */
+        &ADCTask, 1); /* Task handle to keep track of created task */
 }
 
 void ADC_task(void *pvParameters)
@@ -33,10 +33,10 @@ void ADC_task(void *pvParameters)
     // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
+    Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
 
-    long newADC1value= 10000;
-    long newADC2value=10000;
+    long newADC1value = 10000;
+    long newADC2value = 10000;
 
     for (;;)
     {

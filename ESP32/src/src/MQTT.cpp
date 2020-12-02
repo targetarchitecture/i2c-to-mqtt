@@ -19,13 +19,13 @@ void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
 
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
       MQTT_task,   /* Task function. */
       "MQTT Task", /* name of task. */
       2048 * 8,    /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
       NULL,        /* parameter of the task */
       5,           /* priority of the task */
-      &MQTTTask);  /* Task handle to keep track of created task */
+      &MQTTTask,1);  /* Task handle to keep track of created task */
 }
 
 void Wifi_connect()
@@ -102,8 +102,6 @@ void MQTT_task(void *pvParameter)
   Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
   Serial.println(uxHighWaterMark);
 
-  WIFI_SSID = "152 2.4GHz";
-  WIFI_PASSPHRASE = "derwenthorpe";
   Wifi_connect();
 
   for (;;)

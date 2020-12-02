@@ -22,10 +22,10 @@ void microbit_setup()
     uart_driver_install(BBC_UART_NUM, UARTMESSAGELENGTH * 8 * 2, UARTMESSAGELENGTH * 8 * 2, 50, &Microbit_Receive_Queue, 0);
 
     //Create a task to handler UART event from ISR
-    xTaskCreate(microbit_receive_task, "Microbit RX Task", 2048, NULL, 12, &MicrobitRXTask);
+    xTaskCreatePinnedToCore(microbit_receive_task, "Microbit RX Task", 2048, NULL, 12, &MicrobitRXTask,1);
 
     //Create a task to handle send UART data to Microbit
-    xTaskCreate(microbit_transmit_task, "Microbit TX Task", 2048, NULL, 1, &MicrobitTXTask);
+    xTaskCreatePinnedToCore(microbit_transmit_task, "Microbit TX Task", 2048, NULL, 1, &MicrobitTXTask,1);
 }
 
 void microbit_receive_task(void *pvParameters)

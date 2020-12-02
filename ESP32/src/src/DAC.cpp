@@ -5,13 +5,13 @@ TaskHandle_t DACTask;
 
 void DAC_setup()
 {
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         DAC_task,   /* Task function. */
         "DAC Task", /* name of task. */
         3500,       /* Stack size of task (uxTaskGetStackHighWaterMark = 3204) */
         NULL,       /* parameter of the task */
         1,          /* priority of the task */
-        &DACTask);  /* Task handle to keep track of created task */
+        &DACTask,1);  /* Task handle to keep track of created task */
 }
 
 void DAC_task(void *pvParameters)

@@ -35,13 +35,13 @@ void light_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         light_task,   /* Task function. */
         "Light Task", /* name of task. */
         2048 * 4,     /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
         NULL,         /* parameter of the task */
         1,            /* priority of the task */
-        &LightTask);  /* Task handle to keep track of created task */
+        &LightTask,1);  /* Task handle to keep track of created task */
 }
 
 void light_task(void *pvParameters)

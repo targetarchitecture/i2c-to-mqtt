@@ -6,6 +6,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 extern SemaphoreHandle_t i2cSemaphore;
 TaskHandle_t MovementTask;
 
+
 void movement_setup()
 {
     //Serial.println("8 channel Servo test!");
@@ -55,13 +56,15 @@ void movement_setup()
     }
 
     //this task is to recieve the
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         movement_task,                /* Task function. */
         "Movement Task",              /* name of task. */
         configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
         NULL,                         /* parameter of the task */
         2,                            /* priority of the task */
-        &MovementTask);               /* Task handle to keep track of created task */
+        &MovementTask,1);               /* Task handle to keep track of created task */
+
+        
 }
 
 void movement_task(void *pvParameters)
@@ -183,67 +186,67 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     //uxTaskGetStackHighWaterMark = 9750
     if (pin == 0)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 0 Task", 10000, (void *)0, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 0 Task", 10000, (void *)0, 3, NULL,1);
     }
     if (pin == 1)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 1 Task", 10000, (void *)1, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 1 Task", 10000, (void *)1, 3, NULL,1);
     }
     if (pin == 2)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 2 Task", 10000, (void *)2, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 2 Task", 10000, (void *)2, 3, NULL,1);
     }
     if (pin == 3)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 3 Task", 10000, (void *)3, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 3 Task", 10000, (void *)3, 3, NULL,1);
     }
     if (pin == 4)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 4 Task", 10000, (void *)4, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 4 Task", 10000, (void *)4, 3, NULL,1);
     }
     if (pin == 5)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 5 Task", 10000, (void *)5, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 5 Task", 10000, (void *)5, 3, NULL,1);
     }
     if (pin == 6)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 6 Task", 10000, (void *)6, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 6 Task", 10000, (void *)6, 3, NULL,1);
     }
     if (pin == 7)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 7 Task", 10000, (void *)7, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 7 Task", 10000, (void *)7, 3, NULL,1);
     }
     if (pin == 8)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 8 Task", 10000, (void *)8, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 8 Task", 10000, (void *)8, 3, NULL,1);
     }
     if (pin == 9)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 9 Task", 10000, (void *)9, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 9 Task", 10000, (void *)9, 3, NULL,1);
     }
     if (pin == 10)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 10 Task", 10000, (void *)10, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 10 Task", 10000, (void *)10, 3, NULL,1);
     }
     if (pin == 11)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 11 Task", 10000, (void *)11, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 11 Task", 10000, (void *)11, 3, NULL,1);
     }
     if (pin == 12)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 12 Task", 10000, (void *)12, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 12 Task", 10000, (void *)12, 3, NULL,1);
     }
     if (pin == 13)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 13 Task", 10000, (void *)13, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 13 Task", 10000, (void *)13, 3, NULL,1);
     }
     if (pin == 14)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 14 Task", 10000, (void *)14, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 14 Task", 10000, (void *)14, 3, NULL,1);
     }
     if (pin == 15)
     {
-        xTaskCreate(&ServoEasingTask, "Servo 15 Task", 10000, (void *)15, 3, NULL);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 15 Task", 10000, (void *)15, 3, NULL,1);
     }
 }
 

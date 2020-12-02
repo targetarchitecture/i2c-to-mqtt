@@ -21,8 +21,6 @@ Rainbow Sparkle Unicorn - SN4
 #include "movement.h"
 #include "MQTT.h"
 
-//#define WRITETOSERIAL
-
 QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
 QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
 QueueHandle_t Music_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
@@ -73,7 +71,7 @@ void setup()
   Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));
 
   //get wifi going first as this seems to be problematic
-  //MQTT_setup();
+  MQTT_setup();
 
   //call the feature setup methods
   music_setup();

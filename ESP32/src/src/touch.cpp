@@ -32,7 +32,7 @@ void touch_setup()
     xSemaphoreGive(i2cSemaphore);
 
     //uxTaskGetStackHighWaterMark = 1750
-    xTaskCreate(&touch_task, "Touch Task", 2000, NULL, 1, &TouchTask);
+    xTaskCreatePinnedToCore(&touch_task, "Touch Task", 2000, NULL, 1, &TouchTask,1);
 }
 
 void touch_task(void *pvParameter)

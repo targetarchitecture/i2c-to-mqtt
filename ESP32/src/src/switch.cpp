@@ -37,13 +37,13 @@ void switch_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         switch_task,   /* Task function. */
         "Switch Task", /* name of task. */
         2048 * 4,      /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
         NULL,          /* parameter of the task */
         1,             /* priority of the task */
-        &SwitchTask);  /* Task handle to keep track of created task */
+        &SwitchTask,1);  /* Task handle to keep track of created task */
 }
 
 void switch_task(void *pvParameters)

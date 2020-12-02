@@ -5,13 +5,13 @@ TaskHandle_t RoutingTask;
 
 void routing_setup()
 {
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         routing_task,                 /* Task function. */
         "Routing Task",               /* name of task. */
         configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
         NULL,                         /* parameter of the task */
         2,                            /* priority of the task */
-        &RoutingTask);                /* Task handle to keep track of created task */
+        &RoutingTask,1);                /* Task handle to keep track of created task */
 }
 
 void routing_task(void *pvParameters)

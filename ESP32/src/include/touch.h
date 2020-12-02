@@ -16,4 +16,5 @@ extern void checkI2Cerrors(const char *area);
 
 extern SemaphoreHandle_t i2cSemaphore;
 
+
 #endif

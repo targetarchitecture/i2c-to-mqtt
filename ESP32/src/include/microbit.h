@@ -19,4 +19,5 @@ void microbit_receive_task(void *pvParameters);
 
 extern void checkI2Cerrors(const char *area);
 
+
 #endif
