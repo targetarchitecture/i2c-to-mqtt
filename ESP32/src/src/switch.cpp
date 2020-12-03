@@ -12,7 +12,7 @@ void switch_setup()
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    if (!switches.begin(0x3E))
+    if (!switches.begin(0x3F))
     {
         Serial.println("SX1509 for switching not found");
 
@@ -40,7 +40,7 @@ void switch_setup()
     xTaskCreatePinnedToCore(
         switch_task,   /* Task function. */
         "Switch Task", /* name of task. */
-        2048 * 4,      /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
+        8500    ,      /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
         NULL,          /* parameter of the task */
         1,             /* priority of the task */
         &SwitchTask,1);  /* Task handle to keep track of created task */
@@ -67,7 +67,7 @@ void switch_task(void *pvParameters)
     // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-       Serial.printf("Switch task is on core %i\n", xPortGetCoreID());
+    //   Serial.printf("Switch task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {

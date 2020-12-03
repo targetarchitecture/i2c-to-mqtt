@@ -33,7 +33,7 @@ void ADC_task(void *pvParameters)
     // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
+    //Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
 
     long newADC1value = 10000;
     long newADC2value = 10000;

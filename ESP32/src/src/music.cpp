@@ -49,7 +49,7 @@ void music_busy_task(void *pvParameters)
 
     int NewBusyPin;
 
-    Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
+   // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -93,7 +93,7 @@ void music_task(void *pvParameters)
     // Serial.print("music_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    Serial.printf("Music task is on core %i\n", xPortGetCoreID());
+   // Serial.printf("Music task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {

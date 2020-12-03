@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include "MQTT.h"
 
-//extern SemaphoreHandle_t i2cSemaphore;
-
 WiFiClient client;
 PubSubClient MQTTClient;
 
@@ -20,19 +18,19 @@ void MQTT_setup()
   pinMode(ONBOARDLED, OUTPUT);
 
   xTaskCreatePinnedToCore(
-      MQTT_task,   /* Task function. */
-      "MQTT Task", /* name of task. */
-      2048 * 8,    /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
-      NULL,        /* parameter of the task */
-      5,           /* priority of the task */
-      &MQTTTask,1);  /* Task handle to keep track of created task */
+      MQTT_task,     /* Task function. */
+      "MQTT Task",   /* name of task. */
+      17000   ,      /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+      NULL,          /* parameter of the task */
+      5,             /* priority of the task */
+      &MQTTTask, 1); /* Task handle to keep track of created task */
 }
 
 void Wifi_connect()
 {
-  Serial.println("Connecting to Wifi");
-  Serial.println(WIFI_SSID.c_str());
-  Serial.println(WIFI_PASSPHRASE.c_str());
+  // Serial.println("Connecting to Wifi");
+  // Serial.println(WIFI_SSID.c_str());
+  // Serial.println(WIFI_PASSPHRASE.c_str());
 
   WiFi.mode(WIFI_OFF);
   delay(250);
@@ -48,7 +46,7 @@ void Wifi_connect()
     delay(speed);
     digitalWrite(ONBOARDLED, LOW);
     delay(speed);
-    Serial.println(WiFi.status());
+    //Serial.println(WiFi.status());
   }
 
   char msgtosend[MAXBBCMESSAGELENGTH];
@@ -97,12 +95,10 @@ void MQTT_task(void *pvParameter)
 {
   messageParts parts;
 
-  UBaseType_t uxHighWaterMark;
-  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
-  Serial.println(uxHighWaterMark);
-
-  Wifi_connect();
+  // UBaseType_t uxHighWaterMark;
+  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+  // Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
+  // Serial.println(uxHighWaterMark);
 
   for (;;)
   {
@@ -125,8 +121,8 @@ void MQTT_task(void *pvParameter)
     //wait for new music command in the queue
     xQueueReceive(MQTT_Queue, &msg, portMAX_DELAY);
 
-    Serial.print("MQTT_Queue:");
-    Serial.println(msg);
+    //Serial.print("MQTT_Queue:");
+    //Serial.println(msg);
 
     //TODO: see if need this copy of msg
     std::string X = msg;
@@ -140,7 +136,7 @@ void MQTT_task(void *pvParameter)
       //TODO: Better way of sending spaces
       WIFI_SSID = ReplaceString(str, "PPP", " ");
 
-      Serial.printf("\n\nWIFI_SSID:%s<<<\n\n\n", WIFI_SSID.c_str());
+      //Serial.printf("\n\nWIFI_SSID:%s<<<\n\n\n", WIFI_SSID.c_str());
     }
     else if (strcmp(parts.identifier, "T2") == 0)
     {
@@ -148,7 +144,7 @@ void MQTT_task(void *pvParameter)
 
       WIFI_PASSPHRASE = str;
 
-      Serial.printf("\n\n_WIFI_PASSPHRASE:%s<<<\n\n\n", WIFI_PASSPHRASE.c_str());
+      //Serial.printf("\n\n_WIFI_PASSPHRASE:%s<<<\n\n\n", WIFI_PASSPHRASE.c_str());
     }
     else if (strcmp(parts.identifier, "T3") == 0)
     {
@@ -178,22 +174,24 @@ void MQTT_task(void *pvParameter)
     }
     else if (strcmp(parts.identifier, "T8") == 0)
     {
-      MQTT_connect();
+      //only bother if actually connected to internet!!
+      if (WiFi.status() == WL_CONNECTED)
+      {
+        MQTT_connect();
+      }
     }
     else if (strcmp(parts.identifier, "T9") == 0)
-    {
-      checkMQTTconnection(false);
+    { 
+      //only bother if actually connected to internet!!
+      if (WiFi.status() == WL_CONNECTED)
+      {
+        checkMQTTconnection(false);
 
-      std::string topic(parts.value1);
-      std::string payload(parts.value2);
+        std::string topic(parts.value1);
+        std::string payload(parts.value2);
 
-      //TODO: see if this works
-      //wait for the i2c semaphore flag to become available
-      //xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-      MQTTClient.publish(topic.c_str(), payload.c_str());
-
-      //xSemaphoreGive(i2cSemaphore);
+        MQTTClient.publish(topic.c_str(), payload.c_str());
+      }
     }
   }
 

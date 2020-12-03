@@ -31,6 +31,7 @@ QueueHandle_t Message_Queue; //Queue to store all of the DFPlayer commands from 
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
+extern PubSubClient MQTTClient;
 void checkI2Cerrors(const char *area);
 
 void setup()
@@ -44,11 +45,11 @@ void setup()
   //start i2c
   Wire.begin(SDA, SCL);
 
-  checkI2Cerrors("main");
+  //checkI2Cerrors("main");
 
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-  Serial.println(millis());
+  Serial.println("");
 
   //create i2c Semaphore , and set to useable
   i2cSemaphore = xSemaphoreCreateBinary();
@@ -93,6 +94,9 @@ void setup()
   routing_setup();
 
   microbit_setup();
+
+  // Serial.print("completed by ");
+  // Serial.println( millis());
 }
 
 void loop()
@@ -291,6 +295,12 @@ void checkI2Cerrors(const char *area)
   {
     Serial.printf("i2C error @ %s: %s \n", area, Wire.getErrorText(Wire.lastError()));
 
-    Wire.clearWriteError();
+    // if (MQTTClient.connected())
+    // {
+    //    MQTTClient.publish("i2c errors",  Wire.getErrorText(Wire.lastError()));
+    // }
+
+    //TODO: Check to see if this is still needed
+    // Wire.clearWriteError();
   }
 }

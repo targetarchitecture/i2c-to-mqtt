@@ -24,7 +24,7 @@ void routing_task(void *pvParameters)
     // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
+  //  Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -39,9 +39,10 @@ void routing_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Message_Queue, &msg, portMAX_DELAY);
 
-        Serial.printf ("Command_Queue: %s\n",msg);
+        //Serial.printf ("Command_Queue: %s\n",msg);
         //Serial.println(msg);
 
+        //TODO: Fix parsing by space
         auto X = parseUART(msg, " ", false);
 
         // Serial.print("parseUART:");
@@ -53,8 +54,8 @@ void routing_task(void *pvParameters)
 
             strcpy(cmd, X[i].substr(0, MAXMESSAGELENGTH).c_str());
 
-            // Serial.print("cmd:");
-            // Serial.println(cmd);
+            Serial.printf("@@ BBC RX: %s\n", cmd);
+            //Serial.println(cmd);
 
             //X[i].c_str()[0]
 
@@ -97,6 +98,11 @@ void routing_task(void *pvParameters)
                 //MQTT messaging
                 xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
             }
+            else if (strcmp(cmd, "START") == 0)
+            {
+                //reboot ESP32
+                ESP.restart();
+            }            
         }
     }
 

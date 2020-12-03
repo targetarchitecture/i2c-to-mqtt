@@ -20,7 +20,7 @@ void light_setup()
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    if (!lights.begin(0x3F))
+    if (!lights.begin(0x3E))
     {
         Serial.println("SX1509 for lighting not found");
 
@@ -57,7 +57,7 @@ void light_task(void *pvParameters)
     // Serial.print("light_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-      Serial.printf("Light task is on core %i\n", xPortGetCoreID());
+     // Serial.printf("Light task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {

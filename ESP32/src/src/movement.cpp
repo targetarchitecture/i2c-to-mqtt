@@ -77,7 +77,7 @@ void movement_task(void *pvParameters)
     // Serial.print("movement_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
+   // Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -317,10 +317,10 @@ void ServoEasingTask(void *pvParameter)
 
     int pin = (uintptr_t)pvParameter;
 
-    Serial.print("Servo easing task for pin: ");
-    Serial.print(pin);
-    Serial.print(" on core ");
-    Serial.println(xPortGetCoreID());
+    // Serial.print("Servo easing task for pin: ");
+    // Serial.print(pin);
+    // Serial.print(" on core ");
+    // Serial.println(xPortGetCoreID());
 
     u_long startTime = millis();
 

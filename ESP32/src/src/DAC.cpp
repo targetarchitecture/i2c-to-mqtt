@@ -21,7 +21,7 @@ void DAC_task(void *pvParameters)
     // Serial.print("DAC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-Serial.printf("DAC task is on core %i\n", xPortGetCoreID());
+//Serial.printf("DAC task is on core %i\n", xPortGetCoreID());
 
     messageParts parts;
     int8_t DACvalue;
