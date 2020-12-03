@@ -11,7 +11,7 @@ void routing_setup()
         configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
         NULL,                         /* parameter of the task */
         2,                            /* priority of the task */
-        &RoutingTask,1);                /* Task handle to keep track of created task */
+        &RoutingTask, 1);             /* Task handle to keep track of created task */
 }
 
 void routing_task(void *pvParameters)
@@ -24,7 +24,7 @@ void routing_task(void *pvParameters)
     // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-  //  Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
+    //  Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -43,7 +43,9 @@ void routing_task(void *pvParameters)
         //Serial.println(msg);
 
         //TODO: Fix parsing by space
-        auto X = parseUART(msg, " ", false);
+        //auto X = parseUART(msg, " ", false);
+
+        auto X = parseUART(msg, "\r\n", false);
 
         // Serial.print("parseUART:");
         // Serial.println(X.size());
@@ -102,7 +104,7 @@ void routing_task(void *pvParameters)
             {
                 //reboot ESP32
                 ESP.restart();
-            }            
+            }
         }
     }
 
@@ -128,8 +130,9 @@ std::vector<std::string> parseUART(const std::string &strStringToSplit,
 
         std::string strTemp(itSubStrStart, itSubStrEnd);
 
+        //removed as it was stopping spaces in SSIDs
         //remove whitespace
-        strTemp.erase(std::remove_if(strTemp.begin(), strTemp.end(), ::isspace), strTemp.end());
+        //strTemp.erase(std::remove_if(strTemp.begin(), strTemp.end(), ::isspace), strTemp.end());
 
         if (keepEmpty || !strTemp.empty())
         {

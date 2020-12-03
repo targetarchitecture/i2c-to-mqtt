@@ -123,8 +123,7 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 void microbit_transmit_task(void *pvParameters)
 {
    // Serial.printf("Microbit TX task is on core %i\n", xPortGetCoreID());
-
-
+   
     for (;;)
     {
         char msg[MAXBBCMESSAGELENGTH + 1] = {0};

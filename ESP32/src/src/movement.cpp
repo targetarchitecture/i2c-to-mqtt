@@ -6,7 +6,6 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 extern SemaphoreHandle_t i2cSemaphore;
 TaskHandle_t MovementTask;
 
-
 void movement_setup()
 {
     //Serial.println("8 channel Servo test!");
@@ -62,9 +61,7 @@ void movement_setup()
         configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
         NULL,                         /* parameter of the task */
         2,                            /* priority of the task */
-        &MovementTask,1);               /* Task handle to keep track of created task */
-
-        
+        &MovementTask, 1);            /* Task handle to keep track of created task */
 }
 
 void movement_task(void *pvParameters)
@@ -77,7 +74,7 @@ void movement_task(void *pvParameters)
     // Serial.print("movement_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-   // Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
+    // Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -128,28 +125,40 @@ void movement_task(void *pvParameters)
             auto duration = atol(parts.value5);
             auto minPulse = constrain(atol(parts.value6), 0, 4096);
             auto maxPulse = constrain(atol(parts.value7), 0, 4096);
-            easingCurves easingCurve;
-
-            if (strcmp(parts.identifier, "LINEAR") == 0)
-            {
-                easingCurve = LinearInOut;
-            }
-            else if (strcmp(parts.identifier, "BOUNCE") == 0)
-            {
-                easingCurve = BounceInOut;
-            }
-            else if (strcmp(parts.identifier, "QUADRATIC") == 0)
-            {
-                easingCurve = BounceInOut;
-            }
-            else
-            {
-                easingCurve = LinearInOut;
-            }
+            easingCurves easingCurve = LinearInOut;
 
             setServoEase(pin, easingCurve, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
         else if (strcmp(parts.identifier, "V4") == 0)
+        {
+            //Set servo to angle
+            auto pin = atol(parts.value1);
+            auto easing = parts.value2;
+            auto toDegree = constrain(atol(parts.value3), 0, 180);
+            auto fromDegree = constrain(atol(parts.value4), 0, 180);
+            auto duration = atol(parts.value5);
+            auto minPulse = constrain(atol(parts.value6), 0, 4096);
+            auto maxPulse = constrain(atol(parts.value7), 0, 4096);
+            easingCurves easingCurve= BounceInOut;
+
+            setServoEase(pin, easingCurve, toDegree, fromDegree, duration, minPulse, maxPulse);
+        }
+        else if (strcmp(parts.identifier, "V5") == 0)
+        {
+            //Set servo to angle
+            auto pin = atol(parts.value1);
+            auto easing = parts.value2;
+            auto toDegree = constrain(atol(parts.value3), 0, 180);
+            auto fromDegree = constrain(atol(parts.value4), 0, 180);
+            auto duration = atol(parts.value5);
+            auto minPulse = constrain(atol(parts.value6), 0, 4096);
+            auto maxPulse = constrain(atol(parts.value7), 0, 4096);
+            easingCurves easingCurve = BounceInOut;
+
+            setServoEase(pin, easingCurve, toDegree, fromDegree, duration, minPulse, maxPulse);
+        }
+
+        else if (strcmp(parts.identifier, "V6") == 0)
         {
             //Set servo to PWM
             auto pin = atol(parts.value1);
@@ -186,67 +195,67 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     //uxTaskGetStackHighWaterMark = 9750
     if (pin == 0)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 0 Task", 10000, (void *)0, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 0 Task", 10000, (void *)0, 3, NULL, 1);
     }
     if (pin == 1)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 1 Task", 10000, (void *)1, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 1 Task", 10000, (void *)1, 3, NULL, 1);
     }
     if (pin == 2)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 2 Task", 10000, (void *)2, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 2 Task", 10000, (void *)2, 3, NULL, 1);
     }
     if (pin == 3)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 3 Task", 10000, (void *)3, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 3 Task", 10000, (void *)3, 3, NULL, 1);
     }
     if (pin == 4)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 4 Task", 10000, (void *)4, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 4 Task", 10000, (void *)4, 3, NULL, 1);
     }
     if (pin == 5)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 5 Task", 10000, (void *)5, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 5 Task", 10000, (void *)5, 3, NULL, 1);
     }
     if (pin == 6)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 6 Task", 10000, (void *)6, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 6 Task", 10000, (void *)6, 3, NULL, 1);
     }
     if (pin == 7)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 7 Task", 10000, (void *)7, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 7 Task", 10000, (void *)7, 3, NULL, 1);
     }
     if (pin == 8)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 8 Task", 10000, (void *)8, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 8 Task", 10000, (void *)8, 3, NULL, 1);
     }
     if (pin == 9)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 9 Task", 10000, (void *)9, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 9 Task", 10000, (void *)9, 3, NULL, 1);
     }
     if (pin == 10)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 10 Task", 10000, (void *)10, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 10 Task", 10000, (void *)10, 3, NULL, 1);
     }
     if (pin == 11)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 11 Task", 10000, (void *)11, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 11 Task", 10000, (void *)11, 3, NULL, 1);
     }
     if (pin == 12)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 12 Task", 10000, (void *)12, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 12 Task", 10000, (void *)12, 3, NULL, 1);
     }
     if (pin == 13)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 13 Task", 10000, (void *)13, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 13 Task", 10000, (void *)13, 3, NULL, 1);
     }
     if (pin == 14)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 14 Task", 10000, (void *)14, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 14 Task", 10000, (void *)14, 3, NULL, 1);
     }
     if (pin == 15)
     {
-        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 15 Task", 10000, (void *)15, 3, NULL,1);
+        xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 15 Task", 10000, (void *)15, 3, NULL, 1);
     }
 }
 
