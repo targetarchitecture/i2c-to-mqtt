@@ -62,11 +62,11 @@ void microbit_receive_task(void *pvParameters)
                     messageCopy[i] = (char)dtmp[i];
                 }
 
-                // Serial.print("BBC_UART_NUM:");
-                // Serial.println((const char *)dtmp);
+                Serial.print("BBC_UART_NUM:");
+                Serial.println((const char *)dtmp);
 
-                // Serial.print("Event Size:");
-                // Serial.println(event.size);
+                Serial.print("Event Size:");
+             Serial.println(event.size);
 
                 xQueueSend(Message_Queue, &messageCopy, portMAX_DELAY);
 

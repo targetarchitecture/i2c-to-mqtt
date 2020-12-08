@@ -128,12 +128,10 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
       if (index == 1)
       {
         strcpy(mParts.value1, msg.substr(start, end - start).c_str());
-        //mParts.str1 = msg.substr(start, end - start);
       }
       if (index == 2)
       {
         strcpy(mParts.value2, msg.substr(start, end - start).c_str());
-        // mParts.str2 =  msg.substr(start, end - start);
       }
       if (index == 3)
       {
@@ -145,15 +143,15 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
       }
       if (index == 5)
       {
-        strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+        strcpy(mParts.value5, msg.substr(start, end - start).c_str());
       }
       if (index == 6)
       {
-        strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+        strcpy(mParts.value6, msg.substr(start, end - start).c_str());
       }
       if (index == 7)
       {
-        strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+        strcpy(mParts.value7, msg.substr(start, end - start).c_str());
       }
 
       start = end + delim.length();
@@ -185,15 +183,15 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
     }
     if (index == 5)
     {
-      strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+      strcpy(mParts.value5, msg.substr(start, end - start).c_str());
     }
     if (index == 6)
     {
-      strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+      strcpy(mParts.value6, msg.substr(start, end - start).c_str());
     }
     if (index == 7)
     {
-      strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+      strcpy(mParts.value7, msg.substr(start, end - start).c_str());
     }
 
     // Serial.print("identifier:");
