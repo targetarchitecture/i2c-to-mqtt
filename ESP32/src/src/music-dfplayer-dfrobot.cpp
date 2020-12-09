@@ -1,8 +1,8 @@
 #include <Arduino.h>
-#include "music.h"
-#include <DFPlayerMini_Fast.h>
+#include "music-dfplayer-dfrobot.h"
+#include "DFRobotDFPlayerMini.h"
 
-DFPlayerMini_Fast DFPlayer;
+DFRobotDFPlayerMini sound;
 
 TaskHandle_t MusicTask;
 TaskHandle_t MusicBusyTask;
@@ -12,30 +12,45 @@ const int commandPause = 50;
 
 void music_setup()
 {
-    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
+    //Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
 
     //Configure serial port pins and busy pin
     pinMode(DFPLAYER_BUSY, INPUT);
-    DFPlayer.begin(Serial1, 750);
+    // DFPlayer.begin(Serial1, 750);
+
+    // DFPlayer.volume(20);
+    // DFPlayer.play(8);
+
+    //TODO: see if this is needed
+    //     DFPlayer.reset();
+
+    //   delay(30);
+    //   DFPlayer.volume(20);
+    //   delay(30);
+
+    //   int16_t v = DFPlayer.currentVolume();
+
+    //   Serial.print("Volume:");
+    //   Serial.println(v);
 
     BusyPin = digitalRead(DFPLAYER_BUSY);
 
     //Serial.println("music_setup");
 
     xTaskCreatePinnedToCore(
-        music_task,                    /* Task function. */
-        "Music Task",                  /* name of task. */
-        12000,                         /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
-        NULL,                          /* parameter of the task */
-        1,                             /* priority of the task */
+        music_task,     /* Task function. */
+        "Music Task",   /* name of task. */
+        12000,          /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
+        NULL,           /* parameter of the task */
+        1,              /* priority of the task */
         &MusicTask, 1); /* Task handle to keep track of created task */
 
     xTaskCreatePinnedToCore(
-        music_busy_task,                   /* Task function. */
-        "Music Busy Task",                 /* name of task. */
-        2048,                              /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
-        NULL,                              /* parameter of the task */
-        1,                                 /* priority of the task */
+        music_busy_task,    /* Task function. */
+        "Music Busy Task",  /* name of task. */
+        2048,               /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
+        NULL,               /* parameter of the task */
+        1,                  /* priority of the task */
         &MusicBusyTask, 1); /* Task handle to keep track of created task */
 }
 
@@ -49,7 +64,7 @@ void music_busy_task(void *pvParameters)
 
     int NewBusyPin;
 
-   // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
+    // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -87,13 +102,20 @@ void music_task(void *pvParameters)
     int16_t currentVolume;
     int16_t currentTrack;
 
-    /* Inspect our own high water mark on entering the task. */
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("music_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
 
-   // Serial.printf("Music task is on core %i\n", xPortGetCoreID());
+    //Configure serial port pins and busy pin
+    sound.begin(Serial1, true, true);
+    sound.setTimeOut(750); //Set serial communication time out 750ms
+    sound.outputDevice(DFPLAYER_DEVICE_SD);
+
+    /* Inspect our own high water mark on entering the task. */
+    UBaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("music_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
+
+    // Serial.printf("Music task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -119,14 +141,20 @@ void music_task(void *pvParameters)
 
         if (strcmp(parts.identifier, "Z1") == 0)
         {
-            auto volume = atol(parts.value1);
+            auto volume = atoi(parts.value1);
             volume = constrain(volume, 0, 30);
 
-            delay(commandPause);
-            DFPlayer.volume(volume);
+            // Serial.print("vol:");
+            // Serial.println(volume);
 
             delay(commandPause);
-            currentVolume = DFPlayer.currentVolume();
+            sound.volume(volume);
+
+            delay(commandPause);
+            currentVolume = sound.readVolume();
+
+            // Serial.print("current vol:");
+            // Serial.println(currentVolume);
 
             char msgtosend[MAXBBCMESSAGELENGTH];
             sprintf(msgtosend, "A2,%i", currentVolume);
@@ -136,34 +164,39 @@ void music_task(void *pvParameters)
         else if (strcmp(parts.identifier, "Z2") == 0)
         {
             delay(commandPause);
-            DFPlayer.decVolume();
+            sound.volumeDown();
             delay(commandPause);
         }
         else if (strcmp(parts.identifier, "Z3") == 0)
         {
             delay(commandPause);
-            DFPlayer.incVolume();
+            sound.volumeUp();
             delay(commandPause);
         }
         else if (strcmp(parts.identifier, "Z4") == 0)
         {
-            auto trackNum = atol(parts.value1);
+            auto trackNum = atoi(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
 
             // Serial.print("DFPlayer.play:");
             // Serial.println(trackNum);
 
+            // Serial.print("Serial1.getWriteError():");
+            // Serial.println(Serial1.getWriteError());
+
+            //Serial1.flush();
+
             delay(commandPause);
-            DFPlayer.play(trackNum);
+            sound.play(trackNum);
             delay(commandPause);
         }
         else if (strcmp(parts.identifier, "Z5") == 0)
         {
             delay(commandPause);
-            DFPlayer.playNext();
+           sound.next();
 
             delay(commandPause);
-            currentTrack = DFPlayer.currentSdTrack();
+            currentTrack = sound.readCurrentFileNumber();
 
             char msgtosend[MAXBBCMESSAGELENGTH];
             sprintf(msgtosend, "A3,%d", currentTrack);
@@ -173,10 +206,10 @@ void music_task(void *pvParameters)
         else if (strcmp(parts.identifier, "Z6") == 0)
         {
             delay(commandPause);
-            DFPlayer.playPrevious();
+            sound.previous();
 
             delay(commandPause);
-            currentTrack = DFPlayer.currentSdTrack();
+            currentTrack = sound.readCurrentFileNumber();
 
             char msgtosend[MAXBBCMESSAGELENGTH];
             sprintf(msgtosend, "A3,%d", currentTrack);
@@ -186,19 +219,19 @@ void music_task(void *pvParameters)
         else if (strcmp(parts.identifier, "Z7") == 0)
         {
             delay(commandPause);
-            DFPlayer.pause();
+            sound.pause();
             delay(commandPause);
         }
         else if (strcmp(parts.identifier, "Z8") == 0)
         {
             delay(commandPause);
-            DFPlayer.resume();
+            sound.start();
             delay(commandPause);
         }
         else if (strcmp(parts.identifier, "Z9") == 0)
         {
             delay(commandPause);
-            DFPlayer.stop();
+            sound.stop();
             delay(commandPause);
         }
     }

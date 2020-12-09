@@ -108,23 +108,22 @@ void movement_task(void *pvParameters)
         else if (strcmp(parts.identifier, "V2") == 0)
         {
             //Set servo to angle
-            auto pin = atol(parts.value1);
-            auto angle = constrain(atol(parts.value2), 0, 180);
-            auto minPulse = constrain(atol(parts.value3), 0, 4096);
-            auto maxPulse = constrain(atol(parts.value4), 0, 4096);
+            auto pin = atoi(parts.value1);
+            auto angle = atoi(parts.value2);
+            auto minPulse = atoi(parts.value3);
+            auto maxPulse = atoi(parts.value4);
 
             setServoAngle(pin, angle, minPulse, maxPulse);
         }
         else if (strcmp(parts.identifier, "V3") == 0)
         {
             //Set servo to angle
-            auto pin = atol(parts.value1);
-            auto toDegree = atol(parts.value2);
-            auto fromDegree = atol(parts.value3), 0, 180);
-            auto duration = atol(parts.value4);
-            auto minPulse = atol(parts.value5), 0, 4096);
-            auto maxPulse = atol(parts.value6), 0, 4096);
-            //easingCurves easingCurve = LinearInOut;
+            auto pin = atoi(parts.value1);
+            auto toDegree = atoi(parts.value2);
+            auto fromDegree = atoi(parts.value3);
+            auto duration = atoi(parts.value4);
+            auto minPulse = atoi(parts.value5);
+            auto maxPulse = atoi(parts.value6);
 
             setServoEase(pin, LinearInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
@@ -138,25 +137,19 @@ void movement_task(void *pvParameters)
             auto minPulse = atoi(parts.value5);
             auto maxPulse = atoi(parts.value6);
 
-            setServoEase(pin, BounceInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
+            setServoEase(pin, QuadraticInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
         else if (strcmp(parts.identifier, "V5") == 0)
         {
-            Serial.print("BounceInOut on pin ");
+            //Serial.print("BounceInOut on pin ");
 
             //Set servo to angle
-            auto pin = atol(parts.value1);
-            auto toDegree = constrain(atol(parts.value2), 0, 180);
-            auto fromDegree = constrain(atol(parts.value3), 0, 180);
-            auto duration = atol(parts.value4);
-            auto minPulse = constrain(atol(parts.value5), 0, 4096);
-            auto maxPulse = constrain(atol(parts.value6), 0, 4096);
-            //easingCurves easingCurve = BounceInOut;
-
-            //             Serial.print(pin);
-            // Serial.print(" PWM  ");
-            // Serial.print(PWM);
-            // Serial.println("");
+            auto pin = atoi(parts.value1);
+            auto toDegree = atoi(parts.value2);
+            auto fromDegree = atoi(parts.value3);
+            auto duration = atoi(parts.value4);
+            auto minPulse = atoi(parts.value5);
+            auto maxPulse = atoi(parts.value6);
 
             setServoEase(pin, BounceInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
@@ -194,7 +187,6 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     servos[pin].interuptEasing = false;
 
     Serial.printf(">>> change %f \t fromDegree %i \t toDegree %i \n", servos[pin]._change, servos[pin].fromDegree, servos[pin].toDegree);
-
     Serial.println("setServoEase");
 
     //uxTaskGetStackHighWaterMark = 9750
@@ -279,11 +271,11 @@ void setServoPWM(const int16_t pin, const int16_t PWM)
 
     xSemaphoreGive(i2cSemaphore);
 
-    Serial.print("setServoPWM on pin ");
-    Serial.print(pin);
-    Serial.print(" PWM  ");
-    Serial.print(PWM);
-    Serial.println("");
+    // Serial.print("setServoPWM on pin ");
+    // Serial.print(pin);
+    // Serial.print(" PWM  ");
+    // Serial.print(PWM);
+    // Serial.println("");
 }
 
 void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse)
@@ -331,10 +323,10 @@ void ServoEasingTask(void *pvParameter)
 
     int pin = (uintptr_t)pvParameter;
 
-    Serial.print("Servo easing task for pin: ");
-    Serial.print(pin);
-    Serial.print(" on core ");
-    Serial.println(xPortGetCoreID());
+    // Serial.print("Servo easing task for pin: ");
+    // Serial.print(pin);
+    // Serial.print(" on core ");
+    // Serial.println(xPortGetCoreID());
 
     u_long startTime = millis();
 
@@ -362,7 +354,7 @@ void ServoEasingTask(void *pvParameter)
     uint16_t PWM;
 
     Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
- Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
+    Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
     for (int i = 0; i <= duration * 20; i++)
     {
@@ -393,7 +385,7 @@ void ServoEasingTask(void *pvParameter)
             PWM = maxPulse - easedPosition;
         }
 
-        //printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
+        printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
 
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);

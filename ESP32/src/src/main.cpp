@@ -10,7 +10,7 @@ Rainbow Sparkle Unicorn - SN4
 
 #include "globals.h"
 #include "microbit.h"
-#include "music.h"
+#include "music-dfplayer-dfrobot.h"
 #include "encoders.h"
 #include "routing.h"
 #include "touch.h"

@@ -109,7 +109,7 @@ void MQTT_task(void *pvParameter)
     // Serial.println(uxHighWaterMark);
 
     //show WiFi connection
-    if (WiFi.status() == WL_CONNECTED)
+    if (WiFi.isConnected() == true)
     {
       digitalWrite(ONBOARDLED, HIGH);
     }
@@ -175,7 +175,7 @@ void MQTT_task(void *pvParameter)
     else if (strcmp(parts.identifier, "T8") == 0)
     {
       //only bother if actually connected to internet!!
-      if (WiFi.status() == WL_CONNECTED)
+      if (WiFi.isConnected() == true)
       {
         MQTT_connect();
       }
@@ -183,7 +183,7 @@ void MQTT_task(void *pvParameter)
     else if (strcmp(parts.identifier, "T9") == 0)
     { 
       //only bother if actually connected to internet!!
-      if (WiFi.status() == WL_CONNECTED)
+      if (WiFi.isConnected() == true)
       {
         checkMQTTconnection(false);
 
@@ -191,6 +191,8 @@ void MQTT_task(void *pvParameter)
         std::string payload(parts.value2);
 
         MQTTClient.publish(topic.c_str(), payload.c_str());
+      } else {
+        Serial.println("WiFi not connected,cannot send MQTT message");
       }
     }
   }

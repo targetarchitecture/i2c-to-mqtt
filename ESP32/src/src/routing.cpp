@@ -103,7 +103,7 @@ void routing_task(void *pvParameters)
             else if (strcmp(cmd, "START") == 0)
             {
                 //reboot ESP32
-                ESP.restart();
+                //ESP.restart();
             }
         }
     }
