@@ -124,12 +124,18 @@ void microbit_transmit_task(void *pvParameters)
 {
     // Serial.printf("Microbit TX task is on core %i\n", xPortGetCoreID());
 
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
+
     for (;;)
     {
         char msg[MAXBBCMESSAGELENGTH + 1] = {0};
 
         if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
         {
+            //10/12/20 - Just wait around to see if we get hailed to send
+            //xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+
             //append # to the end so the microbit knows the end of the line
             strcat(msg, "#");
 
@@ -139,8 +145,8 @@ void microbit_transmit_task(void *pvParameters)
 
             Serial.printf(">> BBC TX: %s\n", msg);
 
-            //Added on 1/12/20 to try to stop flooding
-            delay(10);
+            //Added on 1/12/20 to try to stop flooding (was 10)
+            delay(20);
         }
     }
 

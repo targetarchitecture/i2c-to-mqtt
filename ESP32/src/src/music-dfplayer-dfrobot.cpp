@@ -110,10 +110,10 @@ void music_task(void *pvParameters)
     sound.outputDevice(DFPLAYER_DEVICE_SD);
 
     /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("music_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("music_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
     // Serial.printf("Music task is on core %i\n", xPortGetCoreID());
 
@@ -152,6 +152,8 @@ void music_task(void *pvParameters)
 
             delay(commandPause);
             currentVolume = sound.readVolume();
+
+            currentVolume = constrain(currentVolume, 0, 30);
 
             // Serial.print("current vol:");
             // Serial.println(currentVolume);

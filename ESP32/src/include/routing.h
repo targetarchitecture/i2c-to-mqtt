@@ -23,4 +23,6 @@ extern QueueHandle_t Light_Queue;
 extern QueueHandle_t Movement_Queue;
 extern QueueHandle_t MQTT_Queue;
 
+extern TaskHandle_t MicrobitTXTask;
+
 #endif
