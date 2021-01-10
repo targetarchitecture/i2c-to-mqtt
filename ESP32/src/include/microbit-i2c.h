@@ -1,9 +1,9 @@
-#ifndef microbit_h
-#define microbit_h
+#ifndef microbit_i2c_h
+#define microbit_i2c_h
 
 #include "driver/uart.h"
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 #define BBC_UART_NUM UART_NUM_2
 
@@ -12,10 +12,10 @@ extern QueueHandle_t Microbit_Transmit_Queue;
 extern QueueHandle_t Microbit_Receive_Queue;
 
 void microbit_setup();
-void microbit_receive_task(void *pvParameters);
-void microbit_transmit_task(void *pvParameters);
+// void microbit_receive_task(void *pvParameters);
+// void microbit_transmit_task(void *pvParameters);
 void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
-void microbit_receive_task(void *pvParameters);
+//void microbit_receive_task(void *pvParameters);
 
 extern void checkI2Cerrors(const char *area);
 

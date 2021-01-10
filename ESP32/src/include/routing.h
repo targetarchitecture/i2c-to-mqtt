@@ -3,7 +3,7 @@
 
 #include "messageParts.h"
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 void routing_task(void *pvParameters);
 void routing_setup();
@@ -23,6 +23,6 @@ extern QueueHandle_t Light_Queue;
 extern QueueHandle_t Movement_Queue;
 extern QueueHandle_t MQTT_Queue;
 
-extern TaskHandle_t MicrobitTXTask;
+//extern TaskHandle_t MicrobitTXTask;
 
 #endif

@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include "messageParts.h"
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 void switch_setup();
 void switch_task(void *pvParameter);

@@ -2,7 +2,7 @@
 #define ADC_h
 
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 void ADC_setup();
 void ADC_task(void *pvParameter);

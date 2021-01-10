@@ -2,7 +2,7 @@
 #define messageParts_h
 
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 struct messageParts
 {

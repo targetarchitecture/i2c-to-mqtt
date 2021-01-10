@@ -9,7 +9,7 @@ Rainbow Sparkle Unicorn - SN4
 #include "esp_log.h"
 
 #include "globals.h"
-#include "microbit.h"
+#include "microbit-i2c.h"
 #include "music-dfplayer-dfrobot.h"
 #include "encoders.h"
 #include "routing.h"

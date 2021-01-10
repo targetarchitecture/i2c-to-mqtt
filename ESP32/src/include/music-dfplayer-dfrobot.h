@@ -3,7 +3,7 @@
 
 #include "messageParts.h"
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 void music_setup();
 void music_task(void *pvParameters);

@@ -3,10 +3,14 @@
 #include <WireSlave.h>
 #include <SN7 pins.h>
 #include <WirePacker.h>
+#include "esp_log.h"
+#include "driver/i2c.h"
+#include <stdio.h>
+#include "soc/i2c_reg.h"
 
 void receiveEvent(int howMany);
 void requestEvent();
-void isr();
+void IRAM_ATTR isr_i2c_from_microbit();
 void i2c_rx_task(void *pvParameter);
 
 #define I2C_SLAVE_ADDR 4
@@ -17,8 +21,6 @@ TaskHandle_t SwitchTask;
 void setup()
 {
   Serial.begin(115200);
-
-  MQTT_Queue = xQueueCreate(50, sizeof(uint8_t));
 
   pinMode(2, OUTPUT);
 
@@ -37,7 +39,9 @@ void setup()
   WireSlave1.onRequest(requestEvent);
 
   pinMode(BBC_INT, INPUT_PULLUP);
-  attachInterrupt(BBC_INT, isr, RISING);
+  attachInterrupt(BBC_INT, isr_i2c_from_microbit, RISING);
+
+  MQTT_Queue = xQueueCreate(50, sizeof(uint8_t));
 
   xTaskCreatePinnedToCore(
       i2c_rx_task,     /* Task function. */
@@ -48,7 +52,7 @@ void setup()
       &SwitchTask, 1); /* Task handle to keep track of created task */
 }
 
-void isr()
+void IRAM_ATTR isr_i2c_from_microbit()
 {
   int32_t cmd = 1;
 

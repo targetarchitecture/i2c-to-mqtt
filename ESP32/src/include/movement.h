@@ -5,7 +5,7 @@
 #include "messageParts.h"
 #include <Adafruit_PWMServoDriver.h>
 #include "easing.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 struct servo
 {

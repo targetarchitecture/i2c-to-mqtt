@@ -103,7 +103,7 @@ void routing_task(void *pvParameters)
             else if (cmd[0] == '0')
             {
                 //Nice....just notify the task to get on with it and send the UART message
-              xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);  
+              //xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);  
             }            
             else if (strcmp(cmd, "START") == 0)
             {

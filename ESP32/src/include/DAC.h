@@ -3,7 +3,7 @@
 
 #include "messageParts.h"
 #include "defines.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 void DAC_setup();
 void DAC_task(void *pvParameter);
