@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <SN4 pins.h>
+#include <SN7 pins.h>
 
 void i2cScan();
 

@@ -1,7 +1,7 @@
 
 //i2c pins
-#define SDA 32
-#define SCL 27
+#define SDA 27
+#define SCL 32
 
 //mp3 player pins
 #define DFPLAYER_RX 16
@@ -9,8 +9,8 @@
 #define DFPLAYER_BUSY 17
 
 //BBC Microbit pins
-#define MICROBIT_RX 18
-#define MICROBIT_TX 5
+#define MICROBIT_SCL 18
+#define MICROBIT_SDA 5
 
 //ADC pins
 #define ADC1 35
@@ -28,3 +28,5 @@
 #define ROTARY2CK 21 
 #define ROTARY2DT 19
 
+//LED
+#define ONBOARDLED 2

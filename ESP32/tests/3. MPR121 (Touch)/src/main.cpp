@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "soc/rtc_wdt.h"
 #include "Adafruit_MPR121.h"
 #include "DFRobotDFPlayerMini.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 Adafruit_MPR121 touch = Adafruit_MPR121();
 uint16_t lasttouched = 0;
@@ -10,11 +11,20 @@ uint16_t currtouched = 0;
 DFRobotDFPlayerMini sound;
 
 void touched();
+void IRAM_ATTR buttonreleased();
+void IRAM_ATTR buttonpressed();
 
 void setup()
 {
   Wire.begin(SDA, SCL); //I2C bus
   Serial.begin(115200); //ESP32 USB Port
+
+  pinMode(TOUCH_INT, INPUT_PULLDOWN);
+  attachInterrupt(digitalPinToInterrupt(TOUCH_INT), buttonpressed, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(TOUCH_INT), buttonreleased, LOW);
+
+  // Configure LED output
+  pinMode(ONBOARDLED, OUTPUT);
 
   //Configure serial port pins and busy pin
   pinMode(DFPLAYER_BUSY, INPUT);
@@ -56,7 +66,7 @@ void setup()
     Serial.print(fileCounts);
     Serial.println(" files");
 
-    sound.volume(30);
+    sound.volume(10); //30
     Serial.print("Volume: ");
     Serial.println(sound.readVolume());
   }
@@ -64,18 +74,24 @@ void setup()
 
 void loop()
 {
-  touched();
+  // touched();
 
-  delay(50);
+  // delay(50);
 }
 
 void touched()
 {
+  rtc_wdt_feed();
+
   // Get the currently touched pads
   currtouched = touch.touched();
 
+  rtc_wdt_feed();
+
   for (uint8_t pin = 0; pin < 12; pin++)
   {
+    rtc_wdt_feed();
+
     // it if *is* touched and *wasnt* touched before, alert!
     if ((currtouched & _BV(pin)) && !(lasttouched & _BV(pin)))
     {
@@ -96,4 +112,21 @@ void touched()
 
   // reset our state
   lasttouched = currtouched;
+}
+
+// The function is placed in the RAM of the ESP32.
+void IRAM_ATTR buttonpressed()
+{
+
+  Serial.println(digitalRead(TOUCH_INT));
+
+  // Serial.println("buttonpressed");
+  digitalWrite(ONBOARDLED, HIGH);
+  touched();
+}
+
+void IRAM_ATTR buttonreleased()
+{
+  Serial.println("buttonreleased");
+  digitalWrite(ONBOARDLED, LOW);
 }

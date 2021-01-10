@@ -6,7 +6,7 @@
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "esp_log.h"
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 #include <DFPlayerMini_Fast.h>
 
 DFPlayerMini_Fast myMP3;
