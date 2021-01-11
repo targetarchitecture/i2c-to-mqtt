@@ -36,8 +36,8 @@ void routing_task(void *pvParameters)
 
         char msg[UARTMESSAGELENGTH] = {0};
 
-        //wait for new music command in the queue
-        xQueueReceive(Message_Queue, &msg, portMAX_DELAY);
+        //wait for new BBC command in the queue
+        xQueueReceive(Microbit_Receive_Queue, &msg, portMAX_DELAY);
 
         //Serial.printf ("Command_Queue: %s\n",msg);
         //Serial.println(msg);
@@ -100,11 +100,11 @@ void routing_task(void *pvParameters)
                 //MQTT messaging
                 xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
             }
-            else if (cmd[0] == '0')
-            {
-                //Nice....just notify the task to get on with it and send the UART message
-              //xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);  
-            }            
+            // else if (cmd[0] == '0')
+            // {
+            //     //Nice....just notify the task to get on with it and send the UART message
+            //   //xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);  
+            // }            
             else if (strcmp(cmd, "START") == 0)
             {
                 //reboot ESP32

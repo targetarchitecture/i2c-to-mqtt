@@ -27,7 +27,7 @@ QueueHandle_t Music_Queue;             //Queue to store all of the DFPlayer comm
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t ADC_Queue;
-QueueHandle_t Message_Queue; //Queue to store all of the DFPlayer commands from the Microbit
+//QueueHandle_t Message_Queue; 
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
@@ -61,15 +61,14 @@ void setup()
   char MAXUSBMessage[UARTMESSAGELENGTH];
 
   Microbit_Receive_Queue = xQueueCreate(UARTMESSAGELENGTH * 8, sizeof(uint8_t)); //1024 = 128x8
-  Message_Queue = xQueueCreate(50, sizeof(MAXUSBMessage));
+  Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));  
+  //Message_Queue = xQueueCreate(50, sizeof(MAXUSBMessage));
 
   Music_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-
-  Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();

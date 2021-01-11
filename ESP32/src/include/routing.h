@@ -18,7 +18,7 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
 extern QueueHandle_t Music_Queue;
-extern QueueHandle_t Message_Queue;
+extern QueueHandle_t Microbit_Receive_Queue;
 extern QueueHandle_t Light_Queue;
 extern QueueHandle_t Movement_Queue;
 extern QueueHandle_t MQTT_Queue;
