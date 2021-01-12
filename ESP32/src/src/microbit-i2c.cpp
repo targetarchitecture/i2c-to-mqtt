@@ -23,7 +23,7 @@ void microbit_i2c_setup()
     xTaskCreatePinnedToCore(
         i2c_rx_task,          /* Task function. */
         "i2c RX Task",        /* name of task. */
-        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8200) */
+        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8064) */
         NULL,                 /* parameter of the task */
         1,                    /* priority of the task */
         &Microbiti2cTask, 1); /* Task handle to keep track of created task */
@@ -57,7 +57,11 @@ void i2c_rx_task(void *pvParameter)
 
         digitalWrite(2, HIGH);
 
+        delay(1);
+
         WireSlave1.update();
+
+        //Serial.println("WireSlave1.update");
     }
 }
 
@@ -98,8 +102,27 @@ void receiveEvent(int howMany)
 
     //Serial.println(millis());
 
+    Serial.print("receivedMsg: ");
+    Serial.println(receivedMsg.c_str());
+
     //now add these to the routing queue for routing
-     xQueueSend(Microbit_Receive_Queue, &receivedMsg, portMAX_DELAY);
+    xQueueSend(Microbit_Receive_Queue, &receivedMsg, portMAX_DELAY);
 
     digitalWrite(2, LOW);
+}
+
+void requestEvent()
+{
+    //WireSlave1.printf("hello @ %i", millis());
+
+    char msg[UARTMESSAGELENGTH] = {0};
+
+    //wait for new BBC command in the queue
+    if (xQueueReceive(Microbit_Transmit_Queue, &msg, 1))
+    {
+        WireSlave1.printf("%s", msg);
+
+        Serial.print("sent: ");
+        Serial.println(msg);
+    }
 }

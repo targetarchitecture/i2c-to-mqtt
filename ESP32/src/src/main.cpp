@@ -92,7 +92,7 @@ void setup()
 
   routing_setup();
 
-  microbit_setup();
+  microbit_i2c_setup();
 
   // Serial.print("completed by ");
   // Serial.println( millis());
