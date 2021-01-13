@@ -31,17 +31,24 @@ void touch_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
+    //set-up the interupt
+    pinMode(TOUCH_INT, INPUT_PULLUP);
+    attachInterrupt(TOUCH_INT, handleTouchInterupt, RISING);
+
     //uxTaskGetStackHighWaterMark = 1750
-    xTaskCreatePinnedToCore(&touch_task, "Touch Task", 2000, NULL, 1, &TouchTask,1);
+    xTaskCreatePinnedToCore(&touch_task, "Touch Task", 2000, NULL, 1, &TouchTask, 1);
 }
 
 void touch_task(void *pvParameter)
 {
 
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
+
+    UBaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("touch_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
 
     //TODO: see if this delay prevents rogue first
 
@@ -53,13 +60,18 @@ void touch_task(void *pvParameter)
     //         //give back the i2c flag for the next task
     //     xSemaphoreGive(i2cSemaphore);
 
-    delay(100);
+    //delay(100);
 
     // int NumOfMessagesSent = 0;
 
     for (;;)
     {
         //TODO: On SN4 there will be an wait for interupt here to prevent scanning if there's no event occured
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+
+        //digitalWrite(2, HIGH);
+
+        delay(1);
 
         // if (Wire.lastError() == 0)
         // {
@@ -127,7 +139,7 @@ void touch_task(void *pvParameter)
         // else
 
         // put a delay so it isn't overwhelming
-        delay(100);
+        delay(10);
 
         // debugging info, what
         // Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x");
@@ -149,4 +161,11 @@ void touch_task(void *pvParameter)
     }
 
     vTaskDelete(NULL);
+}
+
+void IRAM_ATTR handleTouchInterupt()
+{
+    //int32_t cmd = 1;
+
+    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
 }

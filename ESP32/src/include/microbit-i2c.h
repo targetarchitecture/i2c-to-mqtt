@@ -14,8 +14,6 @@
 extern QueueHandle_t Microbit_Transmit_Queue;
 extern QueueHandle_t Microbit_Receive_Queue;
 
-
-
 void microbit_i2c_setup();
 // void microbit_receive_task(void *pvParameters);
 // void microbit_transmit_task(void *pvParameters);

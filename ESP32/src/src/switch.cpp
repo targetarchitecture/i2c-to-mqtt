@@ -38,12 +38,16 @@ void switch_setup()
     xSemaphoreGive(i2cSemaphore);
 
     xTaskCreatePinnedToCore(
-        switch_task,   /* Task function. */
-        "Switch Task", /* name of task. */
-        8500    ,      /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
-        NULL,          /* parameter of the task */
-        1,             /* priority of the task */
-        &SwitchTask,1);  /* Task handle to keep track of created task */
+        switch_task,     /* Task function. */
+        "Switch Task",   /* name of task. */
+        8500,            /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
+        NULL,            /* parameter of the task */
+        1,               /* priority of the task */
+        &SwitchTask, 1); /* Task handle to keep track of created task */
+
+    //set-up the interupt
+    pinMode(SWITCH_INT, INPUT_PULLUP);
+    attachInterrupt(SWITCH_INT, handleSwitchInterupt, RISING);
 }
 
 void switch_task(void *pvParameters)
@@ -59,7 +63,10 @@ void switch_task(void *pvParameters)
     }
 
     //TODO: see if this improves the inital flood of readings
-    delay(100);
+    //delay(100);
+
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
 
     /* Inspect our own high water mark on entering the task. */
     // UBaseType_t uxHighWaterMark;
@@ -71,7 +78,10 @@ void switch_task(void *pvParameters)
 
     for (;;)
     {
-        //TODO: On SN4 there will be an wait for interupt here to prevent scanning if there's no event occured
+        //TODO: On SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+
+        delay(1);
 
         // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
         // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
@@ -82,7 +92,7 @@ void switch_task(void *pvParameters)
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-          checkI2Cerrors("switch (switch_task start)");
+        checkI2Cerrors("switch (switch_task start)");
 
         for (size_t i = 0; i < 16; i++)
         {
@@ -126,4 +136,11 @@ void switch_task(void *pvParameters)
     }
 
     vTaskDelete(NULL);
+}
+
+void IRAM_ATTR handleSwitchInterupt()
+{
+    //int32_t cmd = 1;
+
+    xTaskNotify(SwitchTask, 0, eSetValueWithoutOverwrite);
 }

@@ -1,21 +1,25 @@
 #include <Arduino.h>
-#include "music-dfplayer-dfrobot.h"
+#include "sound.h"
 #include "DFRobotDFPlayerMini.h"
 
 DFRobotDFPlayerMini sound;
 
-TaskHandle_t MusicTask;
-TaskHandle_t MusicBusyTask;
+TaskHandle_t SoundTask;
+TaskHandle_t SoundBusyTask;
 
 volatile int BusyPin;
 const int commandPause = 50;
 
-void music_setup()
+void sound_setup()
 {
     //Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
 
     //Configure serial port pins and busy pin
     pinMode(DFPLAYER_BUSY, INPUT);
+
+    //set-up the interupt
+    attachInterrupt(DFPLAYER_BUSY, handleSoundInterupt, CHANGE);
+
     // DFPlayer.begin(Serial1, 750);
 
     // DFPlayer.volume(20);
@@ -38,23 +42,23 @@ void music_setup()
     //Serial.println("music_setup");
 
     xTaskCreatePinnedToCore(
-        music_task,     /* Task function. */
-        "Music Task",   /* name of task. */
+        sound_task,     /* Task function. */
+        "Sound Task",   /* name of task. */
         12000,          /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
         NULL,           /* parameter of the task */
         1,              /* priority of the task */
-        &MusicTask, 1); /* Task handle to keep track of created task */
+        &SoundTask, 1); /* Task handle to keep track of created task */
 
     xTaskCreatePinnedToCore(
-        music_busy_task,    /* Task function. */
-        "Music Busy Task",  /* name of task. */
+        sound_busy_task,    /* Task function. */
+        "Sound Busy Task",  /* name of task. */
         2048,               /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
         NULL,               /* parameter of the task */
         1,                  /* priority of the task */
-        &MusicBusyTask, 1); /* Task handle to keep track of created task */
+        &SoundBusyTask, 1); /* Task handle to keep track of created task */
 }
 
-void music_busy_task(void *pvParameters)
+void sound_busy_task(void *pvParameters)
 {
     /* Inspect our own high water mark on entering the task. */
     // UBaseType_t uxHighWaterMark;
@@ -62,19 +66,25 @@ void music_busy_task(void *pvParameters)
     // Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
+
     int NewBusyPin;
 
     // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
+        //wait for value to change
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+
         //check for changes to busy pin
         NewBusyPin = digitalRead(DFPLAYER_BUSY);
 
         if (BusyPin != NewBusyPin)
         {
-            // Serial.print("DFPlayer Busy:");
-            // Serial.println(NewBusyPin);
+            Serial.print("DFPlayer Busy:");
+            Serial.println(NewBusyPin);
 
             //TODO: Can this be improved?
             char msgtosend[MAXBBCMESSAGELENGTH];
@@ -89,13 +99,14 @@ void music_busy_task(void *pvParameters)
             BusyPin = NewBusyPin;
         }
 
-        delay(100);
+        //no need for delay aS it now waits for the interupt (13.1.21)
+        //delay(100);
     }
 
     vTaskDelete(NULL);
 }
 
-void music_task(void *pvParameters)
+void sound_task(void *pvParameters)
 {
     //TODO: Ask Google if this is the best place to declare variables in an endless task
     messageParts parts;
@@ -126,7 +137,7 @@ void music_task(void *pvParameters)
         // Serial.println(uxHighWaterMark);
 
         //wait for new music command in the queue
-        xQueueReceive(Music_Queue, &msg, portMAX_DELAY);
+        xQueueReceive(Sound_Queue, &msg, portMAX_DELAY);
 
         // Serial.print("Music_Queue:");
         // Serial.println(msg);
@@ -195,7 +206,7 @@ void music_task(void *pvParameters)
         else if (strcmp(parts.identifier, "Z5") == 0)
         {
             delay(commandPause);
-           sound.next();
+            sound.next();
 
             delay(commandPause);
             currentTrack = sound.readCurrentFileNumber();
@@ -239,4 +250,11 @@ void music_task(void *pvParameters)
     }
 
     vTaskDelete(NULL);
+}
+
+void IRAM_ATTR handleSoundInterupt()
+{
+    //int32_t cmd = 1;
+
+    xTaskNotify(SoundBusyTask, 0, eSetValueWithoutOverwrite);
 }

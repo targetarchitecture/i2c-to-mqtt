@@ -6,12 +6,12 @@ TaskHandle_t DACTask;
 void DAC_setup()
 {
     xTaskCreatePinnedToCore(
-        DAC_task,   /* Task function. */
-        "DAC Task", /* name of task. */
-        3500,       /* Stack size of task (uxTaskGetStackHighWaterMark = 3204) */
-        NULL,       /* parameter of the task */
-        1,          /* priority of the task */
-        &DACTask,1);  /* Task handle to keep track of created task */
+        DAC_task,     /* Task function. */
+        "DAC Task",   /* name of task. */
+        3500,         /* Stack size of task (uxTaskGetStackHighWaterMark = 3204) */
+        NULL,         /* parameter of the task */
+        1,            /* priority of the task */
+        &DACTask, 1); /* Task handle to keep track of created task */
 }
 
 void DAC_task(void *pvParameters)
@@ -21,7 +21,7 @@ void DAC_task(void *pvParameters)
     // Serial.print("DAC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-//Serial.printf("DAC task is on core %i\n", xPortGetCoreID());
+    //Serial.printf("DAC task is on core %i\n", xPortGetCoreID());
 
     messageParts parts;
     int8_t DACvalue;

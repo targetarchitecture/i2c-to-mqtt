@@ -17,7 +17,7 @@ extern void MQTT_deal_with_message(char msg[MAXMESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
-extern QueueHandle_t Music_Queue;
+extern QueueHandle_t Sound_Queue;
 extern QueueHandle_t Microbit_Receive_Queue;
 extern QueueHandle_t Light_Queue;
 extern QueueHandle_t Movement_Queue;

@@ -31,7 +31,7 @@ void microbit_i2c_setup()
 
 void IRAM_ATTR handleBBCi2CInterupt()
 {
-    int32_t cmd = 1;
+    //int32_t cmd = 1;
 
     xTaskNotify(Microbiti2cTask, 0, eSetValueWithoutOverwrite);
 }
@@ -50,12 +50,12 @@ void i2c_rx_task(void *pvParameter)
 
     for (;;)
     {
-        digitalWrite(2, LOW);
+        //digitalWrite(2, LOW);
 
         //10/12/20 - Just wait around to see if we get hailed to send
         xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
-        digitalWrite(2, HIGH);
+        //digitalWrite(2, HIGH);
 
         delay(1);
 
@@ -80,7 +80,7 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
 void receiveEvent(int howMany)
 {
-    digitalWrite(2, HIGH);
+    //digitalWrite(2, HIGH);
 
     //Serial.println(millis());
 
@@ -102,13 +102,13 @@ void receiveEvent(int howMany)
 
     //Serial.println(millis());
 
-    Serial.print("receivedMsg: ");
-    Serial.println(receivedMsg.c_str());
+    // Serial.print("receivedMsg: ");
+    // Serial.println(receivedMsg.c_str());
 
     //now add these to the routing queue for routing
     xQueueSend(Microbit_Receive_Queue, &receivedMsg, portMAX_DELAY);
 
-    digitalWrite(2, LOW);
+    //digitalWrite(2, LOW);
 }
 
 void requestEvent()

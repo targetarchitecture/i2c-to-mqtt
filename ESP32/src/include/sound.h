@@ -1,19 +1,19 @@
-#ifndef music_h
-#define music_h
+#ifndef sound_h
+#define sound_h
 
 #include "messageParts.h"
 #include "defines.h"
 #include "SN7 pins.h"
 
-void music_setup();
-void music_task(void *pvParameters);
-void music_busy_task(void *pvParameters);
+void sound_setup();
+void sound_task(void *pvParameters);
+void sound_busy_task(void *pvParameters);
+void IRAM_ATTR handleSoundInterupt();
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern messageParts processQueueMessage(const std::string msg, const std::string from) ;
 extern void checkI2Cerrors(const char *area);
 
-extern QueueHandle_t Music_Queue;
-
+extern QueueHandle_t Sound_Queue;
 
 #endif

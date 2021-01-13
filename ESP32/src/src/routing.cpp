@@ -65,7 +65,7 @@ void routing_task(void *pvParameters)
             {
                 //Serial.println("Added to Music_Queue");
 
-                xQueueSend(Music_Queue, &cmd, portMAX_DELAY);
+                xQueueSend(Sound_Queue, &cmd, portMAX_DELAY);
             }
             else if (cmd[0] == 'Y')
             {

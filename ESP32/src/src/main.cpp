@@ -10,7 +10,7 @@ Rainbow Sparkle Unicorn - SN4
 
 #include "globals.h"
 #include "microbit-i2c.h"
-#include "music-dfplayer-dfrobot.h"
+#include "sound.h"
 #include "encoders.h"
 #include "routing.h"
 #include "touch.h"
@@ -23,7 +23,7 @@ Rainbow Sparkle Unicorn - SN4
 
 QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
 QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
-QueueHandle_t Music_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
+QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t ADC_Queue;
@@ -64,7 +64,7 @@ void setup()
   Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));  
   //Message_Queue = xQueueCreate(50, sizeof(MAXUSBMessage));
 
-  Music_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
@@ -74,7 +74,7 @@ void setup()
   MQTT_setup();
 
   //call the feature setup methods
-  music_setup();
+  sound_setup();
 
   touch_setup();
 

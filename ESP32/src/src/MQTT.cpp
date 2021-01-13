@@ -20,7 +20,7 @@ void MQTT_setup()
   xTaskCreatePinnedToCore(
       MQTT_task,     /* Task function. */
       "MQTT Task",   /* name of task. */
-      17000   ,      /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+      17000,         /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
       NULL,          /* parameter of the task */
       5,             /* priority of the task */
       &MQTTTask, 1); /* Task handle to keep track of created task */
@@ -181,7 +181,7 @@ void MQTT_task(void *pvParameter)
       }
     }
     else if (strcmp(parts.identifier, "T9") == 0)
-    { 
+    {
       //only bother if actually connected to internet!!
       if (WiFi.isConnected() == true)
       {
@@ -191,7 +191,9 @@ void MQTT_task(void *pvParameter)
         std::string payload(parts.value2);
 
         MQTTClient.publish(topic.c_str(), payload.c_str());
-      } else {
+      }
+      else
+      {
         Serial.println("WiFi not connected,cannot send MQTT message");
       }
     }
