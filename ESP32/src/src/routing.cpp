@@ -39,12 +39,13 @@ void routing_task(void *pvParameters)
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &msg, portMAX_DELAY);
 
-        //Serial.printf ("Command_Queue: %s\n",msg);
-        //Serial.println(msg);
+        Serial.printf("Command_Queue: %s\n", msg);
+        Serial.println(msg);
 
         //TODO: Fix parsing by space
         //auto X = parseUART(msg, " ", false);
 
+        //TODO: Check if parseUART is working with i2c as I'm sure we are not sending \r\n
         auto X = parseUART(msg, "\r\n", false);
 
         // Serial.print("parseUART:");
@@ -100,11 +101,11 @@ void routing_task(void *pvParameters)
                 //MQTT messaging
                 xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
             }
-            // else if (cmd[0] == '0')
+            // else if (strcmp(cmd, "00") == 0)
             // {
             //     //Nice....just notify the task to get on with it and send the UART message
-            //   //xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);  
-            // }            
+            //     xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);
+            // }
             else if (strcmp(cmd, "START") == 0)
             {
                 //reboot ESP32

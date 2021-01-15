@@ -102,11 +102,18 @@ void receiveEvent(int howMany)
 
     //Serial.println(millis());
 
-    // Serial.print("receivedMsg: ");
-    // Serial.println(receivedMsg.c_str());
+    //Serial.print("receivedMsg: ");
+    //Serial.println(receivedMsg.c_str());
+
+    //need to do something to copy the received message
+    char queuedMsg[MAXBBCMESSAGELENGTH];
+    strcpy(queuedMsg, receivedMsg.c_str());
+
+    //Serial.print("strcpy: ");
+    //Serial.println(queuedMsg);
 
     //now add these to the routing queue for routing
-    xQueueSend(Microbit_Receive_Queue, &receivedMsg, portMAX_DELAY);
+    xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
 
     //digitalWrite(2, LOW);
 }
@@ -117,12 +124,17 @@ void requestEvent()
 
     char msg[UARTMESSAGELENGTH] = {0};
 
-    //wait for new BBC command in the queue
-    if (xQueueReceive(Microbit_Transmit_Queue, &msg, 1))
-    {
-        WireSlave1.printf("%s", msg);
+    //Serial.println("requestEvent");
 
+    //wait for new BBC command in the queue
+    if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
+    {
         Serial.print("sent: ");
         Serial.println(msg);
+
+        WireSlave1.printf("%s", msg);
+    } else {
+        //just send back a blank string
+        WireSlave1.print("");
     }
 }

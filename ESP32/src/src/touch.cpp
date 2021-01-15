@@ -33,15 +33,26 @@ void touch_setup()
 
     //set-up the interupt
     pinMode(TOUCH_INT, INPUT_PULLUP);
-    attachInterrupt(TOUCH_INT, handleTouchInterupt, RISING);
+    attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
+    //attachInterrupt(TOUCH_INT, handleTouchInteruptHIGH, HIGH);
+    //attachInterrupt(TOUCH_INT, handleTouchInteruptLOW, LOW);
 
     //uxTaskGetStackHighWaterMark = 1750
     xTaskCreatePinnedToCore(&touch_task, "Touch Task", 2000, NULL, 1, &TouchTask, 1);
 }
 
+// volatile bool touched = HIGH;
+
+// void IRAM_ATTR handleTouchInteruptLOW(){
+//     touched = LOW;
+// }
+
+// void IRAM_ATTR handleTouchInteruptHIGH(){
+//     touched = HIGH;
+// }
+
 void touch_task(void *pvParameter)
 {
-
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
 
@@ -69,11 +80,17 @@ void touch_task(void *pvParameter)
         //TODO: On SN4 there will be an wait for interupt here to prevent scanning if there's no event occured
         xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
+        //int touch_int_state = digitalRead(TOUCH_INT);
+        //touch_int_state = 0;
+
+        //Serial.print("touch interupt: ");
+        //Serial.println(touch_int_state);
+
         //digitalWrite(2, HIGH);
 
-        delay(1);
+        //delay(1);
 
-        // if (Wire.lastError() == 0)
+        // if (touch_int_state == 0)
         // {
 
         //wait for the i2c semaphore flag to become available
@@ -82,13 +99,23 @@ void touch_task(void *pvParameter)
         checkI2Cerrors("Touch (start)");
 
         // Get the currently touched pads
-        currtouched = cap.touched();
+        uint16_t currtouched = cap.touched();
 
         checkI2Cerrors("Touch (end)");
 
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
 
+        //update on 14.1.21 to send the touch pins number
+        // char msgtosend[MAXBBCMESSAGELENGTH];
+        // sprintf(msgtosend, "B3,%u", currtouched);
+        // sendToMicrobit(msgtosend);
+
+        //Serial.printf("B3,%u\n", currtouched);
+
+        //         sendToMicrobit(msgtosend);
+
+        /////// --------------
         for (uint8_t i = 0; i < 12; i++)
         {
             // it if *is* touched and *wasnt* touched before, alert!
@@ -111,6 +138,7 @@ void touch_task(void *pvParameter)
                 // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
                 // Serial.println(uxHighWaterMark);
             }
+
             // if it *was* touched and now *isnt*, alert!
             if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
             {
@@ -135,30 +163,29 @@ void touch_task(void *pvParameter)
 
         // reset our state
         lasttouched = currtouched;
-        // }
-        // else
-
-        // put a delay so it isn't overwhelming
-        delay(10);
-
-        // debugging info, what
-        // Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x");
-        // Serial.println(cap.touched(), HEX);
-        // Serial.print("Filt: ");
-        // for (uint8_t i = 0; i < 12; i++)
-        // {
-        //     Serial.print(cap.filteredData(i));
-        //     Serial.print("\t");
-        // }
-        // Serial.println();
-        // Serial.print("Base: ");
-        // for (uint8_t i = 0; i < 12; i++)
-        // {
-        //     Serial.print(cap.baselineData(i));
-        //     Serial.print("\t");
-        // }
-        // Serial.println();
     }
+
+    // put a delay so it isn't overwhelming
+    //delay(50);
+
+    // debugging info, what
+    // Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x");
+    // Serial.println(cap.touched(), HEX);
+    // Serial.print("Filt: ");
+    // for (uint8_t i = 0; i < 12; i++)
+    // {
+    //     Serial.print(cap.filteredData(i));
+    //     Serial.print("\t");
+    // }
+    // Serial.println();
+    // Serial.print("Base: ");
+    // for (uint8_t i = 0; i < 12; i++)
+    // {
+    //     Serial.print(cap.baselineData(i));
+    //     Serial.print("\t");
+    // }
+    // Serial.println();
+    // }
 
     vTaskDelete(NULL);
 }

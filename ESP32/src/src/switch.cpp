@@ -47,7 +47,7 @@ void switch_setup()
 
     //set-up the interupt
     pinMode(SWITCH_INT, INPUT_PULLUP);
-    attachInterrupt(SWITCH_INT, handleSwitchInterupt, RISING);
+    attachInterrupt(SWITCH_INT, handleSwitchInterupt, LOW);
 }
 
 void switch_task(void *pvParameters)

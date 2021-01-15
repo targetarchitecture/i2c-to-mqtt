@@ -60,7 +60,8 @@ void setup()
   char RXfromBBCmessage[MAXMESSAGELENGTH];
   char MAXUSBMessage[UARTMESSAGELENGTH];
 
-  Microbit_Receive_Queue = xQueueCreate(UARTMESSAGELENGTH * 8, sizeof(uint8_t)); //1024 = 128x8
+  //Microbit_Receive_Queue = xQueueCreate(UARTMESSAGELENGTH * 8, sizeof(uint8_t)); //1024 = 128x8
+  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage)); // changed on 14.1.21
   Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));  
   //Message_Queue = xQueueCreate(50, sizeof(MAXUSBMessage));
 
