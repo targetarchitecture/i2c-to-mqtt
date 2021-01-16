@@ -27,6 +27,7 @@ void switch_setup()
     {
         switches.pinMode(i, INPUT_PULLUP);
         switches.debouncePin(i);
+        switches.enableInterrupt(i, CHANGE); //instruct the pin to set the interupt pin
 
         //Serial.print("debouncePin:");
         //Serial.println(i);
@@ -47,7 +48,6 @@ void switch_setup()
 
     //set-up the interupt
     pinMode(SWITCH_INT, INPUT_PULLUP);
-    attachInterrupt(SWITCH_INT, handleSwitchInterupt, LOW);
 }
 
 void switch_task(void *pvParameters)
@@ -78,69 +78,63 @@ void switch_task(void *pvParameters)
 
     for (;;)
     {
-        //TODO: On SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
-
-        delay(1);
-
-        // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-        // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
-        // Serial.println(uxHighWaterMark);
-
-        //quickly read all of the pins and save the state
-
-        //wait for the i2c semaphore flag to become available
-        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-        checkI2Cerrors("switch (switch_task start)");
-
-        for (size_t i = 0; i < 16; i++)
+        //On SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
+        if (digitalRead(SWITCH_INT) == LOW)
         {
-            if (switches.digitalRead(i) == LOW)
+            //delay(1);
+
+            // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+            // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+            // Serial.println(uxHighWaterMark);
+
+            //quickly read all of the pins and save the state
+
+            //wait for the i2c semaphore flag to become available
+            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+            checkI2Cerrors("switch (switch_task start)");
+
+            for (size_t i = 0; i < 16; i++)
             {
-                newPinState[i] = 0;
+                if (switches.digitalRead(i) == LOW)
+                {
+                    newPinState[i] = 0;
+                }
+                else //if (switches.digitalRead(i) == HIGH)
+                {
+                    newPinState[i] = 1;
+                }
             }
-            else //if (switches.digitalRead(i) == HIGH)
+
+            checkI2Cerrors("switch (switch_task end)");
+
+            //give back the i2c flag for the next task
+            xSemaphoreGive(i2cSemaphore);
+
+            for (size_t i = 0; i < 16; i++)
             {
-                newPinState[i] = 1;
+                //check for differance
+                if (pinState[i] != newPinState[i])
+                {
+                    //Serial.printf("Readings (%i): %i,%i \n", i, pinState[i], newPinState[i]);
+
+                    char msgtosend[MAXBBCMESSAGELENGTH];
+                    sprintf(msgtosend, "E%i,%i", i, newPinState[i]);
+
+                    sendToMicrobit(msgtosend); 
+
+                    Serial.print("msgtosend:");
+                    Serial.println(msgtosend);
+
+                    pinState[i] = newPinState[i];
+                }
             }
         }
 
-        checkI2Cerrors("switch (switch_task end)");
-
-        //give back the i2c flag for the next task
-        xSemaphoreGive(i2cSemaphore);
-
-        for (size_t i = 0; i < 16; i++)
-        {
-            //check for differance
-            if (pinState[i] != newPinState[i])
-            {
-                //Serial.printf("Readings (%i): %i,%i \n", i, pinState[i], newPinState[i]);
-
-                char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "E%i,%i", i, newPinState[i]);
-
-                sendToMicrobit(msgtosend);
-
-                // Serial.print("msgtosend:");
-                // Serial.println(msgtosend);
-
-                pinState[i] = newPinState[i];
-            }
-        }
-
-        //TODO: On SN5 change this to wait for interupt
         // put a delay so it isn't overwhelming
-        delay(100);
+        delay(50);
     }
 
     vTaskDelete(NULL);
 }
 
-void IRAM_ATTR handleSwitchInterupt()
-{
-    //int32_t cmd = 1;
-
-    xTaskNotify(SwitchTask, 0, eSetValueWithoutOverwrite);
-}

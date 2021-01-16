@@ -8,7 +8,6 @@
 
 void switch_setup();
 void switch_task(void *pvParameter);
-void IRAM_ATTR handleSwitchInterupt();
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void POST(uint8_t flashes);
