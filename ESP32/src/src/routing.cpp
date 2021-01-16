@@ -39,8 +39,8 @@ void routing_task(void *pvParameters)
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &msg, portMAX_DELAY);
 
-        Serial.printf("Command_Queue: %s\n", msg);
-        Serial.println(msg);
+        //Serial.printf("Command_Queue: %s\n", msg);
+        //Serial.println(msg);
 
         //TODO: Fix parsing by space
         //auto X = parseUART(msg, " ", false);
@@ -57,7 +57,7 @@ void routing_task(void *pvParameters)
 
             strcpy(cmd, X[i].substr(0, MAXMESSAGELENGTH).c_str());
 
-            Serial.printf("@@ BBC RX: %s\n", cmd);
+            //Serial.printf("@@ BBC RX: %s\n", cmd);
             //Serial.println(cmd);
 
             //X[i].c_str()[0]

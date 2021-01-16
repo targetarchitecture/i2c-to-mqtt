@@ -1,5 +1,5 @@
 /* 
-Rainbow Sparkle Unicorn - SN4
+Rainbow Sparkle Unicorn - SN7
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -27,7 +27,6 @@ QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer comm
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t ADC_Queue;
-//QueueHandle_t Message_Queue; 
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
@@ -37,7 +36,7 @@ void checkI2Cerrors(const char *area);
 void setup()
 {
   //Set UART log level
-  //esp_log_level_set("SN4", ESP_LOG_VERBOSE);
+  esp_log_level_set("SN7", ESP_LOG_VERBOSE);
 
   //stop bluetooth
   btStop();
@@ -45,10 +44,9 @@ void setup()
   //start i2c
   Wire.begin(SDA, SCL);
 
-  //checkI2Cerrors("main");
-
   Serial.begin(115200);
   Serial.setDebugOutput(true);
+  Serial.println("");
   Serial.println("");
 
   //create i2c Semaphore , and set to useable
@@ -60,11 +58,8 @@ void setup()
   char RXfromBBCmessage[MAXMESSAGELENGTH];
   char MAXUSBMessage[UARTMESSAGELENGTH];
 
-  //Microbit_Receive_Queue = xQueueCreate(UARTMESSAGELENGTH * 8, sizeof(uint8_t)); //1024 = 128x8
-  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage)); // changed on 14.1.21
+  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage)); 
   Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));  
-  //Message_Queue = xQueueCreate(50, sizeof(MAXUSBMessage));
-
   Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
@@ -95,8 +90,8 @@ void setup()
 
   microbit_i2c_setup();
 
-  // Serial.print("completed by ");
-  // Serial.println( millis());
+  // Serial.print("SN7 completed in ");
+  // Serial.println(millis());
 }
 
 void loop()
@@ -243,60 +238,11 @@ void POST(uint8_t flashes)
   }
 }
 
-// int printToSerial(const char *format, ...)
-// {
-
-//   int len = 0;
-
-// #ifdef WRITETOSERIAL
-
-//   char loc_buf[64];
-//   char *temp = loc_buf;
-//   va_list arg;
-//   va_list copy;
-//   va_start(arg, format);
-//   va_copy(copy, arg);
-//   len = vsnprintf(temp, sizeof(loc_buf), format, copy);
-//   va_end(copy);
-//   if (len < 0)
-//   {
-//     va_end(arg);
-//     return 0;
-//   };
-//   if (len >= sizeof(loc_buf))
-//   {
-//     temp = (char *)malloc(len + 1);
-//     if (temp == NULL)
-//     {
-//       va_end(arg);
-//       return 0;
-//     }
-//     len = vsnprintf(temp, len + 1, format, arg);
-//   }
-//   va_end(arg);
-
-//   len = Serial.println(temp);
-
-//   if (temp != loc_buf)
-//   {
-//     free(temp);
-//   }
-
-// #endif
-
-//   return len;
-// }
-
 void checkI2Cerrors(const char *area)
 {
   if (Wire.lastError() != 0)
   {
     Serial.printf("i2C error @ %s: %s \n", area, Wire.getErrorText(Wire.lastError()));
-
-    // if (MQTTClient.connected())
-    // {
-    //    MQTTClient.publish("i2c errors",  Wire.getErrorText(Wire.lastError()));
-    // }
 
     //TODO: Check to see if this is still needed
     // Wire.clearWriteError();

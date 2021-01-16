@@ -56,10 +56,10 @@ void touch_task(void *pvParameter)
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
 
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("touch_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
     //TODO: see if this delay prevents rogue first
 

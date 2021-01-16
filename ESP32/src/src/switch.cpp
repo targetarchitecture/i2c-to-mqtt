@@ -65,8 +65,8 @@ void switch_task(void *pvParameters)
     //TODO: see if this improves the inital flood of readings
     //delay(100);
 
-    uint32_t ulNotifiedValue = 0;
-    BaseType_t xResult;
+    // uint32_t ulNotifiedValue = 0;
+    // BaseType_t xResult;
 
     /* Inspect our own high water mark on entering the task. */
     // UBaseType_t uxHighWaterMark;
@@ -123,8 +123,8 @@ void switch_task(void *pvParameters)
 
                     sendToMicrobit(msgtosend); 
 
-                    Serial.print("msgtosend:");
-                    Serial.println(msgtosend);
+                    // Serial.print("msgtosend:");
+                    // Serial.println(msgtosend);
 
                     pinState[i] = newPinState[i];
                 }

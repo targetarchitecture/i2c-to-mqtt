@@ -25,14 +25,12 @@ void microbit_i2c_setup()
         "i2c RX Task",        /* name of task. */
         8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8064) */
         NULL,                 /* parameter of the task */
-        1,                    /* priority of the task */
+        5,                    /* priority of the task */
         &Microbiti2cTask, 1); /* Task handle to keep track of created task */
 }
 
 void IRAM_ATTR handleBBCi2CInterupt()
 {
-    //int32_t cmd = 1;
-
     xTaskNotify(Microbiti2cTask, 0, eSetValueWithoutOverwrite);
 }
 
@@ -43,25 +41,17 @@ void i2c_rx_task(void *pvParameter)
     // Serial.print("i2c_rx_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    //int32_t cmd = 0;
-
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
 
     for (;;)
     {
-        //digitalWrite(2, LOW);
-
         //10/12/20 - Just wait around to see if we get hailed to send
         xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
-
-        //digitalWrite(2, HIGH);
 
         delay(1);
 
         WireSlave1.update();
-
-        //Serial.println("WireSlave1.update");
     }
 }
 
@@ -80,10 +70,6 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
 void receiveEvent(int howMany)
 {
-    //digitalWrite(2, HIGH);
-
-    //Serial.println(millis());
-
     std::string receivedMsg;
 
     while (1 < WireSlave1.available()) // loop through all but the last byte
@@ -98,10 +84,6 @@ void receiveEvent(int howMany)
 
     receivedMsg += c;
 
-    //Serial.println(c);
-
-    //Serial.println(millis());
-
     //Serial.print("receivedMsg: ");
     //Serial.println(receivedMsg.c_str());
 
@@ -114,23 +96,17 @@ void receiveEvent(int howMany)
 
     //now add these to the routing queue for routing
     xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
-
-    //digitalWrite(2, LOW);
 }
 
 void requestEvent()
 {
-    //WireSlave1.printf("hello @ %i", millis());
-
     char msg[UARTMESSAGELENGTH] = {0};
-
-    //Serial.println("requestEvent");
 
     //wait for new BBC command in the queue
     if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
     {
-        Serial.print("sent: ");
-        Serial.println(msg);
+        //Serial.print("sent: ");
+        //Serial.println(msg);
 
         WireSlave1.printf("%s", msg);
     } else {
