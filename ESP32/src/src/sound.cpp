@@ -83,8 +83,8 @@ void sound_busy_task(void *pvParameters)
 
         if (BusyPin != NewBusyPin)
         {
-            Serial.print("DFPlayer Busy:");
-            Serial.println(NewBusyPin);
+            // Serial.print("DFPlayer Busy:");
+            // Serial.println(NewBusyPin);
 
             //TODO: Can this be improved?
             char msgtosend[MAXBBCMESSAGELENGTH];
