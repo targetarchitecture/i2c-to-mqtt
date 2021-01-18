@@ -11,6 +11,8 @@ std::string MQTT_KEY = "";
 std::string WIFI_SSID = "";
 std::string WIFI_PASSPHRASE = "";
 
+std::string IP_ADDRESS = "";
+
 TaskHandle_t MQTTTask;
 
 void MQTT_setup()
@@ -46,13 +48,16 @@ void Wifi_connect()
     delay(speed);
     digitalWrite(ONBOARDLED, LOW);
     delay(speed);
+
     //Serial.println(WiFi.status());
   }
 
   char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str());
+  sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str()); 
+
   sendToMicrobit(msgtosend);
 }
+
 
 void MQTT_connect()
 {
@@ -102,7 +107,7 @@ void MQTT_task(void *pvParameter)
 
   for (;;)
   {
-    char msg[MAXMESSAGELENGTH] = {0};
+    char msg[MAXESP32MESSAGELENGTH] = {0};
 
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
@@ -121,8 +126,8 @@ void MQTT_task(void *pvParameter)
     //wait for new music command in the queue
     xQueueReceive(MQTT_Queue, &msg, portMAX_DELAY);
 
-    //Serial.print("MQTT_Queue:");
-    //Serial.println(msg);
+    // Serial.print("MQTT_Queue:");
+    // Serial.println(msg);
 
     //TODO: see if need this copy of msg
     std::string X = msg;

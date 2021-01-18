@@ -65,6 +65,9 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
     strcpy(queuedMsg, msg);
 
     xQueueSend(Microbit_Transmit_Queue, &queuedMsg, portMAX_DELAY);
+
+    // Serial.print("sendToMicrobit [msg]:");
+    // Serial.println(msg);
 }
 
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
@@ -100,16 +103,24 @@ void receiveEvent(int howMany)
 
 void requestEvent()
 {
-    char msg[UARTMESSAGELENGTH] = {0};
+    char msg[MAXESP32MESSAGELENGTH]; // = {0};
 
     //wait for new BBC command in the queue
     if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
     {
-        //Serial.print("sent: ");
-        //Serial.println(msg);
+        // Serial.print("strlen: ");
+        // Serial.println(strlen(msg));
 
-        WireSlave1.printf("%s", msg);
-    } else {
+        auto retval = WireSlave1.write(msg);
+
+        // Serial.print("retval: ");
+        // Serial.println(retval);
+
+        // Serial.print("sent: ");
+        // Serial.println(msg);
+    }
+    else
+    {
         //just send back a blank string
         WireSlave1.print("");
     }

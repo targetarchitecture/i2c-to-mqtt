@@ -32,7 +32,7 @@ void encoders_setup()
     xTaskCreatePinnedToCore(&encoders_task, "encoders_task", 2048, NULL, 1, &EncodersTask,1);
 }
 
-void encoders_deal_with_message(char msg[MAXMESSAGELENGTH])
+void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     if (strcmp(msg, "W1,0") == 0)
     {

@@ -130,7 +130,7 @@ void sound_task(void *pvParameters)
 
     for (;;)
     {
-        char msg[MAXMESSAGELENGTH] = {0};
+        char msg[MAXESP32MESSAGELENGTH] = {0};
 
         // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
         // Serial.print("sound_task uxTaskGetStackHighWaterMark:");

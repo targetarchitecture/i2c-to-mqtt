@@ -32,7 +32,7 @@ void DAC_task(void *pvParameters)
         // Serial.print("DAC_task uxTaskGetStackHighWaterMark:");
         // Serial.println(uxHighWaterMark);
 
-        char msg[MAXMESSAGELENGTH] = {0};
+        char msg[MAXESP32MESSAGELENGTH] = {0};
 
         //wait for new DAC commands in the queue
         xQueueReceive(DAC_Queue, &msg, portMAX_DELAY);

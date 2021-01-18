@@ -34,7 +34,7 @@ void routing_task(void *pvParameters)
         // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
         // Serial.println(uxHighWaterMark);
 
-        char msg[UARTMESSAGELENGTH] = {0};
+        char msg[MAXBBCMESSAGELENGTH] = {0};
 
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &msg, portMAX_DELAY);
@@ -53,9 +53,9 @@ void routing_task(void *pvParameters)
 
         for (int i = 0; i < X.size(); i++)
         {
-            char cmd[MAXMESSAGELENGTH] = {0};
+            char cmd[MAXESP32MESSAGELENGTH] = {0};
 
-            strcpy(cmd, X[i].substr(0, MAXMESSAGELENGTH).c_str());
+            strcpy(cmd, X[i].substr(0, MAXESP32MESSAGELENGTH).c_str());
 
             //Serial.printf("@@ BBC RX: %s\n", cmd);
             //Serial.println(cmd);
@@ -101,15 +101,10 @@ void routing_task(void *pvParameters)
                 //MQTT messaging
                 xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
             }
-            // else if (strcmp(cmd, "00") == 0)
-            // {
-            //     //Nice....just notify the task to get on with it and send the UART message
-            //     xTaskNotify(MicrobitTXTask, 0, eSetValueWithoutOverwrite);
-            // }
-            else if (strcmp(cmd, "START") == 0)
+            else if (strcmp(cmd, "RESTART") == 0)
             {
                 //reboot ESP32
-                //ESP.restart();
+                ESP.restart();
             }
         }
     }

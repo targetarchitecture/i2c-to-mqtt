@@ -18,7 +18,6 @@ extern TaskHandle_t DACTask;
 extern TaskHandle_t LightTask;
 extern TaskHandle_t EncodersTask;
 extern TaskHandle_t MicrobitRXTask;
-//extern TaskHandle_t MicrobitTXTask;
 extern TaskHandle_t SoundTask;
 extern TaskHandle_t MusicBusyTask;
 extern TaskHandle_t RoutingTask;

@@ -80,7 +80,7 @@ void movement_task(void *pvParameters)
     {
         // Serial.println("waiting for Command_Queue");
 
-        char msg[MAXMESSAGELENGTH] = {0};
+        char msg[MAXESP32MESSAGELENGTH] = {0};
 
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);

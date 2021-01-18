@@ -55,11 +55,12 @@ void setup()
 
   //set up the main queues
   char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-  char RXfromBBCmessage[MAXMESSAGELENGTH];
-  char MAXUSBMessage[UARTMESSAGELENGTH];
+  char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+  //char MAXUSBMessage[UARTMESSAGELENGTH];
 
-  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage)); 
   Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));  
+  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage)); 
+
   Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));

@@ -88,7 +88,7 @@ void ADC_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void ADC_deal_with_message(char msg[MAXMESSAGELENGTH])
+void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     if (strcmp(msg, "U1,0") == 0)
     {

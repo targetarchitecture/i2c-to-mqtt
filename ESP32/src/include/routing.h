@@ -11,9 +11,9 @@ std::vector<std::string> parseUART(const std::string &strStringToSplit,
                                    const std::string &strDelimiter,
                                    const bool keepEmpty);
                                    
-extern void encoders_deal_with_message(char msg[MAXMESSAGELENGTH]);
-extern void ADC_deal_with_message(char msg[MAXMESSAGELENGTH]);
-extern void MQTT_deal_with_message(char msg[MAXMESSAGELENGTH]);
+extern void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
+extern void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
+extern void MQTT_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
@@ -22,7 +22,5 @@ extern QueueHandle_t Microbit_Receive_Queue;
 extern QueueHandle_t Light_Queue;
 extern QueueHandle_t Movement_Queue;
 extern QueueHandle_t MQTT_Queue;
-
-//extern TaskHandle_t MicrobitTXTask;
 
 #endif

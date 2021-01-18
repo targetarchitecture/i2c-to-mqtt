@@ -12,7 +12,7 @@ void Wifi_connect();
 
 std::string ReplaceString(std::string subject, const std::string &search, const std::string &replace);
 
-void MQTT_deal_with_message(char msg[MAXMESSAGELENGTH]);
+void MQTT_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 void MQTT_task(void *pvParameter);
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);

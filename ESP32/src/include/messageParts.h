@@ -6,7 +6,7 @@
 
 struct messageParts
 {
-    char fullMessage[MAXMESSAGELENGTH];
+    char fullMessage[MAXESP32MESSAGELENGTH];
     char identifier[4];
     char value1[MAXMESSAGEFRAGMENTSIZE];
     char value2[MAXMESSAGEFRAGMENTSIZE];
