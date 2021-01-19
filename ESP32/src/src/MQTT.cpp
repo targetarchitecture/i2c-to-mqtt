@@ -53,11 +53,10 @@ void Wifi_connect()
   }
 
   char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str()); 
+  sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str());
 
   sendToMicrobit(msgtosend);
 }
-
 
 void MQTT_connect()
 {
@@ -138,8 +137,7 @@ void MQTT_task(void *pvParameter)
     {
       std::string str(parts.value1);
 
-      //TODO: Better way of sending spaces
-      WIFI_SSID = ReplaceString(str, "PPP", " ");
+      WIFI_SSID = str;
 
       //Serial.printf("\n\nWIFI_SSID:%s<<<\n\n\n", WIFI_SSID.c_str());
     }
@@ -183,6 +181,10 @@ void MQTT_task(void *pvParameter)
       if (WiFi.isConnected() == true)
       {
         MQTT_connect();
+      }
+      else
+      {
+        Serial.println("WiFi not connected,cannot send MQTT message");
       }
     }
     else if (strcmp(parts.identifier, "T9") == 0)

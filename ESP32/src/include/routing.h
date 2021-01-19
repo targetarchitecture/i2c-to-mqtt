@@ -7,9 +7,9 @@
 
 void routing_task(void *pvParameters);
 void routing_setup();
-std::vector<std::string> parseUART(const std::string &strStringToSplit,
-                                   const std::string &strDelimiter,
-                                   const bool keepEmpty);
+// std::vector<std::string> parseUART(const std::string &strStringToSplit,
+//                                    const std::string &strDelimiter,
+//                                    const bool keepEmpty);
                                    
 extern void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
