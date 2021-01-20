@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include "switch.h"
 #include <SparkFunSX1509.h> // Include SX1509 library
+#include <iostream>
+#include <string>
+#include <vector>
 
 SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
-int pinState[15]; // {HIGH};
+//int pinState[15]; // {HIGH};
 
 void switch_setup()
 {
@@ -53,13 +56,15 @@ void switch_setup()
 void switch_task(void *pvParameters)
 {
     //TODO: Ask Google if this is the best place to declare variables in an endless task
-    int newPinState[16]; // {HIGH};
+    //int newPinState[16]; // {HIGH};
+    std::vector<int> pinState;
+    std::vector<int> newPinState;
 
     for (size_t i = 0; i < 16; i++)
     {
         //set the pin states to HIGH as PULLUP is set
-        pinState[i] = 1;    //HIGH;
-        newPinState[i] = 1; // HIGH;
+        pinState.push_back(1);    //HIGH;
+        newPinState.push_back(1); // HIGH;
     }
 
     //TODO: see if this improves the inital flood of readings
@@ -121,7 +126,7 @@ void switch_task(void *pvParameters)
                     char msgtosend[MAXBBCMESSAGELENGTH];
                     sprintf(msgtosend, "E%i,%i", i, newPinState[i]);
 
-                    sendToMicrobit(msgtosend); 
+                    sendToMicrobit(msgtosend);
 
                     // Serial.print("msgtosend:");
                     // Serial.println(msgtosend);
@@ -137,4 +142,3 @@ void switch_task(void *pvParameters)
 
     vTaskDelete(NULL);
 }
-

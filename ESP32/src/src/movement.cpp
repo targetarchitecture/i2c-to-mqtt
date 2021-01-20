@@ -1,7 +1,10 @@
 #include <Arduino.h>
 #include "movement.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
-volatile servo servos[15] = {0};
+std::vector<servo> servos; //[15] = {0};
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 extern SemaphoreHandle_t i2cSemaphore;
 TaskHandle_t MovementTask;
@@ -40,18 +43,22 @@ void movement_setup()
     //set up struct array for the servos
     for (int16_t i = 0; i < 15; i++)
     {
-        servos[i].pin = i;
-        servos[i].PWM = 0;
-        servos[i]._change = 32;
-        servos[i]._duration = 2;
-        servos[i].toDegree = 0;
-        servos[i].fromDegree = 0;
-        servos[i].setDegree = 180;
-        servos[i].minPulse = 100;
-        servos[i].maxPulse = 505;
-        servos[i].isMoving = false;
-        servos[i].easingCurve = LinearInOut;
-        servos[i].interuptEasing = false;
+        servo S;
+
+        S.pin = i;
+        S.PWM = 0;
+        S._change = 32;
+        S._duration = 2;
+        S.toDegree = 0;
+        S.fromDegree = 0;
+        S.setDegree = 180;
+        S.minPulse = 100;
+        S.maxPulse = 505;
+        S.isMoving = false;
+        S.easingCurve = LinearInOut;
+        S.interuptEasing = false;
+
+        servos.push_back(S);
     }
 
     //this task is to recieve the

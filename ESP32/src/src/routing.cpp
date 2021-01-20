@@ -19,10 +19,10 @@ void routing_task(void *pvParameters)
     //char firstCharacter;
 
     /* Inspect our own high water mark on entering the task. */
-    // BaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    BaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("routing_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
 
     //  Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
 

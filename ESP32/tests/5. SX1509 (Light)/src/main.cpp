@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 #include <SparkFunSX1509.h> // Include SX1509 library
 
 const byte SX1509_ADDRESS = 0x3E; // SX1509 I2C address

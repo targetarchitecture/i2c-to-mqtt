@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "light.h"
 #include <SparkFunSX1509.h> // Include SX1509 library
+#include <iostream>
+#include <string>
+#include <vector>
 
 SX1509 lights; // Create an SX1509 object to be used throughout
 
@@ -11,7 +14,8 @@ enum pinState
     blink,
     breathe
 };
-pinState pinStates[16] = {off};
+//pinState pinStates[16] = {off};
+std::vector<pinState> pinStates;
 
 TaskHandle_t LightTask;
 
@@ -36,12 +40,12 @@ void light_setup()
     xSemaphoreGive(i2cSemaphore);
 
     xTaskCreatePinnedToCore(
-        light_task,   /* Task function. */
-        "Light Task", /* name of task. */
-        2048 * 4,     /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
-        NULL,         /* parameter of the task */
-        1,            /* priority of the task */
-        &LightTask,1);  /* Task handle to keep track of created task */
+        light_task,     /* Task function. */
+        "Light Task",   /* name of task. */
+        2048 * 4,       /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
+        NULL,           /* parameter of the task */
+        1,              /* priority of the task */
+        &LightTask, 1); /* Task handle to keep track of created task */
 }
 
 void light_task(void *pvParameters)
@@ -51,13 +55,18 @@ void light_task(void *pvParameters)
     // int16_t currentVolume;
     // int16_t currentTrack;
 
+    for (int pin = 0; pin < 16; pin++)
+    {
+        pinStates.push_back(off);
+    }
+
     /* Inspect our own high water mark on entering the task. */
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("light_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-     // Serial.printf("Light task is on core %i\n", xPortGetCoreID());
+    // Serial.printf("Light task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
