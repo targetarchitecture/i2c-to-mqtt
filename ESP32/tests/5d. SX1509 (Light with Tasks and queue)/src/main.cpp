@@ -2,9 +2,9 @@
 #include <Wire.h>
 #include "SN7 pins.h"
 #include <SparkFunSX1509.h> // Include SX1509 library
-//#include <iostream>
-//#include <string>
 #include <vector>
+#include <sstream>
+#include <iostream>
 
 const byte SX1509_ADDRESS = 0x3E; // SX1509 I2C address
 SX1509 sx1509;                    // Create an SX1509 object to be used throughout
@@ -12,7 +12,7 @@ SX1509 sx1509;                    // Create an SX1509 object to be used througho
 enum LEDactions
 {
   blink,
-  fade,
+  breathe,
   off,
   on
 };
@@ -21,11 +21,13 @@ struct PWM
 {
   int pwm;
   int pin;
+  unsigned long timestamp;
 };
 
 TaskHandle_t i2cTask;
 std::vector<TaskHandle_t> LEDtasks;
 QueueHandle_t PWM_Queue;
+QueueHandle_t PWM_TXT_Queue;
 SemaphoreHandle_t i2cSemaphore;
 
 void blink_LED_task(void *pvParameters);
@@ -33,6 +35,8 @@ void fade_LED_task(void *pvParameters);
 void i2c_task(void *pvParameters);
 void startLED(int pin, LEDactions action);
 void stopLED(int pin);
+void dealWithAction(std::string msg);
+void addTXTQueue(int SX1509_LED_PIN, int currentPWM);
 
 void setup()
 {
@@ -62,13 +66,15 @@ void setup()
 
   xSemaphoreGive(i2cSemaphore);
 
-//create the 16 task handles
+  //create the 16 task handles
   for (int pin = 0; pin < 16; pin++)
   {
     LEDtasks.push_back(NULL);
   }
 
   PWM_Queue = xQueueCreate(100, sizeof(PWM));
+  //PWM_TXT_Queue = xQueueCreate(50, sizeof(std::string));
+  PWM_TXT_Queue = xQueueCreate(50, sizeof(char[10]));
 
   xTaskCreatePinnedToCore(
       i2c_task,   /* Task function. */
@@ -79,18 +85,53 @@ void setup()
       &i2cTask,   /* Task handle to keep track of created task */
       1);         /*core! */
 
-  delay(2000);
+  // delay(2000);
 
-  startLED(3, fade);
-  startLED(15, blink);
+  dealWithAction("Y1,3,3,10");
+  delay(3200);
+  //dealWithAction("Y1,15,5,20");
+  //delay(5000);
+  dealWithAction("Y2,15,1,4,4,1");
+  // startLED(3, fade);
+  // startLED(15, blink);
 
-  delay(5000);
+  // delay(5000);
 
-  stopLED(3);
+  // stopLED(3);
 
-  delay(1000);
+  // delay(1000);
 
-  startLED(3,on);
+  // startLED(3, on);
+}
+
+void dealWithAction(std::string msg)
+{
+  std::vector<std::string> strings;
+  std::istringstream f(msg);
+  std::string s;
+
+  while (std::getline(f, s, ','))
+  {
+    strings.push_back(s);
+
+    Serial.println(s.c_str());
+  }
+
+  auto action = strings[0].c_str();
+  auto pin = atoi(strings[1].c_str());
+
+  if (strcmp(action, "Y1") == 0)
+  {
+    startLED(pin, blink);
+  }
+  else if (strcmp(action, "Y2") == 0)
+  {
+    startLED(pin, breathe);
+  }
+  else if (strcmp(action, "Y3") == 0)
+  {
+    // startLED(3, breathe);
+  }
 }
 
 void i2c_task(void *pvParameters)
@@ -105,10 +146,28 @@ void i2c_task(void *pvParameters)
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
+    auto curentPin = pwm.pin;
+    auto currentPWM = pwm.pwm;
+    auto currentMillis = pwm.timestamp;
+
     // configure the PWM duty cycle
-    sx1509.pwm(pwm.pin, pwm.pwm);
+    sx1509.pwm(curentPin, currentPWM);
 
     xSemaphoreGive(i2cSemaphore);
+
+    //Serial.printf("Pin: %i\tPWM: %i\t time: %lu\n", curentPin, currentPWM, currentMillis);
+
+    char msg[10];
+
+    xQueueReceive(PWM_TXT_Queue, &msg, portMAX_DELAY);
+
+    Serial.println(msg);
+
+    // pwm.pin = NULL;
+    // pwm.pwm = NULL;
+    // pwm.timestamp = 0;
+
+    delay(2);
   }
 }
 
@@ -127,49 +186,52 @@ void fade_LED_task(void *pvParameters)
 
   memcpy(&SX1509_LED_PIN, &pvParameter, sizeof(int));
 
-  Serial.printf("SX1509_LED_PIN: %i\n", SX1509_LED_PIN);
+  Serial.printf("SX1509_LED_PIN: %i\n", pvParameter);
 
-  PWM pwm;
-  pwm.pin = SX1509_LED_PIN;
-  pwm.pwm = 0;
-
-  xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
+  // PWM pwm;
+  // pwm.pin = SX1509_LED_PIN;
+  // pwm.pwm = 0;
 
   for (;;)
   {
-    // Ramp brightness up, from 0-255, delay 2ms in between analogWrite's
+
+    //delay(500); // Delay half-a-second
+
+    for (int brightness = 255; brightness >= 0; brightness--)
+    {
+      PWM pwm;
+      pwm.pin = SX1509_LED_PIN;
+      pwm.pwm = brightness;
+      pwm.timestamp = millis();
+
+      //Serial.println(pwm.pwm);
+
+      xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
+
+      addTXTQueue(SX1509_LED_PIN, brightness);
+
+      delay(20); // Delay 2 milliseconds
+    }
+
     for (int brightness = 0; brightness <= 255; brightness++)
     {
       // Serial.printf("PWM: %i\n", brightness);
 
+      PWM pwm;
+      pwm.pin = SX1509_LED_PIN;
       pwm.pwm = brightness;
+      pwm.timestamp = millis();
+
+      //Serial.println(pwm.pwm);
 
       xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
 
-      delay(10); // Delay 2 milliseconds
+      addTXTQueue(SX1509_LED_PIN, brightness);
+
+      delay(20); // Delay 2 milliseconds
     }
 
-    pwm.pwm = 255;
-
-    xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
-
-    delay(500); // Delay half-a-second
-
-    // Ramp brightness down, from 255-0, delay 2ms in between analogWrite's
-    for (int brightness = 255; brightness >= 0; brightness--)
-    {
-      pwm.pwm = brightness;
-
-      xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
-
-      delay(10); // Delay 2 milliseconds
-    }
-
-    pwm.pwm = 0;
-
-    xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
-
-    delay(500);
+    //delay(500);
   }
 }
 
@@ -180,34 +242,39 @@ void loop()
 
 void startLED(int pin, LEDactions action)
 {
+  stopLED(pin);
+
   switch (action)
   {
-  case fade:
+  case breathe:
     xTaskCreatePinnedToCore(
         fade_LED_task,        /* Task function. */
         "Lighting Fade Task", /* name of task. */
-        9000,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8200) */
+        9000,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8700) */
         (void *)pin,          /* parameter of the task */
         1,                    /* priority of the task */
-        &LEDtasks[pin],           /* Task handle to keep track of created task */
+        &LEDtasks[pin],       /* Task handle to keep track of created task */
         1);                   /* Core */
 
   case blink:
     xTaskCreatePinnedToCore(
         blink_LED_task,        /* Task function. */
         "Lighting Blink Task", /* name of task. */
-        9000,                  /* Stack size of task (uxTaskGetStackHighWaterMark: 8200) */
+        9000,                  /* Stack size of task (uxTaskGetStackHighWaterMark: 8700) */
         (void *)pin,           /* parameter of the task */
         1,                     /* priority of the task */
-        &LEDtasks[pin],            /* Task handle to keep track of created task */
+        &LEDtasks[pin],        /* Task handle to keep track of created task */
         1);                    /* Core */
 
   case on:
     PWM pwm;
     pwm.pin = pin;
     pwm.pwm = 0; //strangely 0 is on with the SX1509
+    pwm.timestamp = millis();
 
     xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
+
+    addTXTQueue(pin, 0);
   }
 }
 
@@ -234,8 +301,19 @@ void stopLED(int pin)
   PWM pwm;
   pwm.pin = pin;
   pwm.pwm = 0; //strangely 0 is on with the SX1509
+  pwm.timestamp = millis();
 
   xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
+
+  addTXTQueue(pin, 0);
+}
+
+void addTXTQueue(int SX1509_LED_PIN, int currentPWM)
+{
+  char temp[10];
+  sprintf(temp, "%i,%i", SX1509_LED_PIN, currentPWM);
+
+  xQueueSend(PWM_TXT_Queue, &temp, portMAX_DELAY);
 }
 
 void blink_LED_task(void *pvParameters)
@@ -253,26 +331,38 @@ void blink_LED_task(void *pvParameters)
 
   memcpy(&SX1509_LED_PIN, &pvParameter, sizeof(int));
 
-  Serial.printf("SX1509_LED_PIN: %i\n", SX1509_LED_PIN);
+  Serial.printf("SX1509_LED_PIN: %i\n", pvParameter);
+
+  int currentPWM = 0;
 
   PWM pwm;
   pwm.pin = SX1509_LED_PIN;
-  pwm.pwm = 0; //strangely 0 is on with the SX1509
+  pwm.pwm = currentPWM; //strangely 0 is on with the SX1509
+  pwm.timestamp = millis();
 
   xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
 
+  addTXTQueue(SX1509_LED_PIN, currentPWM);
+
   for (;;)
   {
-    if (pwm.pwm == 0)
+    if (currentPWM == 0)
     {
-      pwm.pwm = 255;
+      currentPWM = 255;
     }
     else
     {
-      pwm.pwm = 0;
+      currentPWM = 0;
     }
 
+    PWM pwm;
+    pwm.pin = SX1509_LED_PIN;
+    pwm.pwm = currentPWM; //strangely 0 is on with the SX1509
+    pwm.timestamp = millis();
+
     xQueueSend(PWM_Queue, &pwm, portMAX_DELAY);
+
+    addTXTQueue(SX1509_LED_PIN, currentPWM);
 
     delay(500); // Delay half-a-second
   }
