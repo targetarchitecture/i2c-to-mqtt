@@ -46,7 +46,7 @@ void switch_setup()
         "Switch Task",   /* name of task. */
         8500,            /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
         NULL,            /* parameter of the task */
-        1,               /* priority of the task */
+        2,               /* priority of the task */
         &SwitchTask, 1); /* Task handle to keep track of created task */
 
     //set-up the interupt

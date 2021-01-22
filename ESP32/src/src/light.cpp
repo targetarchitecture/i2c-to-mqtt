@@ -32,7 +32,7 @@ void light_setup()
     }
 
     // Use the internal 2MHz oscillator.
-    lights.clock(INTERNAL_CLOCK_2MHZ, 4);
+    //lights.clock(INTERNAL_CLOCK_2MHZ, 4);
 
     checkI2Cerrors("light");
 
@@ -79,8 +79,8 @@ void light_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Light_Queue, &msg, portMAX_DELAY);
 
-        // Serial.print("Light_Queue:");
-        // Serial.println(msg);
+        Serial.print("Light_Queue:");
+        Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
@@ -170,6 +170,10 @@ void light_task(void *pvParameters)
 
                 //give back the i2c flag for the next task
                 xSemaphoreGive(i2cSemaphore);
+            }
+            else if (strcmp(parts.identifier, "Y4") == 0)
+            {
+                lights.begin(0x3E);
             }
             else
             {

@@ -21,10 +21,16 @@ void setup()
 
     sx1509.clock(INTERNAL_CLOCK_2MHZ, 4);
 
-    for (size_t pin = 0; pin < 16; pin++)
+    for (size_t pin = 0; pin < 8; pin++)
+    {
+      sx1509.pinMode(pin, OUTPUT);
+      sx1509.blink(pin, 1000, 1000);
+    }
+
+    for (size_t pin = 8; pin < 16; pin++)
     {
       sx1509.pinMode(pin, ANALOG_OUTPUT);          // To breathe an LED, make sure you set it as an ANALOG_OUTPUT, so we can PWM the pin
-      sx1509.breathe(pin, 1000, 1000, 4000, 4000); // Breathe an LED: 1000ms LOW, 500ms HIGH, 500ms to rise from low to high, 250ms to fall from high to low
+      sx1509.breathe(pin, 500, 500, 500, 500); // Breathe an LED: 1000ms LOW, 500ms HIGH, 500ms to rise from low to high, 250ms to fall from high to low
     }
   }
 }

@@ -25,7 +25,7 @@ void microbit_i2c_setup()
         "i2c RX Task",        /* name of task. */
         8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8064) */
         NULL,                 /* parameter of the task */
-        5,                    /* priority of the task */
+        4,                    /* priority of the task */
         &Microbiti2cTask, 1); /* Task handle to keep track of created task */
 }
 
