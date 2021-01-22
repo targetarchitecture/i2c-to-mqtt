@@ -113,13 +113,13 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
   strcpy(mParts.fullMessage, msg.c_str());
   int index = 0;
 
-  Serial.println(msg.c_str());
+  //Serial.println(msg.c_str());
 
   while (std::getline(f, part, ','))
   {
     //strings.push_back(s);
 
-    Serial.println(part.c_str());
+    //Serial.println(part.c_str());
 
     if (index == 0)
     {

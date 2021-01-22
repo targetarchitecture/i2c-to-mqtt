@@ -6,12 +6,12 @@ TaskHandle_t RoutingTask;
 void routing_setup()
 {
     xTaskCreatePinnedToCore(
-        routing_task,                 /* Task function. */
-        "Routing Task",               /* name of task. */
-        configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
-        NULL,                         /* parameter of the task */
-        2,                            /* priority of the task */
-        &RoutingTask, 1);             /* Task handle to keep track of created task */
+        routing_task,     /* Task function. */
+        "Routing Task",   /* name of task. */
+        3000,             /* Stack size of task */
+        NULL,             /* parameter of the task */
+        2,                /* priority of the task */
+        &RoutingTask, 1); /* Task handle to keep track of created task */
 }
 
 void routing_task(void *pvParameters)
@@ -39,7 +39,7 @@ void routing_task(void *pvParameters)
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &cmd, portMAX_DELAY);
 
-        Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
+        //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
         //Serial.println(msg);
 
         //TODO: Fix parsing by space

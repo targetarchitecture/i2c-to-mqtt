@@ -79,8 +79,8 @@ void light_task(void *pvParameters)
         //wait for new music command in the queue
         xQueueReceive(Light_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Light_Queue:");
-        Serial.println(msg);
+        //Serial.print("Light_Queue:");
+        //Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
