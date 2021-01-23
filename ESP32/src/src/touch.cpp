@@ -36,9 +36,15 @@ void touch_setup()
     attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
 
     //uxTaskGetStackHighWaterMark = 1750
-    xTaskCreatePinnedToCore(&touch_task, "Touch Task", 2000, NULL, 2, &TouchTask, 1);
+    xTaskCreatePinnedToCore(
+        &touch_task,
+        "Touch Task",
+        2000,
+        NULL,
+        touch_task_Priority,
+        &TouchTask,
+        1);
 }
-
 
 void touch_task(void *pvParameter)
 {

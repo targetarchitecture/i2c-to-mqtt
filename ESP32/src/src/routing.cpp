@@ -6,12 +6,12 @@ TaskHandle_t RoutingTask;
 void routing_setup()
 {
     xTaskCreatePinnedToCore(
-        routing_task,     /* Task function. */
-        "Routing Task",   /* name of task. */
-        3000,             /* Stack size of task */
-        NULL,             /* parameter of the task */
-        2,                /* priority of the task */
-        &RoutingTask, 1); /* Task handle to keep track of created task */
+        routing_task,          /* Task function. */
+        "Routing Task",        /* name of task. */
+        3000,                  /* Stack size of task */
+        NULL,                  /* parameter of the task */
+        routing_task_Priority, /* priority of the task */
+        &RoutingTask, 1);      /* Task handle to keep track of created task */
 }
 
 void routing_task(void *pvParameters)
@@ -19,10 +19,10 @@ void routing_task(void *pvParameters)
     //char firstCharacter;
 
     /* Inspect our own high water mark on entering the task. */
-    BaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("routing_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
+    // BaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("routing_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
 
     //  Serial.printf("Routing task is on core %i\n", xPortGetCoreID());
 
@@ -40,7 +40,6 @@ void routing_task(void *pvParameters)
         xQueueReceive(Microbit_Receive_Queue, &cmd, portMAX_DELAY);
 
         //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
-        //Serial.println(msg);
 
         //TODO: Fix parsing by space
         //auto X = parseUART(msg, " ", false);
@@ -61,6 +60,9 @@ void routing_task(void *pvParameters)
         //Serial.println(cmd);
 
         //X[i].c_str()[0]
+
+                //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
+        //Serial.println(msg);
 
         if (cmd[0] == 'Z')
         {

@@ -42,20 +42,20 @@ void sound_setup()
     //Serial.println("music_setup");
 
     xTaskCreatePinnedToCore(
-        sound_task,     /* Task function. */
-        "Sound Task",   /* name of task. */
-        12000,          /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
-        NULL,           /* parameter of the task */
-        1,              /* priority of the task */
-        &SoundTask, 1); /* Task handle to keep track of created task */
+        sound_task,          /* Task function. */
+        "Sound Task",        /* name of task. */
+        12000,               /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
+        NULL,                /* parameter of the task */
+        sound_task_Priority, /* priority of the task */
+        &SoundTask, 1);      /* Task handle to keep track of created task */
 
     xTaskCreatePinnedToCore(
-        sound_busy_task,    /* Task function. */
-        "Sound Busy Task",  /* name of task. */
-        2048,               /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
-        NULL,               /* parameter of the task */
-        1,                  /* priority of the task */
-        &SoundBusyTask, 1); /* Task handle to keep track of created task */
+        sound_busy_task,          /* Task function. */
+        "Sound Busy Task",        /* name of task. */
+        2048,                     /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
+        NULL,                     /* parameter of the task */
+        sound_busy_task_Priority, /* priority of the task */
+        &SoundBusyTask, 1);       /* Task handle to keep track of created task */
 }
 
 void sound_busy_task(void *pvParameters)

@@ -40,12 +40,12 @@ void light_setup()
     xSemaphoreGive(i2cSemaphore);
 
     xTaskCreatePinnedToCore(
-        light_task,     /* Task function. */
-        "Light Task",   /* name of task. */
-        2048 * 4,       /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
-        NULL,           /* parameter of the task */
-        1,              /* priority of the task */
-        &LightTask, 1); /* Task handle to keep track of created task */
+        light_task,          /* Task function. */
+        "Light Task",        /* name of task. */
+        2048 * 4,            /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
+        NULL,                /* parameter of the task */
+        light_task_Priority, /* priority of the task */
+        &LightTask, 1);      /* Task handle to keep track of created task */
 }
 
 void light_task(void *pvParameters)
@@ -171,14 +171,23 @@ void light_task(void *pvParameters)
                 //give back the i2c flag for the next task
                 xSemaphoreGive(i2cSemaphore);
             }
-            else if (strcmp(parts.identifier, "Y4") == 0)
-            {
-                lights.begin(0x3E);
-            }
-            else
-            {
-                //Do nothing - as we already turned off the pin/light
-            }
+        }
+        else if (strcmp(parts.identifier, "Y4") == 0)
+        {
+            //Serial.println("YOYOYO");
+
+            //wait for the i2c semaphore flag to become available
+            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+            lights.reset(0);
+
+            // Set the clock to a default of 2MHz using internal
+            lights.clock(INTERNAL_CLOCK_2MHZ);
+
+            checkI2Cerrors("light Y4");
+
+            //give back the i2c flag for the next task
+            xSemaphoreGive(i2cSemaphore);
         }
     }
 

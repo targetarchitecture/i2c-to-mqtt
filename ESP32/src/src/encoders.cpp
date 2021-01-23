@@ -29,7 +29,14 @@ void encoders_setup()
     encoder2.setCount(0);
 
     //start task to read an send rotary information every 500ms (uxTaskGetStackHighWaterMark = 1560)
-    xTaskCreatePinnedToCore(&encoders_task, "encoders_task", 2048, NULL, 1, &EncodersTask,1);
+    xTaskCreatePinnedToCore(
+        &encoders_task,
+        "encoders_task",
+        2048,
+        NULL,
+        encoders_task_Priority,
+        &EncodersTask,
+        1);
 }
 
 void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH])

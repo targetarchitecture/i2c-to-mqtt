@@ -42,12 +42,12 @@ void switch_setup()
     xSemaphoreGive(i2cSemaphore);
 
     xTaskCreatePinnedToCore(
-        switch_task,     /* Task function. */
-        "Switch Task",   /* name of task. */
-        8500,            /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
-        NULL,            /* parameter of the task */
-        2,               /* priority of the task */
-        &SwitchTask, 1); /* Task handle to keep track of created task */
+        switch_task,          /* Task function. */
+        "Switch Task",        /* name of task. */
+        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
+        NULL,                 /* parameter of the task */
+        switch_task_Priority, /* priority of the task */
+        &SwitchTask, 1);      /* Task handle to keep track of created task */
 
     //set-up the interupt
     pinMode(SWITCH_INT, INPUT_PULLUP);

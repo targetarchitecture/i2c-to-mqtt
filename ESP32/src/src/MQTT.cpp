@@ -20,12 +20,12 @@ void MQTT_setup()
   pinMode(ONBOARDLED, OUTPUT);
 
   xTaskCreatePinnedToCore(
-      MQTT_task,     /* Task function. */
-      "MQTT Task",   /* name of task. */
-      17000,         /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
-      NULL,          /* parameter of the task */
-      5,             /* priority of the task */
-      &MQTTTask, 1); /* Task handle to keep track of created task */
+      MQTT_task,          /* Task function. */
+      "MQTT Task",        /* name of task. */
+      17000,              /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+      NULL,               /* parameter of the task */
+      MQTT_task_Priority, /* priority of the task */
+      &MQTTTask, 1);      /* Task handle to keep track of created task */
 }
 
 void Wifi_connect()

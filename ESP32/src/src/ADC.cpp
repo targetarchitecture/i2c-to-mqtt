@@ -18,12 +18,12 @@ void ADC_setup()
     ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
 
     xTaskCreatePinnedToCore(
-        ADC_task,                    /* Task function. */
-        "ADC Task",                  /* name of task. */
-        3500,                        /* Stack size of task (uxTaskGetStackHighWaterMark = 3208)*/
-        NULL,                        /* parameter of the task */
-        1,                           /* priority of the task */
-        &ADCTask, 1); /* Task handle to keep track of created task */
+        ADC_task,          /* Task function. */
+        "ADC Task",        /* name of task. */
+        3500,              /* Stack size of task (uxTaskGetStackHighWaterMark = 3208)*/
+        NULL,              /* parameter of the task */
+        ADC_task_Priority, /* priority of the task */
+        &ADCTask, 1);      /* Task handle to keep track of created task */
 }
 
 void ADC_task(void *pvParameters)

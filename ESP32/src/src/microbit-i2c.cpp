@@ -97,8 +97,12 @@ void receiveEvent(int howMany)
     //Serial.print("strcpy: ");
     //Serial.println(queuedMsg);
 
-    //now add these to the routing queue for routing
-    xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
+    //disgard the 00 ones and not add them to the queue
+    if (queuedMsg[0] != '0' && queuedMsg[1] != '0')
+    {   
+        //now add these to the routing queue for routing
+        xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
+    }
 }
 
 void requestEvent()
