@@ -122,7 +122,7 @@ void MQTT_task(void *pvParameter)
       digitalWrite(ONBOARDLED, LOW);
     }
 
-    //wait for new music command in the queue
+    //wait for new MQTT command in the queue
     xQueueReceive(MQTT_Queue, &msg, portMAX_DELAY);
 
     // Serial.print("MQTT_Queue:");
@@ -209,14 +209,14 @@ void MQTT_task(void *pvParameter)
   vTaskDelete(NULL);
 }
 
-std::string ReplaceString(std::string subject, const std::string &search,
-                          const std::string &replace)
-{
-  size_t pos = 0;
-  while ((pos = subject.find(search, pos)) != std::string::npos)
-  {
-    subject.replace(pos, search.length(), replace);
-    pos += replace.length();
-  }
-  return subject;
-}
+// std::string ReplaceString(std::string subject, const std::string &search,
+//                           const std::string &replace)
+// {
+//   size_t pos = 0;
+//   while ((pos = subject.find(search, pos)) != std::string::npos)
+//   {
+//     subject.replace(pos, search.length(), replace);
+//     pos += replace.length();
+//   }
+//   return subject;
+// }

@@ -160,123 +160,123 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
   return mParts;
 }
 
-//TODO: check that the the new method works before deleting this one.
-messageParts processQueueMessageV1(const std::string msg, const std::string from)
-{
-  //Serial.printf("processQueueMessage (%s): %s\n", from.c_str(), msg.c_str());
+// //TODO: check that the the new method works before deleting this one.
+// messageParts processQueueMessageV1(const std::string msg, const std::string from)
+// {
+//   //Serial.printf("processQueueMessage (%s): %s\n", from.c_str(), msg.c_str());
 
-  messageParts mParts = {};
-  strcpy(mParts.fullMessage, msg.c_str());
+//   messageParts mParts = {};
+//   strcpy(mParts.fullMessage, msg.c_str());
 
-  try
-  {
-    //https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
-    std::string delim = ",";
-    int index = 0;
-    auto start = 0U;
-    auto end = msg.find(delim);
+//   try
+//   {
+//     //https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+//     std::string delim = ",";
+//     int index = 0;
+//     auto start = 0U;
+//     auto end = msg.find(delim);
 
-    while (end != std::string::npos)
-    {
-      if (index == 0)
-      {
-        strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
-      }
-      if (index == 1)
-      {
-        strcpy(mParts.value1, msg.substr(start, end - start).c_str());
-      }
-      if (index == 2)
-      {
-        strcpy(mParts.value2, msg.substr(start, end - start).c_str());
-      }
-      if (index == 3)
-      {
-        strcpy(mParts.value3, msg.substr(start, end - start).c_str());
-      }
-      if (index == 4)
-      {
-        strcpy(mParts.value4, msg.substr(start, end - start).c_str());
-      }
-      if (index == 5)
-      {
-        strcpy(mParts.value5, msg.substr(start, end - start).c_str());
-      }
-      if (index == 6)
-      {
-        strcpy(mParts.value6, msg.substr(start, end - start).c_str());
-      }
-      if (index == 7)
-      {
-        strcpy(mParts.value7, msg.substr(start, end - start).c_str());
-      }
+//     while (end != std::string::npos)
+//     {
+//       if (index == 0)
+//       {
+//         strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 1)
+//       {
+//         strcpy(mParts.value1, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 2)
+//       {
+//         strcpy(mParts.value2, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 3)
+//       {
+//         strcpy(mParts.value3, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 4)
+//       {
+//         strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 5)
+//       {
+//         strcpy(mParts.value5, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 6)
+//       {
+//         strcpy(mParts.value6, msg.substr(start, end - start).c_str());
+//       }
+//       if (index == 7)
+//       {
+//         strcpy(mParts.value7, msg.substr(start, end - start).c_str());
+//       }
 
-      start = end + delim.length();
-      end = msg.find(delim, start);
+//       start = end + delim.length();
+//       end = msg.find(delim, start);
 
-      index++;
-    }
+//       index++;
+//     }
 
-    //it's a bit crap to repeat the logic - but it works
-    if (index == 0)
-    {
-      strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
-    }
-    if (index == 1)
-    {
-      strcpy(mParts.value1, msg.substr(start, end - start).c_str());
-    }
-    if (index == 2)
-    {
-      strcpy(mParts.value2, msg.substr(start, end - start).c_str());
-    }
-    if (index == 3)
-    {
-      strcpy(mParts.value3, msg.substr(start, end - start).c_str());
-    }
-    if (index == 4)
-    {
-      strcpy(mParts.value4, msg.substr(start, end - start).c_str());
-    }
-    if (index == 5)
-    {
-      strcpy(mParts.value5, msg.substr(start, end - start).c_str());
-    }
-    if (index == 6)
-    {
-      strcpy(mParts.value6, msg.substr(start, end - start).c_str());
-    }
-    if (index == 7)
-    {
-      strcpy(mParts.value7, msg.substr(start, end - start).c_str());
-    }
+//     //it's a bit crap to repeat the logic - but it works
+//     if (index == 0)
+//     {
+//       strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 1)
+//     {
+//       strcpy(mParts.value1, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 2)
+//     {
+//       strcpy(mParts.value2, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 3)
+//     {
+//       strcpy(mParts.value3, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 4)
+//     {
+//       strcpy(mParts.value4, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 5)
+//     {
+//       strcpy(mParts.value5, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 6)
+//     {
+//       strcpy(mParts.value6, msg.substr(start, end - start).c_str());
+//     }
+//     if (index == 7)
+//     {
+//       strcpy(mParts.value7, msg.substr(start, end - start).c_str());
+//     }
 
-    // Serial.print("identifier:");
-    // Serial.println(mParts.identifier);
-    // Serial.print("value1:");
-    // Serial.println(mParts.value1);
-    // Serial.print("value2:");
-    // Serial.println(mParts.value2);
-    // Serial.print("value3:");
-    // Serial.println(mParts.value3);
-    // Serial.print("value4:");
-    // Serial.println(mParts.value4);
-    // Serial.print("value5:");
-    // Serial.println(mParts.value5);
-    // Serial.print("value6:");
-    // Serial.println(mParts.value6);
-    // Serial.print("value7:");
-    // Serial.println(mParts.value7);
-    // Serial.print("fullMessage:");
-    // Serial.println(mParts.fullMessage);
-  }
-  catch (const std::exception &e)
-  {
-    Serial.printf("\n\n\nEXCEPTION: %s \n\n\n", e.what());
-  }
+//     // Serial.print("identifier:");
+//     // Serial.println(mParts.identifier);
+//     // Serial.print("value1:");
+//     // Serial.println(mParts.value1);
+//     // Serial.print("value2:");
+//     // Serial.println(mParts.value2);
+//     // Serial.print("value3:");
+//     // Serial.println(mParts.value3);
+//     // Serial.print("value4:");
+//     // Serial.println(mParts.value4);
+//     // Serial.print("value5:");
+//     // Serial.println(mParts.value5);
+//     // Serial.print("value6:");
+//     // Serial.println(mParts.value6);
+//     // Serial.print("value7:");
+//     // Serial.println(mParts.value7);
+//     // Serial.print("fullMessage:");
+//     // Serial.println(mParts.fullMessage);
+//   }
+//   catch (const std::exception &e)
+//   {
+//     Serial.printf("\n\n\nEXCEPTION: %s \n\n\n", e.what());
+//   }
 
-  return mParts;
-}
+//   return mParts;
+// }
 
 void POST(uint8_t flashes)
 {
