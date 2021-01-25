@@ -44,6 +44,7 @@
         "string": "cpp",
         "bitset": "cpp",
         "regex": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "list": "cpp"
     }
 }

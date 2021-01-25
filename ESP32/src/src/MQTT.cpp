@@ -15,6 +15,8 @@ std::string IP_ADDRESS = "";
 
 TaskHandle_t MQTTTask;
 
+std::list<std::string> MQTTSubscriptions;
+
 void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
@@ -85,6 +87,9 @@ void checkMQTTconnection(const bool signalToMicrobit)
       char msgtosend[MAXBBCMESSAGELENGTH];
       sprintf(msgtosend, "G2,1");
       sendToMicrobit(msgtosend);
+
+      //set up subscription topics
+      setupSubscriptions();
     }
     else
     {
@@ -92,6 +97,18 @@ void checkMQTTconnection(const bool signalToMicrobit)
       sprintf(msgtosend, "G2,0");
       sendToMicrobit(msgtosend);
     }
+  }
+}
+
+void setupSubscriptions()
+{
+  Serial.println("subscribe to:");
+
+  for (const auto &topic : MQTTSubscriptions)
+  {
+    Serial.println(topic.c_str());
+
+    MQTTClient.subscribe(topic.c_str());
   }
 }
 
@@ -202,6 +219,46 @@ void MQTT_task(void *pvParameter)
       else
       {
         Serial.println("WiFi not connected,cannot send MQTT message");
+      }
+    }
+    else if (strcmp(parts.identifier, "T10") == 0)
+    {
+      //add to the list
+      std::string topic = parts.value1;
+      MQTTSubscriptions.push_back(topic);
+
+      //only bother if actually connected to internet!!
+      if (WiFi.isConnected() == true)
+      {
+        checkMQTTconnection(false);
+      }
+      else
+      {
+        Serial.println("WiFi not connected,cannot subscribe to topic");
+      }
+    }
+    else if (strcmp(parts.identifier, "T11") == 0)
+    {
+      std::string topic(parts.value1);
+
+      auto it = std::find(MQTTSubscriptions.begin(), MQTTSubscriptions.end(), topic);
+
+      if (it != MQTTSubscriptions.end())
+      {
+        //Serial.println("Found:");
+
+        MQTTSubscriptions.erase(it);
+        MQTTClient.unsubscribe(parts.value1);
+      }
+
+      //only bother if actually connected to internet!!
+      if (WiFi.isConnected() == true)
+      {
+        checkMQTTconnection(false);
+      }
+      else
+      {
+        Serial.println("WiFi not connected,cannot unsubscribe to topic");
       }
     }
   }
