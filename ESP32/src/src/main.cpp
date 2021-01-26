@@ -33,6 +33,7 @@ QueueHandle_t ADC_Queue;
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
+
 extern PubSubClient MQTTClient;
 void checkI2Cerrors(const char *area);
 
@@ -69,6 +70,7 @@ void setup()
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();
