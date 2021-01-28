@@ -189,6 +189,17 @@ void light_task(void *pvParameters)
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
         }
+        else if (strcmp(parts.identifier, "Y5") == 0)
+        {
+            //turn on all LEDs - using the queue
+            for (int i = 0; i <= 15; i++)
+            {
+                char msgtosend[MAXBBCMESSAGELENGTH];
+                sprintf(msgtosend, "Y3,%i,1", i);
+
+                xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
+            }
+        }
     }
 
     vTaskDelete(NULL);
