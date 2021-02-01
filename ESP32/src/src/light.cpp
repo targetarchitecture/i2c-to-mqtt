@@ -18,7 +18,7 @@ enum pinState
 std::vector<pinState> pinStates;
 
 TaskHandle_t LightTask;
-QueueHandle_t Light_Queue;
+//QueueHandle_t Light_Queue;
 
 void light_setup()
 {
@@ -40,7 +40,7 @@ void light_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+    //Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     xTaskCreatePinnedToCore(
         light_task,          /* Task function. */

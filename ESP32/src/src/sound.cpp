@@ -10,7 +10,7 @@ TaskHandle_t SoundBusyTask;
 volatile int BusyPin;
 const int commandPause = 50;
 
-QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
+//QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
 
 void sound_setup()
 {
@@ -24,7 +24,7 @@ void sound_setup()
 
     BusyPin = digitalRead(DFPLAYER_BUSY);
 
-    Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+    //Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     //Serial.println("music_setup");
 

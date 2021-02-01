@@ -2,11 +2,11 @@
 #include "DAC.h"
 
 TaskHandle_t DACTask;
-QueueHandle_t DAC_Queue;
+//QueueHandle_t DAC_Queue;
 
 void DAC_setup()
 {
-  DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  //DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     xTaskCreatePinnedToCore(
         DAC_task,          /* Task function. */

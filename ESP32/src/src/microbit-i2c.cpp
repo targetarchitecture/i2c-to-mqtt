@@ -3,9 +3,6 @@
 
 TaskHandle_t Microbiti2cTask;
 
-QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
-QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
-
 void microbit_i2c_setup()
 {
     bool success = WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
@@ -22,9 +19,6 @@ void microbit_i2c_setup()
 
     pinMode(BBC_INT, INPUT_PULLUP);
     attachInterrupt(BBC_INT, handleBBCi2CInterupt, RISING);
-
-    Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));
-    Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     xTaskCreatePinnedToCore(
         i2c_rx_task,          /* Task function. */
@@ -70,7 +64,7 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, msg);
 
-    xQueueSend(Microbit_Transmit_Queue, &queuedMsg, portMAX_DELAY);
+    xQueueSend(Microbit_Transmit_Queue, &queuedMsg,  portMAX_DELAY);
 
     // Serial.print("sendToMicrobit [msg]:");
     // Serial.println(msg);

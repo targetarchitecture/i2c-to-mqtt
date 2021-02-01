@@ -13,5 +13,5 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
 
-extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+// extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+// extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

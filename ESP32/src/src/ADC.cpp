@@ -2,7 +2,7 @@
 #include "ADC.h"
 
 TaskHandle_t ADCTask;
-QueueHandle_t ADC_Queue;
+//QueueHandle_t ADC_Queue;
 
 volatile long ADC1_VALUE;
 volatile long ADC2_VALUE;

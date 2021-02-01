@@ -8,7 +8,7 @@ extern SemaphoreHandle_t i2cSemaphore;
 
 Adafruit_PWMServoDriver PCA9685 = Adafruit_PWMServoDriver();
 
-QueueHandle_t Movement_Queue;
+//QueueHandle_t Movement_Queue;
 QueueHandle_t Movement_i2c_Queue;
 
 TaskHandle_t MovementTask;
@@ -69,7 +69,7 @@ void movement_setup()
         //servoTasks.push_back(NULL);
     }
 
-    Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+    //Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     //create a queue to hold servo PWM values (allows us to kill the servo easing processes at anytime)
     Movement_i2c_Queue = xQueueCreate(100, sizeof(servoPWM));
@@ -114,8 +114,8 @@ void movement_task(void *pvParameters)
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);
 
-        Serial.print("Movement_Queue:");
-        Serial.println(msg);
+        // Serial.print("Movement_Queue:");
+        // Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
@@ -317,15 +317,15 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
 
 void stopServo(const int16_t pin)
 {
-    Serial.printf("STOPPING SERVO PIN: %i\n", pin);
+    //Serial.printf("STOPPING SERVO PIN: %i\n", pin);
+    //u_long startTime = millis();
 
     servos[pin].interuptEasing = true;
 
     //not super efficent - but easier, just loop and check
+    //As much as this looks poor - it works and the loop can execute between 1-4 times before the task handle is NULL (0-400ms)
     while (true)
     {
-        //if (servoTasks[pin] == NULL)
-
         if (servos[pin].taskHandle == NULL)
         {
             break;
@@ -334,7 +334,7 @@ void stopServo(const int16_t pin)
         //just adding some delay to give the task enough time to react - the task already has a 50ms delay in it
         delay(50);
 
-        Serial.print("#");
+        // Serial.print("#");
     }
 
     servos[pin].interuptEasing = false;
@@ -342,7 +342,14 @@ void stopServo(const int16_t pin)
     //give the task delete command some time to complete
     delay(10);
 
-    Serial.printf("\nSTOPPING SERVO PIN: %i COMPLETED\n", pin);
+    // Serial.print("pin: ");
+    // Serial.print(pin);
+    // Serial.print(" servo stop completed in: ");
+    // Serial.print(millis() - startTime);
+    // Serial.print(" @ ");
+    // Serial.println(millis());
+
+    //Serial.printf("\nSTOPPING SERVO PIN: %i COMPLETED\n", pin);
 }
 
 void ServoEasingTask(void *pvParameter)
@@ -383,16 +390,13 @@ void ServoEasingTask(void *pvParameter)
     //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
     //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
+    //send message to microbit to indicate it's moving
+    char msgtosend[MAXBBCMESSAGELENGTH];
+    sprintf(msgtosend, "F3,%i", pin);
+    sendToMicrobit(msgtosend);
+
     for (int i = 0; i <= duration * 20; i++)
     {
-        //send message to microbit to indicate it's moving (every other loop)
-        if (i % 2 == 0)
-        {
-            char msgtosend[MAXBBCMESSAGELENGTH];
-            sprintf(msgtosend, "F3,%i", pin);
-            sendToMicrobit(msgtosend);
-        }
-
         switch (easingCurve)
         {
         case QuadraticInOut:
@@ -435,12 +439,12 @@ void ServoEasingTask(void *pvParameter)
         }
     }
 
-    Serial.print("pin: ");
-    Serial.print(pin);
-    Serial.print(" loop completed in: ");
-    Serial.print(millis() - startTime);
-    Serial.print(" @ ");
-    Serial.println(millis());
+    // Serial.print("pin: ");
+    // Serial.print(pin);
+    // Serial.print(" loop completed in: ");
+    // Serial.print(millis() - startTime);
+    // Serial.print(" @ ");
+    // Serial.println(millis());
 
     //servos[pin].isMoving = false;
 
@@ -448,20 +452,18 @@ void ServoEasingTask(void *pvParameter)
     {
         //Add event to BBC microbit queue
         char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F1,%i", pin);
+        sprintf(msgtosend, "F1,%i,%lu", pin, millis() - startTime);
         sendToMicrobit(msgtosend);
     }
     else
     {
         //send message to microbit - Servo 0-15 has stopped due STOP command during easing
         char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F2,%i", pin);
+        sprintf(msgtosend, "F2,%i,%lu", pin, millis() - startTime);
         sendToMicrobit(msgtosend);
     }
 
-    /* 31/1/21 */
     /* The task is going to be deleted. Set the handle to NULL. */
-    //servoTasks[pin] = NULL;
     servos[pin].taskHandle = NULL;
 
     //delete task

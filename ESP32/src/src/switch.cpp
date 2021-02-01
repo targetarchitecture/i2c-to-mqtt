@@ -114,7 +114,7 @@ void switch_task(void *pvParameters)
                     //Serial.printf("Readings (%i): %i,%i \n", i, pinState[i], newPinState[i]);
 
                     char msgtosend[MAXBBCMESSAGELENGTH];
-                    sprintf(msgtosend, "E%i,%i", i, newPinState[i]);
+                    sprintf(msgtosend, "E1,%i,%i", i, newPinState[i]);
 
                     sendToMicrobit(msgtosend);
 

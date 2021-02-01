@@ -26,6 +26,15 @@ Rainbow Sparkle Unicorn - SN7
 
 void checkI2Cerrors(const char *area);
 
+QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
+QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
+QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
+QueueHandle_t DAC_Queue;
+QueueHandle_t Light_Queue;
+//QueueHandle_t ADC_Queue;
+QueueHandle_t Movement_Queue;
+QueueHandle_t MQTT_Queue;
+
 void setup()
 {
   //Set UART log level
@@ -45,6 +54,19 @@ void setup()
   //create i2c Semaphore , and set to useable
   i2cSemaphore = xSemaphoreCreateBinary();
   xSemaphoreGive(i2cSemaphore);
+
+  //set up the main queues
+  char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+  char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+
+  Microbit_Transmit_Queue = xQueueCreate(100, sizeof(TXtoBBCmessage));
+  Microbit_Receive_Queue = xQueueCreate(100, sizeof(RXfromBBCmessage));
+
+  Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();

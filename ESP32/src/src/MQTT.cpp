@@ -13,7 +13,7 @@ std::string WIFI_PASSPHRASE = "";
 
 std::string IP_ADDRESS = "";
 
-QueueHandle_t MQTT_Queue;
+//QueueHandle_t MQTT_Queue;
 QueueHandle_t MQTT_Message_Queue;
 
 unsigned long lastMQTTStatusSent = 0;
@@ -43,7 +43,7 @@ void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
 
-  MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  //MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   xTaskCreatePinnedToCore(
