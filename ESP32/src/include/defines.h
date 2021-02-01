@@ -1,4 +1,6 @@
 
+#pragma once
+
 #define MAXESP32MESSAGELENGTH 50  //This is the length of the message recieved from the BBC Microbit
 #define MAXMESSAGEFRAGMENTSIZE 40 
 

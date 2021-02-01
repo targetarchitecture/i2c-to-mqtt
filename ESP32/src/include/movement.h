@@ -1,5 +1,4 @@
-#ifndef movement_h
-#define movement_h
+#pragma once
 
 #include <Wire.h>
 #include "messageParts.h"
@@ -18,9 +17,15 @@ struct servo
   int16_t setDegree;
   int16_t minPulse; // This is the 'minimum' pulse length count (out of 4096) - normally around 100
   int16_t maxPulse; // This is the 'maximum' pulse length count (out of 4096) - normally around 500
-  bool isMoving;
+  //bool isMoving;
   easingCurves easingCurve;
-  bool interuptEasing; //https://esp32.com/viewtopic.php?t=10855
+  //bool interuptEasing; //https://esp32.com/viewtopic.php?t=10855
+};
+
+struct servoPWM
+{
+  int pwm;
+  int pin;
 };
 
 void ServoEasingTask(void *pvParameter);
@@ -31,6 +36,7 @@ void setServoPWM(const int16_t pin, const int16_t PWM);
 void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse);
 void movement_setup();
 void movement_task(void *pvParameter);
+void movement_i2c_task(void *pvParameter);
 
 extern void checkI2Cerrors(const char *area);
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
@@ -39,6 +45,3 @@ extern void POST(uint8_t flashes);
 extern QueueHandle_t Movement_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
-
-
-#endif

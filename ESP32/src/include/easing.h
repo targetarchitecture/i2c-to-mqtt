@@ -1,5 +1,4 @@
-#ifndef easing_h
-#define easing_h
+#pragma once
 
 double BounceEaseOut(const double _change, const double _duration, double time_);
 double QuarticEaseInOut(const double _change, const double _duration, double time_);
@@ -40,7 +39,5 @@ enum easingCurves
   // SineOut,
   // SineInOut
 };
-
-#endif
 
 

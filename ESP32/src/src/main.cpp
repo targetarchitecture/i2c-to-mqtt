@@ -33,7 +33,6 @@ QueueHandle_t ADC_Queue;
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
-
 extern PubSubClient MQTTClient;
 void checkI2Cerrors(const char *area);
 
@@ -70,7 +69,6 @@ void setup()
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();
@@ -283,7 +281,8 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
 void POST(uint8_t flashes)
 {
   //TODO: debate which tasks need stopping?
-  vTaskDelete(ADCTask);
+  //vTaskDelete(ADCTask);
+  vTaskSuspendAll(); //added on 31/1/21
 
   pinMode(ONBOARDLED, OUTPUT);
 

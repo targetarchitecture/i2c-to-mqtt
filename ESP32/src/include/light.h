@@ -1,5 +1,4 @@
-#ifndef light_h
-#define light_h
+#pragma once
 
 #include <Wire.h>
 #include "messageParts.h"
@@ -17,5 +16,3 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t Light_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
-
-#endif

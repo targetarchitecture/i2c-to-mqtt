@@ -1,5 +1,4 @@
-#ifndef MQTT_h
-#define MQTT_h
+#pragma once
 
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -11,7 +10,6 @@
 #include "esp_event_loop.h"
 
 void MQTT_setup();
-//void MQTT_connect2();
 void checkMQTTconnection();
 void Wifi_connect();
 
@@ -27,4 +25,3 @@ extern void checkI2Cerrors(const char *area);
 extern QueueHandle_t MQTT_Queue;
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 
-#endif

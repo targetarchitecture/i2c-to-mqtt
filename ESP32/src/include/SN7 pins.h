@@ -1,3 +1,4 @@
+#pragma once
 
 //i2c pins
 #define SDA 27

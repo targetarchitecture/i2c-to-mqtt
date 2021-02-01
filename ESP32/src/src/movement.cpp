@@ -4,19 +4,21 @@
 #include <string>
 #include <vector>
 
-std::vector<servo> servos; //[15] = {0};
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 extern SemaphoreHandle_t i2cSemaphore;
+
+Adafruit_PWMServoDriver PCA9685 = Adafruit_PWMServoDriver();
+
+QueueHandle_t Movement_i2c_Queue;
+
 TaskHandle_t MovementTask;
+TaskHandle_t Movementi2cTask;
+
+std::vector<servo> servos;
 std::vector<TaskHandle_t> servoTasks;
 
 void movement_setup()
 {
-    //Serial.println("8 channel Servo test!");
-
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-    //Serial.println("xSemaphoreTake");
 
     //see if it's actually connected
     Wire.beginTransmission(64);
@@ -30,10 +32,10 @@ void movement_setup()
     }
 
     //don't need to call pwm.begin as this reinitialise the i2c
-    //pwm.begin
-    pwm.reset();
-    pwm.setOscillatorFrequency(27000000);
-    pwm.setPWMFreq(50); // Analog servos run at ~50 Hz updates
+    //PCA9685.begin
+    PCA9685.reset();
+    PCA9685.setOscillatorFrequency(27000000);
+    PCA9685.setPWMFreq(50); // Analog servos run at ~50 Hz updates
 
     checkI2Cerrors("movement");
 
@@ -55,9 +57,9 @@ void movement_setup()
         S.setDegree = 180;
         S.minPulse = 100;
         S.maxPulse = 505;
-        S.isMoving = false;
+        //S.isMoving = false;
         S.easingCurve = LinearInOut;
-        S.interuptEasing = false;
+        // S.interuptEasing = false;
 
         servos.push_back(S);
 
@@ -65,27 +67,39 @@ void movement_setup()
         servoTasks.push_back(NULL);
     }
 
-    //this task is to recieve the
+    //create a queue to hold servo PWM values (allows us to kill the servo easing processes at anytime)
+    Movement_i2c_Queue = xQueueCreate(100, sizeof(servoPWM));
+
+    //this task is to recieve the servo messages
     xTaskCreatePinnedToCore(
-        movement_task,                /* Task function. */
-        "Movement Task",              /* name of task. */
-        configMINIMAL_STACK_SIZE * 4, /* Stack size of task */
-        NULL,                         /* parameter of the task */
-        2,                            /* priority of the task */
-        &MovementTask, 1);            /* Task handle to keep track of created task */
+        movement_task,   /* Task function. */
+        "Movement Task", /* name of task. */
+        3000,            /* Stack size of task (2780) */
+        NULL,            /* parameter of the task */
+        2,               /* priority of the task */
+        &MovementTask,   /* Task handle to keep track of created task */
+        1);              /* core */
+
+    //this task is to perform pwms for the servos
+    xTaskCreatePinnedToCore(
+        movement_i2c_task,   /* Task function. */
+        "Movement i2c Task", /* name of task. */
+        3000,                /* Stack size of task (2700) */
+        NULL,                /* parameter of the task */
+        2,                   /* priority of the task */
+        &Movementi2cTask,    /* Task handle to keep track of created task */
+        1);                  /* core */
 }
 
 void movement_task(void *pvParameters)
 {
     messageParts parts;
-    //UBaseType_t uxHighWaterMark;
 
     /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("movement_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
-
-    // Serial.printf("Movement task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
@@ -178,10 +192,44 @@ void movement_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void movement_i2c_task(void *pvParameters)
+{
+    /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("movement_i2c_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    for (;;)
+    {
+        servoPWM pwm;
+
+        //wait for the next PWM command to be queued - timing is one each loop making it simpler
+        xQueueReceive(Movement_i2c_Queue, &pwm, portMAX_DELAY);
+
+        //wait for the i2c semaphore flag to become available
+        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+        // configure the PWM duty cycle
+        PCA9685.setPWM(pwm.pin, 0, pwm.pwm);
+
+        checkI2Cerrors("movement (movement_i2c_task)");
+
+        xSemaphoreGive(i2cSemaphore);
+
+        delay(1);
+    }
+
+    vTaskDelete(NULL);
+}
+
 void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse)
 {
+    // call stop servo to stop the servo - kill off the task
+    stopServo(pin);
+
     //set variables
-    servos[pin].isMoving = true;
+    //servos[pin].isMoving = true;
     servos[pin]._change = 32;
     servos[pin]._duration = duration;
 
@@ -195,80 +243,16 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     servos[pin].PWM = 0;
     servos[pin].setDegree = 0;
 
-    servos[pin].interuptEasing = false;
+    //servos[pin].interuptEasing = false;
 
-    Serial.printf(">>> change %f \t fromDegree %i \t toDegree %i \n", servos[pin]._change, servos[pin].fromDegree, servos[pin].toDegree);
-    Serial.println("setServoEase");
+    // Serial.printf(">>> change %f \t fromDegree %i \t toDegree %i \n", servos[pin]._change, servos[pin].fromDegree, servos[pin].toDegree);
+    // Serial.println("setServoEase");
 
-    //uxTaskGetStackHighWaterMark = 9750
-    // if (pin == 0)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 0 Task", 10000, (void *)0, 3, NULL, 1);
-    // }
-    // if (pin == 1)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 1 Task", 10000, (void *)1, 3, NULL, 1);
-    // }
-    // if (pin == 2)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 2 Task", 10000, (void *)2, 3, NULL, 1);
-    // }
-    // if (pin == 3)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 3 Task", 10000, (void *)3, 3, NULL, 1);
-    // }
-    // if (pin == 4)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 4 Task", 10000, (void *)4, 3, NULL, 1);
-    // }
-    // if (pin == 5)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 5 Task", 10000, (void *)5, 3, NULL, 1);
-    // }
-    // if (pin == 6)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 6 Task", 10000, (void *)6, 3, NULL, 1);
-    // }
-    // if (pin == 7)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 7 Task", 10000, (void *)7, 3, NULL, 1);
-    // }
-    // if (pin == 8)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 8 Task", 10000, (void *)8, 3, NULL, 1);
-    // }
-    // if (pin == 9)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 9 Task", 10000, (void *)9, 3, NULL, 1);
-    // }
-    // if (pin == 10)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 10 Task", 10000, (void *)10, 3, NULL, 1);
-    // }
-    // if (pin == 11)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 11 Task", 10000, (void *)11, 3, NULL, 1);
-    // }
-    // if (pin == 12)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 12 Task", 10000, (void *)12, 3, NULL, 1);
-    // }
-    // if (pin == 13)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 13 Task", 10000, (void *)13, 3, NULL, 1);
-    // }
-    // if (pin == 14)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 14 Task", 10000, (void *)14, 3, NULL, 1);
-    // }
-    // if (pin == 15)
-    // {
-    //     xTaskCreatePinnedToCore(&ServoEasingTask, "Servo 15 Task", 10000, (void *)15, 3, NULL, 1);
-    // }
+    const char *taskName = "Servo Task " + pin;
 
     xTaskCreatePinnedToCore(
         &ServoEasingTask,
-        "Servo Task",
+        taskName, //"Servo Task",
         10000,
         NULL,
         ServoEasingTask_Priority,
@@ -276,28 +260,25 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
         1);
 
     xTaskNotify(servoTasks[pin], pin, eSetValueWithOverwrite);
+
+    delay(10);
 }
 
 void setServoPWM(const int16_t pin, const int16_t PWM)
 {
     // Serial.println("setServoPWM");
 
-    servos[pin].PWM = PWM;
-
-    //wait for the i2c semaphore flag to become available
-    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-    pwm.setPWM(pin, 0, PWM);
-
-    checkI2Cerrors("movement (setServoPWM)");
-
-    xSemaphoreGive(i2cSemaphore);
-
     // Serial.print("setServoPWM on pin ");
     // Serial.print(pin);
     // Serial.print(" PWM  ");
     // Serial.print(PWM);
     // Serial.println("");
+
+    servoPWM toBeQueued;
+    toBeQueued.pin = pin;
+    toBeQueued.pwm = PWM;
+
+    xQueueSend(Movement_i2c_Queue, &toBeQueued, portMAX_DELAY);
 }
 
 void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse)
@@ -314,25 +295,49 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
     servos[pin].setDegree = angle;
     servos[pin].PWM = mapAngles(servos[pin].setDegree, 0, 180, servos[pin].minPulse, servos[pin].maxPulse);
 
-    //wait for the i2c semaphore flag to become available
-
-    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-    pwm.setPWM(pin, 0, servos[pin].PWM);
-
-    checkI2Cerrors("movement (setServoAngle)");
-
-    xSemaphoreGive(i2cSemaphore);
+    //add to the queue
+    setServoPWM(pin, servos[pin].PWM);
 }
 
 void stopServo(const int16_t pin)
 {
-    //Serial.println("stopServo");
+    //Serial.printf("STOPPING SERVO PIN: %i\n", pin);
 
-    // set the stopEasing value to the stop the task
-    servos[pin].interuptEasing = true;
+    //I think this should be removed as it seems to stop the i2c tasks
+    //vTaskSuspendAll();
 
-    //just changed this to a small delay as the code below takes time as it run sequentially.
+    TaskHandle_t xTask = servoTasks[pin];
+
+    if (xTask != NULL)
+    {
+        //Serial.printf("xTask != NULL\n", pin);
+
+        //configASSERT(xTask);
+
+        //Serial.println("vTaskDelete");
+
+        /* The task is going to be deleted. Set the handle to NULL. */
+        servoTasks[pin] = NULL;
+
+        /* Delete using the copy of the handle. */
+        vTaskDelete(xTask);
+
+        //Serial.println("vTaskDelete completed");
+    }
+    else
+    {
+        //Serial.printf("xTask == NULL\n", pin);
+    }
+
+    //I think this should be removed as it seems to stop the i2c tasks
+    //xTaskResumeAll();
+
+    //send message to microbit - Servo 0-15 has stopped due STOP command during easing
+    char msgtosend[MAXBBCMESSAGELENGTH];
+    sprintf(msgtosend, "F2,%i", pin);
+    sendToMicrobit(msgtosend);
+
+    //just adding some delay to give the CPU some time back
     delay(10);
 }
 
@@ -340,13 +345,11 @@ void ServoEasingTask(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("Servo1TaskNew uxTaskGetStackHighWaterMark:");
+    // Serial.print("ServoEasingTask uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
     uint32_t pin = 0;
     BaseType_t xResult = xTaskNotifyWait(0X00, 0x00, &pin, portMAX_DELAY);
-
-    //int pin = (uintptr_t)pvParameter;
 
     // Serial.print("Servo easing task for pin: ");
     // Serial.print(pin);
@@ -367,7 +370,7 @@ void ServoEasingTask(void *pvParameter)
     // servos[pin].PWM = 0;
     // servos[pin].setDegree = 0;
 
-    servos[pin].interuptEasing = false;
+    //servos[pin].interuptEasing = false;
 
     auto fromDegreeMapped = mapAngles(fromDegree, 0, 180, minPulse, maxPulse);
     auto toDegreeMapped = mapAngles(toDegree, 0, 180, minPulse, maxPulse);
@@ -378,8 +381,8 @@ void ServoEasingTask(void *pvParameter)
     double t = 0;
     uint16_t PWM;
 
-    Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
-    Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
+    //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
+    //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
     for (int i = 0; i <= duration * 20; i++)
     {
@@ -410,40 +413,17 @@ void ServoEasingTask(void *pvParameter)
             PWM = maxPulse - easedPosition;
         }
 
-        printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
+        //printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
 
-        //wait for the i2c semaphore flag to become available
-        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-        pwm.setPWM(pin, 0, PWM);
-
-        checkI2Cerrors("movement (ServoEasingTask)");
-
-        xSemaphoreGive(i2cSemaphore);
-
-        //check for marker to stop easing
-        if (servos[pin].interuptEasing == true)
-        {
-            // Serial.print("Request to leave easing task: ");
-            // Serial.println(millis());
-
-            break;
-        }
+        //add to the queue
+        setServoPWM(pin, PWM);
 
         delay(50);
     }
 
     //Add event to BBC microbit queue
     char msgtosend[MAXBBCMESSAGELENGTH];
-
-    if (servos[pin].interuptEasing == false)
-    {
-        sprintf(msgtosend, "F1,%d", pin);
-    }
-    else
-    {
-        sprintf(msgtosend, "F2,%d", pin);
-    }
+    sprintf(msgtosend, "F1,%i", pin);
     sendToMicrobit(msgtosend);
 
     // Serial.print("completed in: ");
@@ -451,8 +431,12 @@ void ServoEasingTask(void *pvParameter)
     // Serial.print(" @ ");
     // Serial.println(millis());
 
-    servos[pin].isMoving = false;
-    servos[pin].interuptEasing = false;
+    //servos[pin].isMoving = false;
+    //servos[pin].interuptEasing = false;
+
+    /* 31/1/21 */
+    /* The task is going to be deleted. Set the handle to NULL. */
+    servoTasks[pin] = NULL;
 
     //delete task
     vTaskDelete(NULL);

@@ -1,5 +1,4 @@
-#ifndef sound_h
-#define sound_h
+#pragma once
 
 #include "messageParts.h"
 #include "defines.h"
@@ -16,4 +15,3 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t Sound_Queue;
 
-#endif

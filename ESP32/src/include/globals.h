@@ -1,5 +1,4 @@
-#ifndef globals_h
-#define globals_h
+#pragma once
 
 #include "messageParts.h"
 
@@ -9,19 +8,13 @@ SemaphoreHandle_t i2cSemaphore;
 
 messageParts processQueueMessage(const std::string msg, const std::string from);
 
-int printToSerial(const char *format, ...);
-
-//extern volatile servo servos[15];
-
-extern TaskHandle_t ADCTask;
-extern TaskHandle_t DACTask;
-extern TaskHandle_t LightTask;
-extern TaskHandle_t EncodersTask;
-extern TaskHandle_t MicrobitRXTask;
-extern TaskHandle_t SoundTask;
-extern TaskHandle_t MusicBusyTask;
-extern TaskHandle_t RoutingTask;
-extern TaskHandle_t TouchTask;
-extern TaskHandle_t MovementTask;
-
-#endif
+// extern TaskHandle_t ADCTask;
+// extern TaskHandle_t DACTask;
+// extern TaskHandle_t LightTask;
+// extern TaskHandle_t EncodersTask;
+// extern TaskHandle_t MicrobitRXTask;
+// extern TaskHandle_t SoundTask;
+// extern TaskHandle_t MusicBusyTask;
+// extern TaskHandle_t RoutingTask;
+// extern TaskHandle_t TouchTask;
+// extern TaskHandle_t MovementTask;

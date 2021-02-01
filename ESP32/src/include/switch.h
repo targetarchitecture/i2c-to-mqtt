@@ -1,5 +1,4 @@
-#ifndef switch_h
-#define switch_h
+#pragma once
 
 #include <Wire.h>
 #include "messageParts.h"
@@ -14,5 +13,3 @@ extern void POST(uint8_t flashes);
 extern void checkI2Cerrors(const char *area);
 
 extern SemaphoreHandle_t i2cSemaphore;
-
-#endif

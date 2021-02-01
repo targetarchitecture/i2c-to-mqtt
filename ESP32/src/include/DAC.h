@@ -1,5 +1,4 @@
-#ifndef DAC_h
-#define DAC_h
+#pragma once
 
 #include "messageParts.h"
 #include "defines.h"
@@ -13,5 +12,3 @@ extern messageParts processQueueMessage(const std::string msg, const std::string
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
-
-#endif

@@ -1,3 +1,5 @@
+#pragma once
+
 /*
     MPR121.h
 	April 8, 2010
