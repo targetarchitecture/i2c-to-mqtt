@@ -9,17 +9,18 @@
 struct servo
 {
   int16_t pin;
-  int16_t PWM;
-  double _change;
-  double _duration;
+  //int16_t PWM;
+  //double _change;
+  double duration;
   int16_t toDegree;
   int16_t fromDegree;
-  int16_t setDegree;
+  //int16_t setDegree;
   int16_t minPulse; // This is the 'minimum' pulse length count (out of 4096) - normally around 100
   int16_t maxPulse; // This is the 'maximum' pulse length count (out of 4096) - normally around 500
   //bool isMoving;
   easingCurves easingCurve;
-  //bool interuptEasing; //https://esp32.com/viewtopic.php?t=10855
+  bool interuptEasing; //https://esp32.com/viewtopic.php?t=10855;
+  TaskHandle_t taskHandle;
 };
 
 struct servoPWM
@@ -45,3 +46,6 @@ extern void POST(uint8_t flashes);
 extern QueueHandle_t Movement_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
+
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

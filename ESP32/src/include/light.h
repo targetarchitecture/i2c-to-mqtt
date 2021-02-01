@@ -16,3 +16,6 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t Light_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
+
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

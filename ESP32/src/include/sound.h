@@ -15,3 +15,5 @@ extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t Sound_Queue;
 
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

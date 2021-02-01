@@ -14,10 +14,11 @@ enum pinState
     blink,
     breathe
 };
-//pinState pinStates[16] = {off};
+
 std::vector<pinState> pinStates;
 
 TaskHandle_t LightTask;
+QueueHandle_t Light_Queue;
 
 void light_setup()
 {
@@ -39,6 +40,8 @@ void light_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
+    Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+
     xTaskCreatePinnedToCore(
         light_task,          /* Task function. */
         "Light Task",        /* name of task. */
@@ -50,31 +53,22 @@ void light_setup()
 
 void light_task(void *pvParameters)
 {
-    //TODO: Ask Google if this is the best place to declare variables in an endless task
-    messageParts parts;
-    // int16_t currentVolume;
-    // int16_t currentTrack;
-
-    for (int pin = 0; pin < 16; pin++)
-    {
-        pinStates.push_back(off);
-    }
-
     /* Inspect our own high water mark on entering the task. */
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("light_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    // Serial.printf("Light task is on core %i\n", xPortGetCoreID());
+    messageParts parts;
+
+    for (int pin = 0; pin < 16; pin++)
+    {
+        pinStates.push_back(off);
+    }
 
     for (;;)
     {
         char msg[MAXESP32MESSAGELENGTH] = {0};
-
-        //uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-        //Serial.print("light_task uxTaskGetStackHighWaterMark:");
-        //Serial.println(uxHighWaterMark);
 
         //wait for new music command in the queue
         xQueueReceive(Light_Queue, &msg, portMAX_DELAY);

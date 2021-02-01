@@ -2,6 +2,7 @@
 #include "ADC.h"
 
 TaskHandle_t ADCTask;
+QueueHandle_t ADC_Queue;
 
 volatile long ADC1_VALUE;
 volatile long ADC2_VALUE;
@@ -33,17 +34,11 @@ void ADC_task(void *pvParameters)
     // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    //Serial.printf("ADC task is on core %i\n", xPortGetCoreID());
-
     long newADC1value = 10000;
     long newADC2value = 10000;
 
     for (;;)
     {
-        // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-        // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
-        // Serial.println(uxHighWaterMark);
-
         if (ADC1Enabled == true)
         {
             newADC1value = map(analogRead(ADC1), 0, 4095, 0, 100);

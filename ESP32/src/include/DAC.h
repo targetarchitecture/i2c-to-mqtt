@@ -8,7 +8,10 @@ void DAC_setup();
 void DAC_task(void *pvParameter);
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
-extern messageParts processQueueMessage(const std::string msg, const std::string from) ;
+extern messageParts processQueueMessage(const std::string msg, const std::string from);
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t DAC_Queue;
+
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

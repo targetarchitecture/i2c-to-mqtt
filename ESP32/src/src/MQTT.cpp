@@ -13,6 +13,7 @@ std::string WIFI_PASSPHRASE = "";
 
 std::string IP_ADDRESS = "";
 
+QueueHandle_t MQTT_Queue;
 QueueHandle_t MQTT_Message_Queue;
 
 unsigned long lastMQTTStatusSent = 0;
@@ -23,6 +24,12 @@ struct MQTTMessage
   std::string payload;
 };
 
+struct MQTTSubscription
+{
+  std::string topic;
+  bool subscribe;
+};
+
 TaskHandle_t MQTTTask;
 TaskHandle_t MQTTClientTask;
 
@@ -30,18 +37,13 @@ volatile bool ConnectWifi = false;
 volatile bool ConnectMQTT = false;
 volatile bool ConnectSubscriptions = true;
 
-struct MQTTSubscription
-{
-  std::string topic;
-  bool subscribe;
-};
-
 std::list<MQTTSubscription> MQTTSubscriptions;
 
 void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
 
+  MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   xTaskCreatePinnedToCore(
@@ -329,7 +331,7 @@ void MQTT_task(void *pvParameter)
       WIFI_PASSPHRASE = str;
     }
     else if (strcmp(parts.identifier, "T3") == 0)
-    {    
+    {
       std::string strA(parts.value1);
       WIFI_SSID = strA;
 

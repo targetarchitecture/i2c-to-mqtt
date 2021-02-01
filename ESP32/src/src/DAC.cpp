@@ -2,9 +2,12 @@
 #include "DAC.h"
 
 TaskHandle_t DACTask;
+QueueHandle_t DAC_Queue;
 
 void DAC_setup()
 {
+  DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+
     xTaskCreatePinnedToCore(
         DAC_task,          /* Task function. */
         "DAC Task",        /* name of task. */
@@ -21,17 +24,11 @@ void DAC_task(void *pvParameters)
     // Serial.print("DAC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    //Serial.printf("DAC task is on core %i\n", xPortGetCoreID());
-
     messageParts parts;
     int8_t DACvalue;
 
     for (;;)
     {
-        // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-        // Serial.print("DAC_task uxTaskGetStackHighWaterMark:");
-        // Serial.println(uxHighWaterMark);
-
         char msg[MAXESP32MESSAGELENGTH] = {0};
 
         //wait for new DAC commands in the queue

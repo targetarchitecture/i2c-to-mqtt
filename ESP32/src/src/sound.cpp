@@ -10,6 +10,8 @@ TaskHandle_t SoundBusyTask;
 volatile int BusyPin;
 const int commandPause = 50;
 
+QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
+
 void sound_setup()
 {
     //Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
@@ -20,24 +22,9 @@ void sound_setup()
     //set-up the interupt
     attachInterrupt(DFPLAYER_BUSY, handleSoundInterupt, CHANGE);
 
-    // DFPlayer.begin(Serial1, 750);
-
-    // DFPlayer.volume(20);
-    // DFPlayer.play(8);
-
-    //TODO: see if this is needed
-    //     DFPlayer.reset();
-
-    //   delay(30);
-    //   DFPlayer.volume(20);
-    //   delay(30);
-
-    //   int16_t v = DFPlayer.currentVolume();
-
-    //   Serial.print("Volume:");
-    //   Serial.println(v);
-
     BusyPin = digitalRead(DFPLAYER_BUSY);
+
+    Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     //Serial.println("music_setup");
 

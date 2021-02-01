@@ -35,11 +35,10 @@ void touch_setup()
     pinMode(TOUCH_INT, INPUT_PULLUP);
     attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
 
-    //uxTaskGetStackHighWaterMark = 1750
     xTaskCreatePinnedToCore(
         &touch_task,
         "Touch Task",
-        2000,
+        2000, //uxTaskGetStackHighWaterMark = 1750
         NULL,
         touch_task_Priority,
         &TouchTask,
@@ -48,13 +47,13 @@ void touch_setup()
 
 void touch_task(void *pvParameter)
 {
-    uint32_t ulNotifiedValue = 0;
-    BaseType_t xResult;
-
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
+
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
 
     for (;;)
     {
@@ -106,25 +105,6 @@ void touch_task(void *pvParameter)
         // reset our state
         lasttouched = currtouched;
     }
-
-    // debugging info, what
-    // Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x");
-    // Serial.println(cap.touched(), HEX);
-    // Serial.print("Filt: ");
-    // for (uint8_t i = 0; i < 12; i++)
-    // {
-    //     Serial.print(cap.filteredData(i));
-    //     Serial.print("\t");
-    // }
-    // Serial.println();
-    // Serial.print("Base: ");
-    // for (uint8_t i = 0; i < 12; i++)
-    // {
-    //     Serial.print(cap.baselineData(i));
-    //     Serial.print("\t");
-    // }
-    // Serial.println();
-    // }
 
     vTaskDelete(NULL);
 }

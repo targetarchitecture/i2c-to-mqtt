@@ -8,14 +8,16 @@
 
 //RTOS task priorities
 #define MQTT_task_Priority	2
-#define MQTT_client_task_Priority	4
+#define MQTT_client_task_Priority	5
 
-#define switch_task_Priority 3
-#define touch_task_Priority	3
+#define switch_task_Priority 4
+#define touch_task_Priority	4
 
 #define routing_task_Priority 2
 
-#define ServoEasingTask_Priority 5
+#define MovementTask_Priority 1
+#define Movementi2cTask_Priority 2
+#define ServoEasingTask_Priority 3
 
 #define ADC_task_Priority	1
 #define DAC_task_Priority	1	

@@ -15,3 +15,10 @@ struct messageParts
     char value6[MAXMESSAGEFRAGMENTSIZE];
     char value7[MAXMESSAGEFRAGMENTSIZE];
 };
+
+struct messageParts2
+{
+    std::string fullMessage;
+    std::string identifier;
+    std::vector<std::string> values;
+};

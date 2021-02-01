@@ -20,3 +20,6 @@ void receiveEvent(int howMany); //when BBC Microbit calls i2cWriteBuffer
 void requestEvent();  //when BBC Microbit call i2cReadBuffer
 void IRAM_ATTR handleBBCi2CInterupt();
 void i2c_rx_task(void *pvParameter);
+
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

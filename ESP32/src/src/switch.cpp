@@ -8,7 +8,9 @@
 SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
-//int pinState[15]; // {HIGH};
+
+std::vector<int> pinState;
+std::vector<int> newPinState;
 
 void switch_setup()
 {
@@ -41,6 +43,13 @@ void switch_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
+    for (size_t i = 0; i < 16; i++)
+    {
+        //set the pin states to HIGH as PULLUP is set
+        pinState.push_back(1);    //HIGH;
+        newPinState.push_back(1); // HIGH;
+    }
+
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
         "Switch Task",        /* name of task. */
@@ -55,31 +64,12 @@ void switch_setup()
 
 void switch_task(void *pvParameters)
 {
-    //TODO: Ask Google if this is the best place to declare variables in an endless task
-    //int newPinState[16]; // {HIGH};
-    std::vector<int> pinState;
-    std::vector<int> newPinState;
-
-    for (size_t i = 0; i < 16; i++)
-    {
-        //set the pin states to HIGH as PULLUP is set
-        pinState.push_back(1);    //HIGH;
-        newPinState.push_back(1); // HIGH;
-    }
-
-    //TODO: see if this improves the inital flood of readings
-    //delay(100);
-
-    // uint32_t ulNotifiedValue = 0;
-    // BaseType_t xResult;
-
     /* Inspect our own high water mark on entering the task. */
+    // BaseType_t xResult;
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
-
-    //   Serial.printf("Switch task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {

@@ -24,16 +24,6 @@ Rainbow Sparkle Unicorn - SN7
 #include "movement.h"
 #include "MQTT.h"
 
-QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
-QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
-QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
-QueueHandle_t DAC_Queue;
-QueueHandle_t Light_Queue;
-QueueHandle_t ADC_Queue;
-QueueHandle_t Movement_Queue;
-QueueHandle_t MQTT_Queue;
-
-extern PubSubClient MQTTClient;
 void checkI2Cerrors(const char *area);
 
 void setup()
@@ -55,20 +45,6 @@ void setup()
   //create i2c Semaphore , and set to useable
   i2cSemaphore = xSemaphoreCreateBinary();
   xSemaphoreGive(i2cSemaphore);
-
-  //set up the main queues
-  char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-  char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
-  //char MAXUSBMessage[UARTMESSAGELENGTH];
-
-  Microbit_Transmit_Queue = xQueueCreate(50, sizeof(TXtoBBCmessage));
-  Microbit_Receive_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-
-  Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();
@@ -112,6 +88,17 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
   messageParts mParts = {};
   strcpy(mParts.fullMessage, msg.c_str());
   int index = 0;
+
+  // messageParts2 mParts2 = {};
+  // mParts2.fullMessage = msg;
+
+  // while (std::getline(f, part, ','))
+  // {
+  //   mParts2.values.push_back(part);
+  // }
+
+  // mParts2.identifier = mParts2.values.front();
+  // mParts2.values.erase(mParts2.values.begin());
 
   //Serial.println(msg.c_str());
 
@@ -159,124 +146,6 @@ messageParts processQueueMessage(const std::string msg, const std::string from)
 
   return mParts;
 }
-
-// //TODO: check that the the new method works before deleting this one.
-// messageParts processQueueMessageV1(const std::string msg, const std::string from)
-// {
-//   //Serial.printf("processQueueMessage (%s): %s\n", from.c_str(), msg.c_str());
-
-//   messageParts mParts = {};
-//   strcpy(mParts.fullMessage, msg.c_str());
-
-//   try
-//   {
-//     //https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
-//     std::string delim = ",";
-//     int index = 0;
-//     auto start = 0U;
-//     auto end = msg.find(delim);
-
-//     while (end != std::string::npos)
-//     {
-//       if (index == 0)
-//       {
-//         strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 1)
-//       {
-//         strcpy(mParts.value1, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 2)
-//       {
-//         strcpy(mParts.value2, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 3)
-//       {
-//         strcpy(mParts.value3, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 4)
-//       {
-//         strcpy(mParts.value4, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 5)
-//       {
-//         strcpy(mParts.value5, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 6)
-//       {
-//         strcpy(mParts.value6, msg.substr(start, end - start).c_str());
-//       }
-//       if (index == 7)
-//       {
-//         strcpy(mParts.value7, msg.substr(start, end - start).c_str());
-//       }
-
-//       start = end + delim.length();
-//       end = msg.find(delim, start);
-
-//       index++;
-//     }
-
-//     //it's a bit crap to repeat the logic - but it works
-//     if (index == 0)
-//     {
-//       strcpy(mParts.identifier, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 1)
-//     {
-//       strcpy(mParts.value1, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 2)
-//     {
-//       strcpy(mParts.value2, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 3)
-//     {
-//       strcpy(mParts.value3, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 4)
-//     {
-//       strcpy(mParts.value4, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 5)
-//     {
-//       strcpy(mParts.value5, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 6)
-//     {
-//       strcpy(mParts.value6, msg.substr(start, end - start).c_str());
-//     }
-//     if (index == 7)
-//     {
-//       strcpy(mParts.value7, msg.substr(start, end - start).c_str());
-//     }
-
-//     // Serial.print("identifier:");
-//     // Serial.println(mParts.identifier);
-//     // Serial.print("value1:");
-//     // Serial.println(mParts.value1);
-//     // Serial.print("value2:");
-//     // Serial.println(mParts.value2);
-//     // Serial.print("value3:");
-//     // Serial.println(mParts.value3);
-//     // Serial.print("value4:");
-//     // Serial.println(mParts.value4);
-//     // Serial.print("value5:");
-//     // Serial.println(mParts.value5);
-//     // Serial.print("value6:");
-//     // Serial.println(mParts.value6);
-//     // Serial.print("value7:");
-//     // Serial.println(mParts.value7);
-//     // Serial.print("fullMessage:");
-//     // Serial.println(mParts.fullMessage);
-//   }
-//   catch (const std::exception &e)
-//   {
-//     Serial.printf("\n\n\nEXCEPTION: %s \n\n\n", e.what());
-//   }
-
-//   return mParts;
-// }
 
 void POST(uint8_t flashes)
 {

@@ -8,13 +8,14 @@ extern SemaphoreHandle_t i2cSemaphore;
 
 Adafruit_PWMServoDriver PCA9685 = Adafruit_PWMServoDriver();
 
+QueueHandle_t Movement_Queue;
 QueueHandle_t Movement_i2c_Queue;
 
 TaskHandle_t MovementTask;
 TaskHandle_t Movementi2cTask;
 
 std::vector<servo> servos;
-std::vector<TaskHandle_t> servoTasks;
+//std::vector<TaskHandle_t> servoTasks;
 
 void movement_setup()
 {
@@ -49,46 +50,49 @@ void movement_setup()
         servo S;
 
         S.pin = i;
-        S.PWM = 0;
-        S._change = 32;
-        S._duration = 2;
+        //S.PWM = 0;
+        //S._change = 32;
+        S.duration = 2;
         S.toDegree = 0;
         S.fromDegree = 0;
-        S.setDegree = 180;
+        //S.setDegree = 180;
         S.minPulse = 100;
         S.maxPulse = 505;
         //S.isMoving = false;
         S.easingCurve = LinearInOut;
-        // S.interuptEasing = false;
+        S.interuptEasing = false;
+        S.taskHandle = NULL; //create the task handles
 
         servos.push_back(S);
 
         //create the task handles
-        servoTasks.push_back(NULL);
+        //servoTasks.push_back(NULL);
     }
+
+    Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     //create a queue to hold servo PWM values (allows us to kill the servo easing processes at anytime)
     Movement_i2c_Queue = xQueueCreate(100, sizeof(servoPWM));
 
     //this task is to recieve the servo messages
     xTaskCreatePinnedToCore(
-        movement_task,   /* Task function. */
-        "Movement Task", /* name of task. */
-        3000,            /* Stack size of task (2780) */
-        NULL,            /* parameter of the task */
-        2,               /* priority of the task */
-        &MovementTask,   /* Task handle to keep track of created task */
-        1);              /* core */
+        movement_task,         /* Task function. */
+        "Movement Task",       /* name of task. */
+        3000,                  /* Stack size of task (2780) */
+        NULL,                  /* parameter of the task */
+        MovementTask_Priority, /* priority of the task */
+        &MovementTask,         /* Task handle to keep track of created task */
+        1);                    /* core */
 
     //this task is to perform pwms for the servos
     xTaskCreatePinnedToCore(
-        movement_i2c_task,   /* Task function. */
-        "Movement i2c Task", /* name of task. */
-        3000,                /* Stack size of task (2700) */
-        NULL,                /* parameter of the task */
-        2,                   /* priority of the task */
-        &Movementi2cTask,    /* Task handle to keep track of created task */
-        1);                  /* core */
+        movement_i2c_task,        /* Task function. */
+        "Movement i2c Task",      /* name of task. */
+        3000,                     /* Stack size of task (2700) */
+        NULL,                     /* parameter of the task */
+        Movementi2cTask_Priority, /* priority of the task */
+        &Movementi2cTask,         /* Task handle to keep track of created task */
+        1);                       /* core */
 }
 
 void movement_task(void *pvParameters)
@@ -124,8 +128,8 @@ void movement_task(void *pvParameters)
         // Serial.println(millis());
 
         //OK OK - What ever your doing stop the servo task first
-        auto pin = atol(parts.value1);
-        stopServo(pin);
+        auto stopPin = atol(parts.value1);
+        stopServo(stopPin);
 
         if (strcmp(parts.identifier, "V1") == 0)
         {
@@ -138,7 +142,7 @@ void movement_task(void *pvParameters)
         else if (strcmp(parts.identifier, "V2") == 0)
         {
             //Set servo to angle
-            //auto pin = atoi(parts.value1);
+            auto pin = atoi(parts.value1);
             auto angle = atoi(parts.value2);
             auto minPulse = atoi(parts.value3);
             auto maxPulse = atoi(parts.value4);
@@ -148,7 +152,7 @@ void movement_task(void *pvParameters)
         else if (strcmp(parts.identifier, "V3") == 0)
         {
             //Set servo to angle
-            //auto pin = atoi(parts.value1);
+            auto pin = atoi(parts.value1);
             auto toDegree = atoi(parts.value2);
             auto fromDegree = atoi(parts.value3);
             auto duration = atoi(parts.value4);
@@ -232,8 +236,8 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
 {
     //set variables
     //servos[pin].isMoving = true;
-    servos[pin]._change = 32;
-    servos[pin]._duration = duration;
+    //servos[pin]._change = 32;
+    servos[pin].duration = duration;
 
     servos[pin].toDegree = toDegree;
     servos[pin].fromDegree = fromDegree;
@@ -242,10 +246,10 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     servos[pin].maxPulse = maxPulse;
     servos[pin].easingCurve = easingCurve;
 
-    servos[pin].PWM = 0;
-    servos[pin].setDegree = 0;
+    //servos[pin].PWM = 0;
+    //servos[pin].setDegree = 0;
 
-    //servos[pin].interuptEasing = false;
+    servos[pin].interuptEasing = false;
 
     // Serial.printf(">>> change %f \t fromDegree %i \t toDegree %i \n", servos[pin]._change, servos[pin].fromDegree, servos[pin].toDegree);
     // Serial.println("setServoEase");
@@ -258,10 +262,21 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
         10000,
         NULL,
         ServoEasingTask_Priority,
-        &servoTasks[pin],
+        &servos[pin].taskHandle,
         1);
 
-    xTaskNotify(servoTasks[pin], pin, eSetValueWithOverwrite);
+    // xTaskCreatePinnedToCore(
+    //     &ServoEasingTask,
+    //     taskName, //"Servo Task",
+    //     10000,
+    //     NULL,
+    //     ServoEasingTask_Priority,
+    //     &servoTasks[pin],
+    //     1);
+
+    xTaskNotify(servos[pin].taskHandle, pin, eSetValueWithOverwrite);
+
+    //xTaskNotify(servoTasks[pin], pin, eSetValueWithOverwrite);
 
     delay(10);
 }
@@ -287,49 +302,47 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
 {
     //Serial.println("setServoAngle");
 
-    //servos[pin].interuptEasing = false;
+    servos[pin].interuptEasing = false;
     //servos[pin].isMoving = false;
     servos[pin].minPulse = minPulse;
     servos[pin].maxPulse = maxPulse;
-    servos[pin].setDegree = angle;
-    servos[pin].PWM = mapAngles(servos[pin].setDegree, 0, 180, servos[pin].minPulse, servos[pin].maxPulse);
+    //servos[pin].setDegree = angle;
+    //servos[pin].PWM = mapAngles(servos[pin].setDegree, 0, 180, servos[pin].minPulse, servos[pin].maxPulse);
+
+    int16_t PWM = mapAngles(angle, 0, 180, servos[pin].minPulse, servos[pin].maxPulse);
 
     //add to the queue
-    setServoPWM(pin, servos[pin].PWM);
+    setServoPWM(pin, PWM);
 }
 
 void stopServo(const int16_t pin)
 {
     Serial.printf("STOPPING SERVO PIN: %i\n", pin);
 
-    //TaskHandle_t xTask = servoTasks[pin];
+    servos[pin].interuptEasing = true;
 
-    if (servoTasks[pin] != NULL)
+    //not super efficent - but easier, just loop and check
+    while (true)
     {
-        //Serial.printf("xTask != NULL\n", pin);
+        //if (servoTasks[pin] == NULL)
 
-        //configASSERT(xTask);
+        if (servos[pin].taskHandle == NULL)
+        {
+            break;
+        }
 
-        //Serial.println("vTaskDelete");
+        //just adding some delay to give the task enough time to react - the task already has a 50ms delay in it
+        delay(50);
 
-        xTaskNotify(servoTasks[pin], 1, eSetValueWithOverwrite);
-
-        /* The task is going to be deleted. Set the handle to NULL. */
-        //ervoTasks[pin] = NULL;
-
-        /* Delete using the copy of the handle. */
-        //vTaskDelete(xTask);
-
-        //Serial.println("vTaskDelete completed");
-    }
-    else
-    {
-        //Serial.printf("xTask == NULL\n", pin);
+        Serial.print("#");
     }
 
-    //TODO: - explore using a semaphore (array of semaphones) one per task as the wait
-    //just adding some delay to give the task enough time to react - the task already has a 50ms delay in it
-    delay(100);
+    servos[pin].interuptEasing = false;
+
+    //give the task delete command some time to complete
+    delay(10);
+
+    Serial.printf("\nSTOPPING SERVO PIN: %i COMPLETED\n", pin);
 }
 
 void ServoEasingTask(void *pvParameter)
@@ -349,7 +362,7 @@ void ServoEasingTask(void *pvParameter)
 
     u_long startTime = millis();
 
-    auto duration = servos[pin]._duration;
+    auto duration = servos[pin].duration;
 
     auto toDegree = servos[pin].toDegree;
     auto fromDegree = servos[pin].fromDegree;
@@ -357,11 +370,6 @@ void ServoEasingTask(void *pvParameter)
     auto minPulse = servos[pin].minPulse;
     auto maxPulse = servos[pin].maxPulse;
     auto easingCurve = servos[pin].easingCurve;
-
-    // servos[pin].PWM = 0;
-    // servos[pin].setDegree = 0;
-
-    //servos[pin].interuptEasing = false;
 
     auto fromDegreeMapped = mapAngles(fromDegree, 0, 180, minPulse, maxPulse);
     auto toDegreeMapped = mapAngles(toDegree, 0, 180, minPulse, maxPulse);
@@ -372,15 +380,19 @@ void ServoEasingTask(void *pvParameter)
     double t = 0;
     uint16_t PWM;
 
-    //stop interupt flag
-    uint32_t stopEasing = 0;
-    BaseType_t xStopEasingResult;
-
     //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
     //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
     for (int i = 0; i <= duration * 20; i++)
     {
+        //send message to microbit to indicate it's moving (every other loop)
+        if (i % 2 == 0)
+        {
+            char msgtosend[MAXBBCMESSAGELENGTH];
+            sprintf(msgtosend, "F3,%i", pin);
+            sendToMicrobit(msgtosend);
+        }
+
         switch (easingCurve)
         {
         case QuadraticInOut:
@@ -416,9 +428,7 @@ void ServoEasingTask(void *pvParameter)
         delay(50);
 
         //check for the message to interupt early
-        xStopEasingResult = xTaskNotifyWait(0X00, 0x00, &stopEasing, 0);
-
-        if (stopEasing == 1)
+        if (servos[pin].interuptEasing == true)
         {
             //jump out of the for loop
             break;
@@ -433,9 +443,8 @@ void ServoEasingTask(void *pvParameter)
     Serial.println(millis());
 
     //servos[pin].isMoving = false;
-    //servos[pin].interuptEasing = false;
 
-    if (stopEasing == 0)
+    if (servos[pin].interuptEasing == false)
     {
         //Add event to BBC microbit queue
         char msgtosend[MAXBBCMESSAGELENGTH];
@@ -452,7 +461,8 @@ void ServoEasingTask(void *pvParameter)
 
     /* 31/1/21 */
     /* The task is going to be deleted. Set the handle to NULL. */
-    servoTasks[pin] = NULL;
+    //servoTasks[pin] = NULL;
+    servos[pin].taskHandle = NULL;
 
     //delete task
     vTaskDelete(NULL);

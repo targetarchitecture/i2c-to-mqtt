@@ -25,3 +25,5 @@ extern void checkI2Cerrors(const char *area);
 extern QueueHandle_t MQTT_Queue;
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 
+extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
