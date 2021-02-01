@@ -110,8 +110,8 @@ void movement_task(void *pvParameters)
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);
 
-        // Serial.print("Movement_Queue:");
-        // Serial.println(msg);
+        Serial.print("Movement_Queue:");
+        Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
@@ -123,17 +123,22 @@ void movement_task(void *pvParameters)
         // Serial.print(" @ ");
         // Serial.println(millis());
 
+        //OK OK - What ever your doing stop the servo task first
+        auto pin = atol(parts.value1);
+        stopServo(pin);
+
         if (strcmp(parts.identifier, "V1") == 0)
         {
-            //Stop servo
-            auto pin = atol(parts.value1);
+            //not much to do now as we always stop the servos
 
-            stopServo(pin);
+            //Stop servo
+            //auto pin = atol(parts.value1);
+            //stopServo(pin);
         }
         else if (strcmp(parts.identifier, "V2") == 0)
         {
             //Set servo to angle
-            auto pin = atoi(parts.value1);
+            //auto pin = atoi(parts.value1);
             auto angle = atoi(parts.value2);
             auto minPulse = atoi(parts.value3);
             auto maxPulse = atoi(parts.value4);
@@ -143,7 +148,7 @@ void movement_task(void *pvParameters)
         else if (strcmp(parts.identifier, "V3") == 0)
         {
             //Set servo to angle
-            auto pin = atoi(parts.value1);
+            //auto pin = atoi(parts.value1);
             auto toDegree = atoi(parts.value2);
             auto fromDegree = atoi(parts.value3);
             auto duration = atoi(parts.value4);
@@ -225,9 +230,6 @@ void movement_i2c_task(void *pvParameters)
 
 void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse)
 {
-    // call stop servo to stop the servo - kill off the task
-    stopServo(pin);
-
     //set variables
     //servos[pin].isMoving = true;
     servos[pin]._change = 32;
@@ -285,9 +287,6 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
 {
     //Serial.println("setServoAngle");
 
-    // call stop servo to stop the servo
-    stopServo(pin);
-
     //servos[pin].interuptEasing = false;
     //servos[pin].isMoving = false;
     servos[pin].minPulse = minPulse;
@@ -301,14 +300,11 @@ void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPuls
 
 void stopServo(const int16_t pin)
 {
-    //Serial.printf("STOPPING SERVO PIN: %i\n", pin);
+    Serial.printf("STOPPING SERVO PIN: %i\n", pin);
 
-    //I think this should be removed as it seems to stop the i2c tasks
-    //vTaskSuspendAll();
+    //TaskHandle_t xTask = servoTasks[pin];
 
-    TaskHandle_t xTask = servoTasks[pin];
-
-    if (xTask != NULL)
+    if (servoTasks[pin] != NULL)
     {
         //Serial.printf("xTask != NULL\n", pin);
 
@@ -316,11 +312,13 @@ void stopServo(const int16_t pin)
 
         //Serial.println("vTaskDelete");
 
+        xTaskNotify(servoTasks[pin], 1, eSetValueWithOverwrite);
+
         /* The task is going to be deleted. Set the handle to NULL. */
-        servoTasks[pin] = NULL;
+        //ervoTasks[pin] = NULL;
 
         /* Delete using the copy of the handle. */
-        vTaskDelete(xTask);
+        //vTaskDelete(xTask);
 
         //Serial.println("vTaskDelete completed");
     }
@@ -329,16 +327,9 @@ void stopServo(const int16_t pin)
         //Serial.printf("xTask == NULL\n", pin);
     }
 
-    //I think this should be removed as it seems to stop the i2c tasks
-    //xTaskResumeAll();
-
-    //send message to microbit - Servo 0-15 has stopped due STOP command during easing
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "F2,%i", pin);
-    sendToMicrobit(msgtosend);
-
-    //just adding some delay to give the CPU some time back
-    delay(10);
+    //TODO: - explore using a semaphore (array of semaphones) one per task as the wait
+    //just adding some delay to give the task enough time to react - the task already has a 50ms delay in it
+    delay(100);
 }
 
 void ServoEasingTask(void *pvParameter)
@@ -381,6 +372,10 @@ void ServoEasingTask(void *pvParameter)
     double t = 0;
     uint16_t PWM;
 
+    //stop interupt flag
+    uint32_t stopEasing = 0;
+    BaseType_t xStopEasingResult;
+
     //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
     //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
@@ -419,20 +414,41 @@ void ServoEasingTask(void *pvParameter)
         setServoPWM(pin, PWM);
 
         delay(50);
+
+        //check for the message to interupt early
+        xStopEasingResult = xTaskNotifyWait(0X00, 0x00, &stopEasing, 0);
+
+        if (stopEasing == 1)
+        {
+            //jump out of the for loop
+            break;
+        }
     }
 
-    //Add event to BBC microbit queue
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "F1,%i", pin);
-    sendToMicrobit(msgtosend);
-
-    // Serial.print("completed in: ");
-    // Serial.print(millis() - startTime);
-    // Serial.print(" @ ");
-    // Serial.println(millis());
+    Serial.print("pin: ");
+    Serial.print(pin);
+    Serial.print(" loop completed in: ");
+    Serial.print(millis() - startTime);
+    Serial.print(" @ ");
+    Serial.println(millis());
 
     //servos[pin].isMoving = false;
     //servos[pin].interuptEasing = false;
+
+    if (stopEasing == 0)
+    {
+        //Add event to BBC microbit queue
+        char msgtosend[MAXBBCMESSAGELENGTH];
+        sprintf(msgtosend, "F1,%i", pin);
+        sendToMicrobit(msgtosend);
+    }
+    else
+    {
+        //send message to microbit - Servo 0-15 has stopped due STOP command during easing
+        char msgtosend[MAXBBCMESSAGELENGTH];
+        sprintf(msgtosend, "F2,%i", pin);
+        sendToMicrobit(msgtosend);
+    }
 
     /* 31/1/21 */
     /* The task is going to be deleted. Set the handle to NULL. */
