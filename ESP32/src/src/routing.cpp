@@ -103,11 +103,19 @@ void routing_task(void *pvParameters)
             //MQTT messaging
             xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
         }
+        else if (cmd[0] == 'S')
+        {
+            //touch sensor
+            touch_deal_with_message(cmd);
+        }
         else if (strcmp(cmd, "RESTART") == 0)
         {
             //reboot ESP32
             ESP.restart();
         }
+
+
+
         //}
     }
 

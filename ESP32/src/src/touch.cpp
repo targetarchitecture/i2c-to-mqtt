@@ -15,6 +15,8 @@ uint16_t currtouched = 0;
 
 TaskHandle_t TouchTask;
 
+volatile uint8_t debounceDelay = 50; // the debounce time; increase if the output flickers
+
 void touch_setup()
 {
     //wait for the i2c semaphore flag to become available
@@ -45,6 +47,11 @@ void touch_setup()
         1);
 }
 
+void IRAM_ATTR handleTouchInterupt()
+{
+    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
+}
+
 void touch_task(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
@@ -54,6 +61,16 @@ void touch_task(void *pvParameter)
 
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
+
+    //unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
+
+std::vector<unsigned long> lastDebounceTimes;
+
+            for (uint8_t i = 0; i < 12; i++)
+            {
+                lastDebounceTimes.push_back(0);
+            }
+
 
     for (;;)
     {
@@ -75,41 +92,60 @@ void touch_task(void *pvParameter)
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
 
-        for (uint8_t i = 0; i < 12; i++)
+        //added a debouncing time delay
+        if (millis() - lastDebounceTime >= debounceDelay)
         {
-            // it if *is* touched and *wasnt* touched before, alert!
-            if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
+            for (uint8_t i = 0; i < 12; i++)
             {
-                // Serial.print(i);
-                // Serial.println(" touched");
+                // it if *is* touched and *wasnt* touched before, alert!
+                if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
+                {
+                    // Serial.print(i);
+                    // Serial.println(" touched");
 
-                char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "B1,%d", i);
+                    char msgtosend[MAXBBCMESSAGELENGTH];
+                    sprintf(msgtosend, "B1,%d", i);
 
-                sendToMicrobit(msgtosend);
+                    sendToMicrobit(msgtosend);
+                }
+
+                // if it *was* touched and now *isnt*, alert!
+                if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
+                {
+                    // Serial.print(i);
+                    // Serial.println(" released");
+
+                    char msgtosend[MAXBBCMESSAGELENGTH];
+                    sprintf(msgtosend, "B2,%d", i);
+
+                    sendToMicrobit(msgtosend);
+                }
             }
 
-            // if it *was* touched and now *isnt*, alert!
-            if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
-            {
-                // Serial.print(i);
-                // Serial.println(" released");
-
-                char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "B2,%d", i);
-
-                sendToMicrobit(msgtosend);
-            }
+            // reset our state
+            lasttouched = currtouched;
         }
-
-        // reset our state
-        lasttouched = currtouched;
+        lastDebounceTime = millis();
     }
 
     vTaskDelete(NULL);
 }
 
-void IRAM_ATTR handleTouchInterupt()
+void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
-    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
+    auto parts = processQueueMessage(msg, "TOUCH");
+
+    if (strcmp(parts.identifier, "S1") == 0)
+    {
+        auto touchThreshold = atoi(parts.value1);
+        auto releaseThreshold = atoi(parts.value2);
+
+        cap.setThresholds(touchThreshold, releaseThreshold);
+    }
+
+    //overwrite bounce delay
+    if (strcmp(parts.identifier, "S2") == 0)
+    {
+        debounceDelay = atoi(parts.value3);
+    }
 }

@@ -8,6 +8,7 @@
 void touch_setup();
 void touch_task(void *pvParameter);
 void IRAM_ATTR handleTouchInterupt();
+void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
