@@ -15,7 +15,7 @@ uint16_t currtouched = 0;
 
 TaskHandle_t TouchTask;
 
-volatile uint8_t debounceDelay = 50; // the debounce time; increase if the output flickers
+volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
 
 void touch_setup()
 {
@@ -62,15 +62,15 @@ void touch_task(void *pvParameter)
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
 
-    //unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
+    //unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
 
-std::vector<unsigned long> lastDebounceTimes;
+    // the last time each output pin was toggled
+    std::vector<unsigned long> lastDebounceTimes;
 
-            for (uint8_t i = 0; i < 12; i++)
-            {
-                lastDebounceTimes.push_back(0);
-            }
-
+    for (uint8_t i = 0; i < 12; i++)
+    {
+        lastDebounceTimes.push_back(0);
+    }
 
     for (;;)
     {
@@ -92,16 +92,16 @@ std::vector<unsigned long> lastDebounceTimes;
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
 
-        //added a debouncing time delay
-        if (millis() - lastDebounceTime >= debounceDelay)
+        for (uint8_t i = 0; i < 12; i++)
         {
-            for (uint8_t i = 0; i < 12; i++)
+            //added a debouncing time delay
+            if (millis() - lastDebounceTimes[i] >= debounceDelay)
             {
                 // it if *is* touched and *wasnt* touched before, alert!
                 if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
                 {
-                    // Serial.print(i);
-                    // Serial.println(" touched");
+                    //  Serial.print(i);
+                    //  Serial.println(" touched");
 
                     char msgtosend[MAXBBCMESSAGELENGTH];
                     sprintf(msgtosend, "B1,%d", i);
@@ -112,20 +112,21 @@ std::vector<unsigned long> lastDebounceTimes;
                 // if it *was* touched and now *isnt*, alert!
                 if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
                 {
-                    // Serial.print(i);
-                    // Serial.println(" released");
+                    //  Serial.print(i);
+                    //  Serial.println(" released");
 
                     char msgtosend[MAXBBCMESSAGELENGTH];
                     sprintf(msgtosend, "B2,%d", i);
 
                     sendToMicrobit(msgtosend);
                 }
-            }
 
-            // reset our state
-            lasttouched = currtouched;
+                lastDebounceTimes[i] = millis();
+            }
         }
-        lastDebounceTime = millis();
+
+        // reset our state
+        lasttouched = currtouched;
     }
 
     vTaskDelete(NULL);
