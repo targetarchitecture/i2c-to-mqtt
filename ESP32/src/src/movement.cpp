@@ -427,7 +427,7 @@ void ServoEasingTask(void *pvParameter)
             PWM = fromDegreeMapped + easedPosition;
         }
 
-        //printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
+        //Serial.printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
 
         //only send if a differance to reduce i2c traffic
         if (PWM != previousPWM)
@@ -440,6 +440,7 @@ void ServoEasingTask(void *pvParameter)
         previousPWM = PWM;
 
         //take a very defined break
+        delay(50);
 
         //check for the message to interupt early
         if (servos[pin].interuptEasing == true)
