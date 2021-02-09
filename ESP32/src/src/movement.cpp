@@ -386,7 +386,7 @@ void ServoEasingTask(void *pvParameter)
     double easedPosition = 0;
     double t = 0;
     uint16_t PWM;
-       uint16_t previousPWM;
+    uint16_t previousPWM;
 
     //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
     //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
@@ -437,7 +437,7 @@ void ServoEasingTask(void *pvParameter)
         }
 
         //remember the previous PWM
-         previousPWM = PWM;
+        previousPWM = PWM;
 
         //take a very defined break
 
@@ -449,12 +449,12 @@ void ServoEasingTask(void *pvParameter)
         }
     }
 
-    Serial.print("pin: ");
-    Serial.print(pin);
-    Serial.print(" loop completed in: ");
-    Serial.print(millis() - startTime);
-    Serial.print(" @ ");
-    Serial.println(millis());
+    // Serial.print("pin: ");
+    // Serial.print(pin);
+    // Serial.print(" loop completed in: ");
+    // Serial.print(millis() - startTime);
+    // Serial.print(" @ ");
+    // Serial.println(millis());
 
     //servos[pin].isMoving = false;
 
