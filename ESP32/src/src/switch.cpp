@@ -58,7 +58,7 @@ void switch_setup()
         switch_task_Priority, /* priority of the task */
         &SwitchTask, 1);      /* Task handle to keep track of created task */
 
-    //set-up the interupt
+    //set-up the input pin
     pinMode(SWITCH_INT, INPUT_PULLUP);
 }
 

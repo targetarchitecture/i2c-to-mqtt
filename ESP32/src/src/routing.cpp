@@ -39,7 +39,7 @@ void routing_task(void *pvParameters)
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &cmd, portMAX_DELAY);
 
-        //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
+        Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
 
         //TODO: Fix parsing by space
         //auto X = parseUART(msg, " ", false);

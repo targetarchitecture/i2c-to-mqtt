@@ -29,7 +29,7 @@ void movement_setup()
     {
         Serial.println("SX1509 for switching not found");
 
-        POST(5);
+        //POST(5);
     }
 
     //don't need to call pwm.begin as this reinitialise the i2c
@@ -285,11 +285,11 @@ void setServoPWM(const int16_t pin, const int16_t PWM)
 {
     // Serial.println("setServoPWM");
 
-    // Serial.print("setServoPWM on pin ");
-    // Serial.print(pin);
-    // Serial.print(" PWM  ");
-    // Serial.print(PWM);
-    // Serial.println("");
+    Serial.print("setServoPWM on pin ");
+    Serial.print(pin);
+    Serial.print(" PWM  ");
+    Serial.print(PWM);
+    Serial.println("");
 
     servoPWM toBeQueued;
     toBeQueued.pin = pin;
@@ -386,15 +386,15 @@ void ServoEasingTask(void *pvParameter)
     double easedPosition = 0;
     double t = 0;
     uint16_t PWM;
-       uint16_t previousPWM;
+    uint16_t previousPWM;
 
-    //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
-    //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
+    Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
+    Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
     //send message to microbit to indicate it's moving
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "F3,%i", pin);
-    sendToMicrobit(msgtosend);
+    // char msgtosend[MAXBBCMESSAGELENGTH];
+    // sprintf(msgtosend, "F3,%i", pin);
+    // sendToMicrobit(msgtosend);
 
     for (int i = 0; i <= duration * 20; i++)
     {
@@ -440,6 +440,7 @@ void ServoEasingTask(void *pvParameter)
          previousPWM = PWM;
 
         //take a very defined break
+        delay(50);
 
         //check for the message to interupt early
         if (servos[pin].interuptEasing == true)
@@ -461,16 +462,16 @@ void ServoEasingTask(void *pvParameter)
     if (servos[pin].interuptEasing == false)
     {
         //Add event to BBC microbit queue
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F1,%i,%lu", pin, millis() - startTime);
-        sendToMicrobit(msgtosend);
+        // char msgtosend[MAXBBCMESSAGELENGTH];
+        // sprintf(msgtosend, "F1,%i,%lu", pin, millis() - startTime);
+        // sendToMicrobit(msgtosend);
     }
     else
     {
         //send message to microbit - Servo 0-15 has stopped due STOP command during easing
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F2,%i,%lu", pin, millis() - startTime);
-        sendToMicrobit(msgtosend);
+        // char msgtosend[MAXBBCMESSAGELENGTH];
+        // sprintf(msgtosend, "F2,%i,%lu", pin, millis() - startTime);
+        // sendToMicrobit(msgtosend);
     }
 
     /* The task is going to be deleted. Set the handle to NULL. */
