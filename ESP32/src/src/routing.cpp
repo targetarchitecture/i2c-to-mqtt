@@ -61,7 +61,7 @@ void routing_task(void *pvParameters)
 
         //X[i].c_str()[0]
 
-                //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
+        //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
         //Serial.println(msg);
 
         if (cmd[0] == 'Z')
@@ -108,13 +108,16 @@ void routing_task(void *pvParameters)
             //touch sensor
             touch_deal_with_message(cmd);
         }
+        else if (cmd[0] == 'R')
+        {
+            //switch
+            switch_deal_with_message(cmd);
+        }
         else if (strcmp(cmd, "RESTART") == 0)
         {
             //reboot ESP32
             ESP.restart();
         }
-
-
 
         //}
     }

@@ -10,7 +10,6 @@ SX1509 switches; // Create an SX1509 object to be used throughout
 TaskHandle_t SwitchTask;
 
 std::vector<int> pinState;
-std::vector<int> newPinState;
 
 void switch_setup()
 {
@@ -43,12 +42,15 @@ void switch_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
+    //create the vector
     for (size_t i = 0; i < 16; i++)
     {
         //set the pin states to HIGH as PULLUP is set
-        pinState.push_back(1);    //HIGH;
-        newPinState.push_back(1); // HIGH;
+        pinState.push_back(1); //HIGH;
     }
+
+    //read and set state
+    read_and_send_pin_state();
 
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
@@ -70,6 +72,14 @@ void switch_task(void *pvParameters)
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
+
+    std::vector<int> newPinState;
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        //set the pin states to HIGH as PULLUP is set
+        newPinState.push_back(1); // HIGH;
+    }
 
     for (;;)
     {
@@ -131,4 +141,45 @@ void switch_task(void *pvParameters)
     }
 
     vTaskDelete(NULL);
+}
+
+void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
+{
+    auto parts = processQueueMessage(msg, "SWITCH");
+
+    if (strcmp(parts.identifier, "R1") == 0)
+    {
+        read_and_send_pin_state();
+    }
+}
+
+void read_and_send_pin_state()
+{
+    //wait for the i2c semaphore flag to become available
+    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+    checkI2Cerrors("switch (switch_deal_with_message)");
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        if (switches.digitalRead(i) == LOW)
+        {
+            pinState[i] = 0;
+        }
+        else
+        {
+            pinState[i] = 1;
+        }
+    }
+
+    checkI2Cerrors("switch (switch_deal_with_message)");
+
+    //give back the i2c flag for the next task
+    xSemaphoreGive(i2cSemaphore);
+
+    //build string to send back
+    char msgtosend[MAXBBCMESSAGELENGTH];
+    sprintf(msgtosend, "E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
+
+    sendToMicrobit(msgtosend);
 }

@@ -10,6 +10,7 @@ void routing_setup();
 extern void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
+extern void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void MQTT_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
