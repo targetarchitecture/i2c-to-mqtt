@@ -64,62 +64,17 @@ void routing_task(void *pvParameters)
         //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
         //Serial.println(msg);
 
-        if (cmd[0] == 'Z')
+        if (strncmp(cmd, "RESTART", 7) == 0)
         {
-            //Serial.println("Added to Music_Queue");
+            //Serial.println("RESTART");
 
-            xQueueSend(Sound_Queue, &cmd, portMAX_DELAY);
-        }
-        else if (cmd[0] == 'Y')
-        {
-            //Serial.println("Added to Light_Queue");
-
-            xQueueSend(Light_Queue, &cmd, portMAX_DELAY);
-        }
-        else if (cmd[0] == 'X')
-        {
-            //Serial.println("Added to DAC_Queue");
-
-            xQueueSend(DAC_Queue, &cmd, portMAX_DELAY);
-        }
-        else if (cmd[0] == 'W')
-        {
-            //rotary encoders
-            encoders_deal_with_message(cmd);
-        }
-        else if (cmd[0] == 'V')
-        {
-            //Serial.println("Added to Movement_Queue");
-
-            xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
-        }
-        else if (cmd[0] == 'U')
-        {
-            //ADC encoders
-            ADC_deal_with_message(cmd);
-        }
-        else if (cmd[0] == 'T')
-        {
-            //MQTT messaging
-            xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
-        }
-        else if (cmd[0] == 'S')
-        {
-            //touch sensor
-            touch_deal_with_message(cmd);
-        }
-        else if (cmd[0] == 'R')
-        {
-            //switch
-            switch_deal_with_message(cmd);
-        }
-        else if (strncmp(cmd, "RESTART", 7) == 0)
-        {
             //reboot ESP32...
             ESP.restart();
         }
         else if (strncmp(cmd, "STARTING", 8) == 0)
         {
+            //Serial.println("STARTING");
+
             //clear down the queue
             xQueueReset(Microbit_Receive_Queue);
 
@@ -129,7 +84,59 @@ void routing_task(void *pvParameters)
 
             sendToMicrobit(msgtosend);
         }
-    } 
+        else
+        {
+            if (cmd[0] == 'Z')
+            {
+                //Serial.println("Added to Music_Queue");
+
+                xQueueSend(Sound_Queue, &cmd, portMAX_DELAY);
+            }
+            else if (cmd[0] == 'Y')
+            {
+                //Serial.println("Added to Light_Queue");
+
+                xQueueSend(Light_Queue, &cmd, portMAX_DELAY);
+            }
+            else if (cmd[0] == 'X')
+            {
+                //Serial.println("Added to DAC_Queue");
+
+                xQueueSend(DAC_Queue, &cmd, portMAX_DELAY);
+            }
+            else if (cmd[0] == 'W')
+            {
+                //rotary encoders
+                encoders_deal_with_message(cmd);
+            }
+            else if (cmd[0] == 'V')
+            {
+                //Serial.println("Added to Movement_Queue");
+
+                xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
+            }
+            else if (cmd[0] == 'U')
+            {
+                //ADC encoders
+                ADC_deal_with_message(cmd);
+            }
+            else if (cmd[0] == 'T')
+            {
+                //MQTT messaging
+                xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
+            }
+            else if (cmd[0] == 'S')
+            {
+                //touch sensor
+                touch_deal_with_message(cmd);
+            }
+            else if (cmd[0] == 'R')
+            {
+                //switch
+                switch_deal_with_message(cmd);
+            }
+        }
+    }
 
     vTaskDelete(NULL);
 }
