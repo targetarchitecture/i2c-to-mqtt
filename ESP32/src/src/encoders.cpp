@@ -41,19 +41,19 @@ void encoders_setup()
 
 void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
-    if (strncmp(msg, "W1,0",4) == 0)
+    if (strcmp(msg, "W1,0") == 0)
     {
         encoder1Enabled = false;
     }
-    else if (strncmp(msg, "W1,1",4) == 0)
+    else if (strcmp(msg, "W1,1") == 0)
     {
         encoder1Enabled = true;
     }
-    else if (strncmp(msg, "W2,0",4) == 0)
+    else if (strcmp(msg, "W2,0") == 0)
     {
         encoder2Enabled = false;
     }
-    else if (strncmp(msg, "W2,1",4) == 0)
+    else if (strcmp(msg, "W2,1") == 0)
     {
         encoder2Enabled = true;
     }

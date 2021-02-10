@@ -131,7 +131,7 @@ void movement_task(void *pvParameters)
         auto stopPin = atol(parts.value1);
         stopServo(stopPin);
 
-        if (strncmp(parts.identifier, "V1",2) == 0)
+        if (strcmp(parts.identifier, "V1") == 0)
         {
             //not much to do now as we always stop the servos
 
@@ -139,7 +139,7 @@ void movement_task(void *pvParameters)
             //auto pin = atol(parts.value1);
             //stopServo(pin);
         }
-        else if (strncmp(parts.identifier, "V2",2) == 0)
+        else if (strcmp(parts.identifier, "V2") == 0)
         {
             //Set servo to angle
             auto pin = atoi(parts.value1);
@@ -149,7 +149,7 @@ void movement_task(void *pvParameters)
 
             setServoAngle(pin, angle, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V3",2) == 0)
+        else if (strcmp(parts.identifier, "V3") == 0)
         {
             //Set servo to angle
             auto pin = atoi(parts.value1);
@@ -161,7 +161,7 @@ void movement_task(void *pvParameters)
 
             setServoEase(pin, LinearInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V4",2) == 0)
+        else if (strcmp(parts.identifier, "V4") == 0)
         {
             //Set servo to angle
             auto pin = atoi(parts.value1);
@@ -173,7 +173,7 @@ void movement_task(void *pvParameters)
 
             setServoEase(pin, QuadraticInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V5",2) == 0)
+        else if (strcmp(parts.identifier, "V5") == 0)
         {
             //Serial.print("BounceInOut on pin ");
 
@@ -188,7 +188,7 @@ void movement_task(void *pvParameters)
             setServoEase(pin, BounceInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
 
-        else if (strncmp(parts.identifier, "V6",2) == 0)
+        else if (strcmp(parts.identifier, "V6") == 0)
         {
             //Set servo to PWM
             auto pin = atol(parts.value1);

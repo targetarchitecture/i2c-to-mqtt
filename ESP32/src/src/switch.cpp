@@ -154,7 +154,7 @@ void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     auto parts = processQueueMessage(msg, "SWITCH");
 
-    if (strncmp(parts.identifier, "R1",2) == 0)
+    if (strcmp(parts.identifier, "R1") == 0)
     {
         read_and_send_pin_state();
     }

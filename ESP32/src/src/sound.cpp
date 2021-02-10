@@ -137,7 +137,7 @@ void sound_task(void *pvParameters)
         // Serial.print("action:");
         // Serial.println(parts.identifier);
 
-        if (strncmp(parts.identifier, "Z1",2) == 0)
+        if (strcmp(parts.identifier, "Z1") == 0)
         {
             auto volume = atoi(parts.value1);
             volume = constrain(volume, 0, 30);
@@ -161,19 +161,19 @@ void sound_task(void *pvParameters)
 
             sendToMicrobit(msgtosend);
         }
-        else if (strncmp(parts.identifier, "Z2",2) == 0)
+        else if (strcmp(parts.identifier, "Z2") == 0)
         {
             delay(commandPause);
             sound.volumeDown();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z3",2) == 0)
+        else if (strcmp(parts.identifier, "Z3") == 0)
         {
             delay(commandPause);
             sound.volumeUp();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z4",2) == 0)
+        else if (strcmp(parts.identifier, "Z4") == 0)
         {
             auto trackNum = atoi(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
@@ -190,7 +190,7 @@ void sound_task(void *pvParameters)
             sound.play(trackNum);
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z5",2) == 0)
+        else if (strcmp(parts.identifier, "Z5") == 0)
         {
             delay(commandPause);
             sound.next();
@@ -203,7 +203,7 @@ void sound_task(void *pvParameters)
 
             sendToMicrobit(msgtosend);
         }
-        else if (strncmp(parts.identifier, "Z6",2) == 0)
+        else if (strcmp(parts.identifier, "Z6") == 0)
         {
             delay(commandPause);
             sound.previous();
@@ -216,19 +216,19 @@ void sound_task(void *pvParameters)
 
             sendToMicrobit(msgtosend);
         }
-        else if (strncmp(parts.identifier, "Z7",2) == 0)
+        else if (strcmp(parts.identifier, "Z7") == 0)
         {
             delay(commandPause);
             sound.pause();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z8",2) == 0)
+        else if (strcmp(parts.identifier, "Z8") == 0)
         {
             delay(commandPause);
             sound.start();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z9",2) == 0)
+        else if (strcmp(parts.identifier, "Z9") == 0)
         {
             delay(commandPause);
             sound.stop();

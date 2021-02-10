@@ -92,7 +92,7 @@ void light_task(void *pvParameters)
         ledDriverInit should be called on the pin to be blinked before this.
         */
 
-        if (strncmp(parts.identifier, "Y1",2) == 0)
+        if (strcmp(parts.identifier, "Y1") == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             long tOn = atol(parts.value2);
@@ -115,7 +115,7 @@ void light_task(void *pvParameters)
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = blink;
         }
-        else if (strncmp(parts.identifier, "Y2",2) == 0)
+        else if (strcmp(parts.identifier, "Y2") == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             long tOn = atol(parts.value2);
@@ -140,7 +140,7 @@ void light_task(void *pvParameters)
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = breathe;
         }
-        else if (strncmp(parts.identifier, "Y3",2) == 0)
+        else if (strcmp(parts.identifier, "Y3") == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             int tOnOff = atoi(parts.value2);
@@ -166,7 +166,7 @@ void light_task(void *pvParameters)
                 xSemaphoreGive(i2cSemaphore);
             }
         }
-        else if (strncmp(parts.identifier, "Y4",2) == 0)
+        else if (strcmp(parts.identifier, "Y4") == 0)
         {
             //Serial.println("YOYOYO");
 
@@ -183,7 +183,7 @@ void light_task(void *pvParameters)
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
         }
-        else if (strncmp(parts.identifier, "Y5",2) == 0)
+        else if (strcmp(parts.identifier, "Y5") == 0)
         {
             //turn on all LEDs - using the queue
             for (int i = 0; i <= 15; i++)

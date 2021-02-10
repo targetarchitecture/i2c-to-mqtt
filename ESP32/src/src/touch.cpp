@@ -136,7 +136,7 @@ void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     auto parts = processQueueMessage(msg, "TOUCH");
 
-    if (strncmp(parts.identifier, "S1",2) == 0)
+    if (strcmp(parts.identifier, "S1") == 0)
     {
         auto touchThreshold = atoi(parts.value1);
         auto releaseThreshold = atoi(parts.value2);
@@ -145,7 +145,7 @@ void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
     }
 
     //overwrite bounce delay
-    if (strncmp(parts.identifier, "S2",2) == 0)
+    if (strcmp(parts.identifier, "S2") == 0)
     {
         debounceDelay = atoi(parts.value3);
     }

@@ -42,11 +42,11 @@ void DAC_task(void *pvParameters)
 
         //Serial.printf("DAC action: %s @ %iV\n", parts.identifier, DACvalue);
 
-        if (strncmp(parts.identifier, "X1",2) == 0)
+        if (strcmp(parts.identifier, "X1") == 0)
         {
             dacWrite(DAC1, DACvalue);
         }
-        else if (strncmp(parts.identifier, "X2",2) == 0)
+        else if (strcmp(parts.identifier, "X2") == 0)
         {
             dacWrite(DAC2, DACvalue);
         }
