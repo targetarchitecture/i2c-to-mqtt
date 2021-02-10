@@ -13,6 +13,7 @@ extern void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void MQTT_deal_with_message(char msg[MAXESP32MESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
+extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 
 extern QueueHandle_t DAC_Queue;
 extern QueueHandle_t Sound_Queue;

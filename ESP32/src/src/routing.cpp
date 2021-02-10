@@ -118,8 +118,17 @@ void routing_task(void *pvParameters)
             //reboot ESP32
             ESP.restart();
         }
+        else if (strcmp(cmd, "STARTING") == 0)
+        {
+            //clear down the queue
+            xQueueReset(Microbit_Receive_Queue);
 
-        //}
+            //build string to send back
+            char msgtosend[MAXBBCMESSAGELENGTH];
+            sprintf(msgtosend, "H1");
+
+            sendToMicrobit(msgtosend);
+        }
     }
 
     vTaskDelete(NULL);
