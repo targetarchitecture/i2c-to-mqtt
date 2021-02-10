@@ -144,7 +144,7 @@ void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
         cap.setThresholds(touchThreshold, releaseThreshold);
     }
 
-    //overwrite bounce delay
+    //overwrite bounce delay..
     if (strncmp(parts.identifier, "S2",2) == 0)
     {
         debounceDelay = atoi(parts.value3);

@@ -137,7 +137,7 @@ void movement_task(void *pvParameters)
 
             //Stop servo
             //auto pin = atol(parts.value1);
-            //stopServo(pin);
+            //stopServo(pin);.
         }
         else if (strncmp(parts.identifier, "V2",2) == 0)
         {
@@ -150,8 +150,8 @@ void movement_task(void *pvParameters)
             setServoAngle(pin, angle, minPulse, maxPulse);
         }
         else if (strncmp(parts.identifier, "V3",2) == 0)
-        {
-            //Set servo to angle
+        { 
+            //Set servo to angle.
             auto pin = atoi(parts.value1);
             auto toDegree = atoi(parts.value2);
             auto fromDegree = atoi(parts.value3);

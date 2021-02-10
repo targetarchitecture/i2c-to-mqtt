@@ -115,7 +115,7 @@ void routing_task(void *pvParameters)
         }
         else if (strncmp(cmd, "RESTART", 7) == 0)
         {
-            //reboot ESP32
+            //reboot ESP32...
             ESP.restart();
         }
         else if (strncmp(cmd, "STARTING", 8) == 0)
@@ -129,7 +129,7 @@ void routing_task(void *pvParameters)
 
             sendToMicrobit(msgtosend);
         }
-    }
+    } 
 
     vTaskDelete(NULL);
 }

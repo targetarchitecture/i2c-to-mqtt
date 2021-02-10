@@ -184,7 +184,7 @@ void sound_task(void *pvParameters)
             // Serial.print("Serial1.getWriteError():");
             // Serial.println(Serial1.getWriteError());
 
-            //Serial1.flush();
+            //Serial1.flush();..
 
             delay(commandPause);
             sound.play(trackNum);

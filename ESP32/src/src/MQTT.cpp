@@ -315,7 +315,7 @@ void MQTT_task(void *pvParameter)
     // Serial.print("MQTT_Queue:");
     // Serial.println(msg);
 
-    //TODO: see if need this copy of msg
+    //TODO: see if need this copy of msg.
     std::string X = msg;
 
     parts = processQueueMessage(X.c_str(), "MQTT");

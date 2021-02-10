@@ -37,10 +37,10 @@ void DAC_task(void *pvParameters)
         //Serial.printf("DAC_Queue: %s\n", msg);
 
         messageParts parts = processQueueMessage(msg, "DAC");
-
+ 
         DACvalue = constrain(atoi(parts.value1), 0, 254);
 
-        //Serial.printf("DAC action: %s @ %iV\n", parts.identifier, DACvalue);
+        //Serial.printf("DAC action: %s @ %iV\n", parts.identifier, DACvalue);.
 
         if (strncmp(parts.identifier, "X1",2) == 0)
         {

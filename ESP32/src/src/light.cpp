@@ -114,7 +114,7 @@ void light_task(void *pvParameters)
 
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = blink;
-        }
+        } 
         else if (strncmp(parts.identifier, "Y2",2) == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);

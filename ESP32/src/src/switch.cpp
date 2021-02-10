@@ -162,7 +162,7 @@ void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 
 void read_and_send_pin_state()
 {
-    //wait for the i2c semaphore flag to become available
+    //wait for the i2c semaphore flag to become available.
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     checkI2Cerrors("switch (switch_deal_with_message)");

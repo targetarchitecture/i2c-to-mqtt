@@ -71,7 +71,7 @@ void ADC_task(void *pvParameters)
 
         if (ADC1Enabled == false && ADC2Enabled == false)
         {
-            //take your time to do nothing
+            //take your time to do nothing.
             delay(1000);
         }
         else
@@ -87,7 +87,7 @@ void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     if (strncmp(msg, "U1,0",4) == 0)
     {
-        ADC1Enabled = false;
+        ADC1Enabled = false; 
     }
     else if (strncmp(msg, "U1,1",4) == 0)
     {
