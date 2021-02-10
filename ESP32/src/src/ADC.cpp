@@ -85,19 +85,19 @@ void ADC_task(void *pvParameters)
 
 void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
-    if (strcmp(msg, "U1,0") == 0)
+    if (strncmp(msg, "U1,0",4) == 0)
     {
         ADC1Enabled = false;
     }
-    else if (strcmp(msg, "U1,1") == 0)
+    else if (strncmp(msg, "U1,1",4) == 0)
     {
         ADC1Enabled = true;
     }
-    else if (strcmp(msg, "U2,0") == 0)
+    else if (strncmp(msg, "U2,0",4) == 0)
     {
         ADC2Enabled = false;
     }
-    else if (strcmp(msg, "U2,1") == 0)
+    else if (strncmp(msg, "U2,1",4) == 0)
     {
         ADC2Enabled = true;
     }

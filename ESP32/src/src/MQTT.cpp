@@ -320,17 +320,17 @@ void MQTT_task(void *pvParameter)
 
     parts = processQueueMessage(X.c_str(), "MQTT");
 
-    if (strcmp(parts.identifier, "T1") == 0)
+    if (strncmp(parts.identifier, "T1",2) == 0)
     {
       std::string str(parts.value1);
       WIFI_SSID = str;
     }
-    else if (strcmp(parts.identifier, "T2") == 0)
+    else if (strncmp(parts.identifier, "T2",2) == 0)
     {
       std::string str(parts.value1);
       WIFI_PASSPHRASE = str;
     }
-    else if (strcmp(parts.identifier, "T3") == 0)
+    else if (strncmp(parts.identifier, "T3",2) == 0)
     {
       std::string strA(parts.value1);
       WIFI_SSID = strA;
@@ -340,27 +340,27 @@ void MQTT_task(void *pvParameter)
 
       ConnectWifi = true;
     }
-    else if (strcmp(parts.identifier, "T4") == 0)
+    else if (strncmp(parts.identifier, "T4",2) == 0)
     {
       std::string str(parts.value1);
       MQTT_SERVER = str;
     }
-    else if (strcmp(parts.identifier, "T5") == 0)
+    else if (strncmp(parts.identifier, "T5",2) == 0)
     {
       std::string str(parts.value1);
       MQTT_CLIENTID = str;
     }
-    else if (strcmp(parts.identifier, "T6") == 0)
+    else if (strncmp(parts.identifier, "T6",2) == 0)
     {
       std::string str(parts.value1);
       MQTT_USERNAME = str;
     }
-    else if (strcmp(parts.identifier, "T7") == 0)
+    else if (strncmp(parts.identifier, "T7",2) == 0)
     {
       std::string str(parts.value1);
       MQTT_KEY = str;
     }
-    else if (strcmp(parts.identifier, "T8") == 0)
+    else if (strncmp(parts.identifier, "T8",2) == 0)
     {
       //set server variables
       MQTTClient.setClient(client);
@@ -372,7 +372,7 @@ void MQTT_task(void *pvParameter)
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
-    else if (strcmp(parts.identifier, "T9") == 0)
+    else if (strncmp(parts.identifier, "T9",2) == 0)
     {
       std::string topic(parts.value1);
       std::string payload(parts.value2);
@@ -381,7 +381,7 @@ void MQTT_task(void *pvParameter)
 
       xQueueSend(MQTT_Message_Queue, &msg, portMAX_DELAY);
     }
-    else if (strcmp(parts.identifier, "T10") == 0)
+    else if (strncmp(parts.identifier, "T10",3) == 0)
     {
       //add to the list (if it doesn't exist)
       std::string topic(parts.value1);
@@ -415,7 +415,7 @@ void MQTT_task(void *pvParameter)
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
-    else if (strcmp(parts.identifier, "T11") == 0)
+    else if (strncmp(parts.identifier, "T11",3) == 0)
     {
       std::string topic(parts.value1);
 
@@ -438,7 +438,7 @@ void MQTT_task(void *pvParameter)
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
-    else if (strcmp(parts.identifier, "T12") == 0)
+    else if (strncmp(parts.identifier, "T12",3) == 0)
     {
       //turn off WiFi
       WiFi.mode(WIFI_OFF);
