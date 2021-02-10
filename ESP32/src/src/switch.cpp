@@ -13,6 +13,13 @@ std::vector<int> pinState;
 
 void switch_setup()
 {
+    //create the vector
+    for (size_t i = 0; i < 16; i++)
+    {
+        //set the pin states to HIGH as PULLUP is set
+        pinState.push_back(0);
+    }
+
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
@@ -35,22 +42,22 @@ void switch_setup()
 
         //Serial.print("debouncePin:");
         //Serial.println(i);
+
+        //set pin and read value
+        if (switches.digitalRead(i) == LOW)
+        {
+            pinState[i] = 1;
+        }
+        else
+        {
+            pinState[i] = 0;
+        }
     }
 
     checkI2Cerrors("switch");
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
-
-    //create the vector
-    for (size_t i = 0; i < 16; i++)
-    {
-        //set the pin states to HIGH as PULLUP is set
-        pinState.push_back(1); //HIGH;
-    }
-
-    //read and set state
-    read_and_send_pin_state();
 
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
@@ -78,7 +85,7 @@ void switch_task(void *pvParameters)
     for (size_t i = 0; i < 16; i++)
     {
         //set the pin states to HIGH as PULLUP is set
-        newPinState.push_back(1); // HIGH;
+        newPinState.push_back(0); // HIGH;
     }
 
     for (;;)
@@ -103,11 +110,11 @@ void switch_task(void *pvParameters)
             {
                 if (switches.digitalRead(i) == LOW)
                 {
-                    newPinState[i] = 0;
+                    newPinState[i] = 1;
                 }
                 else //if (switches.digitalRead(i) == HIGH)
                 {
-                    newPinState[i] = 1;
+                    newPinState[i] = 0;
                 }
             }
 
@@ -164,11 +171,11 @@ void read_and_send_pin_state()
     {
         if (switches.digitalRead(i) == LOW)
         {
-            pinState[i] = 0;
+            pinState[i] = 1;
         }
         else
         {
-            pinState[i] = 1;
+            pinState[i] = 0;
         }
     }
 
@@ -182,4 +189,7 @@ void read_and_send_pin_state()
     sprintf(msgtosend, "E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
 
     sendToMicrobit(msgtosend);
+
+    // Serial.print("switch state :");
+    // Serial.println(msgtosend);
 }
