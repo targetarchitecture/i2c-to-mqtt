@@ -113,12 +113,12 @@ void routing_task(void *pvParameters)
             //switch
             switch_deal_with_message(cmd);
         }
-        else if (strcmp(cmd, "RESTART") == 0)
+        else if (strncmp(cmd, "RESTART", 7) == 0)
         {
             //reboot ESP32
             ESP.restart();
         }
-        else if (strcmp(cmd, "STARTING") == 0)
+        else if (strncmp(cmd, "STARTING", 8) == 0)
         {
             //clear down the queue
             xQueueReset(Microbit_Receive_Queue);
