@@ -67,14 +67,14 @@ void MQTT_setup()
 
 void Wifi_connect()
 {
-  // Serial.println("Connecting to Wifi");
-  // Serial.println(WIFI_SSID.c_str());
-  // Serial.println(WIFI_PASSPHRASE.c_str());
+  Serial.println("Connecting to Wifi");
+  Serial.println(WIFI_SSID.c_str());
+  Serial.println(WIFI_PASSPHRASE.c_str());
 
   WiFi.mode(WIFI_OFF);
-  delay(250);
+  delay(500);
   WiFi.mode(WIFI_STA);
-  delay(250);
+  delay(500);
 
   //connect
   uint32_t speed = 500;
@@ -87,7 +87,7 @@ void Wifi_connect()
     digitalWrite(ONBOARDLED, LOW);
     delay(speed);
 
-    //Serial.println(WiFi.status());
+    Serial.println(WiFi.status());
   }
 
   char msgtosend[MAXBBCMESSAGELENGTH];
@@ -142,9 +142,9 @@ void checkMQTTconnection()
 {
   if (!MQTTClient.connected())
   {
-    //Serial.println("!MQTTClient.connected()");
+    Serial.println("MQTTClient NOT Connected :(");
 
-    delay(10);
+    delay(500);
 
     bool MQTTConnected = MQTTClient.connect(MQTT_CLIENTID.c_str(), MQTT_USERNAME.c_str(), MQTT_KEY.c_str());
 
@@ -320,17 +320,19 @@ void MQTT_task(void *pvParameter)
 
     parts = processQueueMessage(X.c_str(), "MQTT");
 
-    if (strncmp(parts.identifier, "T1",2) == 0)
-    {
-      std::string str(parts.value1);
-      WIFI_SSID = str;
-    }
-    else if (strncmp(parts.identifier, "T2",2) == 0)
-    {
-      std::string str(parts.value1);
-      WIFI_PASSPHRASE = str;
-    }
-    else if (strncmp(parts.identifier, "T3",2) == 0)
+    // if (strncmp(parts.identifier, "T1",2) == 0)
+    // {
+    //   std::string str(parts.value1);
+    //   WIFI_SSID = str;
+    // }
+    // else if (strncmp(parts.identifier, "T2",2) == 0)
+    // {
+    //   std::string str(parts.value1);
+    //   WIFI_PASSPHRASE = str;
+    // }
+    // else
+
+    if (strncmp(parts.identifier, "T3", 2) == 0)
     {
       std::string strA(parts.value1);
       WIFI_SSID = strA;
@@ -340,39 +342,54 @@ void MQTT_task(void *pvParameter)
 
       ConnectWifi = true;
     }
-    else if (strncmp(parts.identifier, "T4",2) == 0)
+    else if (strncmp(parts.identifier, "T4", 2) == 0)
     {
       std::string str(parts.value1);
       MQTT_SERVER = str;
+
+      //set this up as early as possible
+      MQTTClient.setClient(client);
+      MQTTClient.setServer(MQTT_SERVER.c_str(), 1883);
+      MQTTClient.setCallback(recieveMessage);
     }
-    else if (strncmp(parts.identifier, "T5",2) == 0)
+    else if (strncmp(parts.identifier, "T5", 2) == 0)
     {
       std::string str(parts.value1);
       MQTT_CLIENTID = str;
     }
-    else if (strncmp(parts.identifier, "T6",2) == 0)
+    else if (strncmp(parts.identifier, "T6", 2) == 0)
     {
       std::string str(parts.value1);
       MQTT_USERNAME = str;
     }
-    else if (strncmp(parts.identifier, "T7",2) == 0)
+    else if (strncmp(parts.identifier, "T7", 2) == 0)
     {
       std::string str(parts.value1);
       MQTT_KEY = str;
     }
-    else if (strncmp(parts.identifier, "T8",2) == 0)
+    else if (strncmp(parts.identifier, "T8", 2) == 0)
     {
-      //set server variables
-      MQTTClient.setClient(client);
-      MQTTClient.setServer(MQTT_SERVER.c_str(), 1883);
-      MQTTClient.setCallback(recieveMessage);
+      Serial.print("MQTT_SERVER:");
+      Serial.println(MQTT_SERVER.length());
+      Serial.print("MQTT_KEY:");
+      Serial.println(MQTT_KEY.length());
+      Serial.print("MQTT_USERNAME:");
+      Serial.println(MQTT_USERNAME.length());
+      Serial.print("MQTT_CLIENTID:");
+      Serial.println(MQTT_CLIENTID.length());
 
-      ConnectMQTT = true;
+      //only give the order to connect if we really do have all of the pieces
+      if (MQTT_SERVER.length() > 1 && MQTT_KEY.length() > 1 && MQTT_USERNAME.length() > 1 && MQTT_CLIENTID.length() > 1)
+      {
+        Serial.println("All good to connect to the MQTT server");
 
-      //set to true to get the subscriptions setup again
-      ConnectSubscriptions = true;
+        ConnectMQTT = true;
+
+        //set to true to get the subscriptions setup again
+        ConnectSubscriptions = true;
+      }
     }
-    else if (strncmp(parts.identifier, "T9",2) == 0)
+    else if (strncmp(parts.identifier, "T9", 2) == 0)
     {
       std::string topic(parts.value1);
       std::string payload(parts.value2);
@@ -381,7 +398,7 @@ void MQTT_task(void *pvParameter)
 
       xQueueSend(MQTT_Message_Queue, &msg, portMAX_DELAY);
     }
-    else if (strncmp(parts.identifier, "T10",3) == 0)
+    else if (strncmp(parts.identifier, "T10", 3) == 0)
     {
       //add to the list (if it doesn't exist)
       std::string topic(parts.value1);
@@ -415,7 +432,7 @@ void MQTT_task(void *pvParameter)
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
-    else if (strncmp(parts.identifier, "T11",3) == 0)
+    else if (strncmp(parts.identifier, "T11", 3) == 0)
     {
       std::string topic(parts.value1);
 
@@ -438,11 +455,15 @@ void MQTT_task(void *pvParameter)
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
-    else if (strncmp(parts.identifier, "T12",3) == 0)
+    else if (strncmp(parts.identifier, "T12", 3) == 0)
     {
+      //reset variables
+      ConnectMQTT = false;
+      ConnectWifi = false;
+
       //turn off WiFi
       WiFi.mode(WIFI_OFF);
-      delay(250);
+      delay(500);
 
       //turn off LED
       digitalWrite(ONBOARDLED, LOW);
