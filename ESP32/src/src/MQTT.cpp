@@ -35,7 +35,7 @@ TaskHandle_t MQTTClientTask;
 
 volatile bool ConnectWifi = false;
 volatile bool ConnectMQTT = false;
-volatile bool ConnectSubscriptions = true;
+volatile bool ConnectSubscriptions = false;
 
 std::list<MQTTSubscription> MQTTSubscriptions;
 
@@ -140,46 +140,48 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
 
 void checkMQTTconnection()
 {
-  if (!MQTTClient.connected())
+  if (MQTTClient.connected() == false)
   {
     Serial.println("MQTTClient NOT Connected :(");
 
     delay(500);
 
-    bool MQTTConnected = MQTTClient.connect(MQTT_CLIENTID.c_str(), MQTT_USERNAME.c_str(), MQTT_KEY.c_str());
+    MQTTClient.connect(MQTT_CLIENTID.c_str(), MQTT_USERNAME.c_str(), MQTT_KEY.c_str());
 
-    if (MQTTConnected == true)
+    if (MQTTClient.connected() == true)
     {
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
     }
+  }
 
-    unsigned long currentMillis = millis();
+  unsigned long currentMillis = millis();
 
-    if (currentMillis - lastMQTTStatusSent >= 1000)
-    {
-      lastMQTTStatusSent = currentMillis;
+  if (currentMillis - lastMQTTStatusSent >= 1000)
+  {
+    lastMQTTStatusSent = currentMillis;
 
-      if (MQTTConnected == true)
-      {
-        //Serial.println("G2,1");
+    sendMQTTConnectionStatus();
+  }
+}
 
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "G2,1");
-        sendToMicrobit(msgtosend);
+void sendMQTTConnectionStatus()
+{
+  if (MQTTClient.connected() == true)
+  {
+    //Serial.println("G2,1");
 
-        //set to true to get the subscriptions setup again
-        ConnectSubscriptions = true;
-      }
-      else
-      {
-        //Serial.println("G2,0");
+    char msgtosend[MAXBBCMESSAGELENGTH];
+    sprintf(msgtosend, "G2,1");
+    sendToMicrobit(msgtosend);
+  }
+  else
+  {
+    //Serial.println("G2,0");
 
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "G2,0");
-        sendToMicrobit(msgtosend);
-      }
-    }
+    char msgtosend[MAXBBCMESSAGELENGTH];
+    sprintf(msgtosend, "G2,0");
+    sendToMicrobit(msgtosend);
   }
 }
 
@@ -195,15 +197,15 @@ void setupSubscriptions()
 
     if (subscribe == true)
     {
-      //Serial.print("subscribing to:");
-      //Serial.println(it->topic.c_str());
+      Serial.print("subscribing to:");
+      Serial.println(it->topic.c_str());
 
       MQTTClient.subscribe(it->topic.c_str());
     }
     else
     {
-      //Serial.print("unsubscribing to:");
-      //Serial.println(it->topic.c_str());
+      Serial.print("unsubscribing to:");
+      Serial.println(it->topic.c_str());
 
       MQTTClient.unsubscribe(it->topic.c_str());
     }
@@ -344,6 +346,9 @@ void MQTT_task(void *pvParameter)
     }
     else if (strncmp(parts.identifier, "T4", 2) == 0)
     {
+      //send status to try to get the BBC loop to stop if it senses it's connected
+      sendMQTTConnectionStatus();
+
       std::string str(parts.value1);
       MQTT_SERVER = str;
 
@@ -354,21 +359,33 @@ void MQTT_task(void *pvParameter)
     }
     else if (strncmp(parts.identifier, "T5", 2) == 0)
     {
+            //send status to try to get the BBC loop to stop if it senses it's connected
+      sendMQTTConnectionStatus();
+
       std::string str(parts.value1);
       MQTT_CLIENTID = str;
     }
     else if (strncmp(parts.identifier, "T6", 2) == 0)
     {
+            //send status to try to get the BBC loop to stop if it senses it's connected
+      sendMQTTConnectionStatus();
+
       std::string str(parts.value1);
       MQTT_USERNAME = str;
     }
     else if (strncmp(parts.identifier, "T7", 2) == 0)
     {
+            //send status to try to get the BBC loop to stop if it senses it's connected
+      sendMQTTConnectionStatus();
+
       std::string str(parts.value1);
       MQTT_KEY = str;
     }
     else if (strncmp(parts.identifier, "T8", 2) == 0)
     {
+      //send status to try to get the BBC loop to stop if it senses it's connected
+      sendMQTTConnectionStatus();
+
       Serial.print("MQTT_SERVER:");
       Serial.println(MQTT_SERVER.length());
       Serial.print("MQTT_KEY:");
@@ -384,9 +401,6 @@ void MQTT_task(void *pvParameter)
         Serial.println("All good to connect to the MQTT server");
 
         ConnectMQTT = true;
-
-        //set to true to get the subscriptions setup again
-        ConnectSubscriptions = true;
       }
     }
     else if (strncmp(parts.identifier, "T9", 2) == 0)

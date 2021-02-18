@@ -18,6 +18,7 @@ void MQTT_task(void *pvParameter);
 void setupSubscriptions();
 void recieveMessage(char *topic, byte *payload, unsigned int length);
 void MQTTClient_task(void *pvParameter);
+void sendMQTTConnectionStatus();
 
 extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
