@@ -152,12 +152,16 @@ void checkMQTTconnection()
     {
       //set to true to get the subscriptions setup again
       ConnectSubscriptions = true;
+
+      //send status regardless of timings
+      sendMQTTConnectionStatus();
     }
   }
 
+  //send a connection status messaGE EVERY 10 SECONDS
   unsigned long currentMillis = millis();
 
-  if (currentMillis - lastMQTTStatusSent >= 1000)
+  if (currentMillis - lastMQTTStatusSent >= 10 * 1000)
   {
     lastMQTTStatusSent = currentMillis;
 
@@ -359,7 +363,7 @@ void MQTT_task(void *pvParameter)
     }
     else if (strncmp(parts.identifier, "T5", 2) == 0)
     {
-            //send status to try to get the BBC loop to stop if it senses it's connected
+      //send status to try to get the BBC loop to stop if it senses it's connected
       sendMQTTConnectionStatus();
 
       std::string str(parts.value1);
@@ -367,7 +371,7 @@ void MQTT_task(void *pvParameter)
     }
     else if (strncmp(parts.identifier, "T6", 2) == 0)
     {
-            //send status to try to get the BBC loop to stop if it senses it's connected
+      //send status to try to get the BBC loop to stop if it senses it's connected
       sendMQTTConnectionStatus();
 
       std::string str(parts.value1);
@@ -375,7 +379,7 @@ void MQTT_task(void *pvParameter)
     }
     else if (strncmp(parts.identifier, "T7", 2) == 0)
     {
-            //send status to try to get the BBC loop to stop if it senses it's connected
+      //send status to try to get the BBC loop to stop if it senses it's connected
       sendMQTTConnectionStatus();
 
       std::string str(parts.value1);
@@ -427,8 +431,8 @@ void MQTT_task(void *pvParameter)
 
         if (topic == MQTTSubscriptionTopic)
         {
-          //Serial.print("Update to subscription list: ");
-          //Serial.println(parts.value1);
+          Serial.print("Update to subscription list: ");
+          Serial.println(parts.value1);
 
           it->subscribe = true;
           found = true;
