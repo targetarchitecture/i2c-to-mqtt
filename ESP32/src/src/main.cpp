@@ -23,7 +23,6 @@ Rainbow Sparkle Unicorn - SN7
 #include "switch.h"
 #include "movement.h"
 #include "MQTT.h"
-#include "BLE.h"
 
 void checkI2Cerrors(const char *area);
 
@@ -36,15 +35,13 @@ QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
-void BLE_setup();
-
 void setup()
 {
   //Set UART log level
   esp_log_level_set("SN7", ESP_LOG_VERBOSE);
 
   //stop bluetooth
-  //btStop();
+  btStop();
 
   //start i2c
   Wire.begin(SDA, SCL);
@@ -94,9 +91,6 @@ void setup()
   routing_setup();
 
   microbit_i2c_setup();
-
-  //setup BLE for UART
-  BLE_setup();
 
   // Serial.print("SN7 completed in ");
   // Serial.println(millis());
@@ -202,41 +196,6 @@ void checkI2Cerrors(const char *area)
     //TODO: Check to see if this is still needed
     // Wire.clearWriteError();
   }
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
-
-#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-
-void BLE_setup()
-{
-  Serial.println("1");
-  BLEDevice::init("Long name works now");
-  BLEServer *pServer = BLEDevice::createServer();
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-                                         CHARACTERISTIC_UUID,
-                                         BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE
-                                       );
-  Serial.println("2");
-  pCharacteristic->setValue("Hello World says Neil");
-  pService->start();
-    Serial.println("3");
-   BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
-  //BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-    Serial.println("4");
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  pAdvertising->setMinPreferred(0x12);
-  BLEDevice::startAdvertising();
-  Serial.println("Characteristic defined! Now you can read it in your phone!");
 }
 
 void loop()
