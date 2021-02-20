@@ -76,6 +76,11 @@ void Wifi_connect()
   WiFi.mode(WIFI_STA);
   delay(500);
 
+  //   WiFi.mode(WIFI_AP_STA);
+  // delay(500);
+
+   
+
   //connect
   uint32_t speed = 500;
   while (WiFi.status() != WL_CONNECTED)

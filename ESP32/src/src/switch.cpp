@@ -62,7 +62,7 @@ void switch_setup()
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
         "Switch Task",        /* name of task. */
-        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 7728) */
+        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8204)   */
         NULL,                 /* parameter of the task */
         switch_task_Priority, /* priority of the task */
         &SwitchTask, 1);      /* Task handle to keep track of created task */
@@ -74,11 +74,12 @@ void switch_setup()
 void switch_task(void *pvParameters)
 {
     /* Inspect our own high water mark on entering the task. */
-    // BaseType_t xResult;
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
+
+    BaseType_t xResult;
 
     std::vector<int> newPinState;
 
@@ -135,6 +136,8 @@ void switch_task(void *pvParameters)
 
                     sendToMicrobit(msgtosend);
 
+                  // sendToMicrobit("E1,%i,%i", i, newPinState[i]);
+
                     // Serial.print("msgtosend:");
                     // Serial.println(msgtosend);
 
@@ -154,7 +157,7 @@ void switch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     auto parts = processQueueMessage(msg, "SWITCH");
 
-    if (strncmp(parts.identifier, "R1",2) == 0)
+    if (strncmp(parts.identifier, "R1", 2) == 0)
     {
         read_and_send_pin_state();
     }
@@ -185,10 +188,12 @@ void read_and_send_pin_state()
     xSemaphoreGive(i2cSemaphore);
 
     //build string to send back
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
+    // char msgtosend[MAXBBCMESSAGELENGTH];
+    // sprintf(msgtosend, "E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
 
-    sendToMicrobit(msgtosend);
+    //sendToMicrobit(msgtosend);
+
+   // sendToMicrobit("E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
 
     // Serial.print("switch state :");
     // Serial.println(msgtosend);
