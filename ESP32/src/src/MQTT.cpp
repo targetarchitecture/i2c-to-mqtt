@@ -13,23 +13,6 @@ std::string WIFI_PASSPHRASE = "";
 
 std::string IP_ADDRESS = "";
 
-//QueueHandle_t MQTT_Queue;
-QueueHandle_t MQTT_Message_Queue;
-
-unsigned long lastMQTTStatusSent = 0;
-
-struct MQTTMessage
-{
-  std::string topic;
-  std::string payload;
-};
-
-struct MQTTSubscription
-{
-  std::string topic;
-  bool subscribe;
-};
-
 TaskHandle_t MQTTTask;
 TaskHandle_t MQTTClientTask;
 
@@ -37,14 +20,13 @@ volatile bool ConnectWifi = false;
 volatile bool ConnectMQTT = false;
 volatile bool ConnectSubscriptions = false;
 
+unsigned long lastMQTTStatusSent = 0;
+
 std::list<MQTTSubscription> MQTTSubscriptions;
 
 void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
-
-  //MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   xTaskCreatePinnedToCore(
       MQTT_task,          /* Task function. */
@@ -75,11 +57,6 @@ void Wifi_connect()
   delay(500);
   WiFi.mode(WIFI_STA);
   delay(500);
-
-  //   WiFi.mode(WIFI_AP_STA);
-  // delay(500);
-
-   
 
   //connect
   uint32_t speed = 500;
@@ -262,6 +239,8 @@ void MQTTClient_task(void *pvParameter)
               // Serial.print("payload:");
               // Serial.print(msg.payload.c_str());
               // Serial.println("");
+
+              foo("publish topic:",msg.topic.c_str());
 
               MQTTClient.publish(msg.topic.c_str(), msg.payload.c_str());
             }
@@ -495,3 +474,25 @@ void MQTT_task(void *pvParameter)
 
   vTaskDelete(NULL);
 }
+
+// template <class... Args>;
+// void foo(const std::string &format, Args... args)
+// {
+//   Serial.printf(format.c_str(), args...);
+
+//   if (MQTTClient.connected() == true)
+//   {
+//     char payload[MAXBBCMESSAGELENGTH];
+//     sprintf(payload, format.c_str(), args...);
+
+//     auto chipID = ESP.getEfuseMac();
+//     std::string topic;
+
+//     topic = "debug/";
+//     topic += chipID;
+
+//     MQTTMessage msg = {topic, payload};
+
+//     xQueueSend(MQTT_Message_Queue, &msg, portMAX_DELAY);
+//   }
+// }

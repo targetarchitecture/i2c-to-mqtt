@@ -11,6 +11,7 @@ Rainbow Sparkle Unicorn - SN7
 #include <sstream>
 #include <iostream>
 
+
 #include "globals.h"
 #include "microbit-i2c.h"
 #include "sound.h"
@@ -23,6 +24,7 @@ Rainbow Sparkle Unicorn - SN7
 #include "switch.h"
 #include "movement.h"
 #include "MQTT.h"
+#include "debug.h"
 
 void checkI2Cerrors(const char *area);
 
@@ -31,9 +33,13 @@ QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the 
 QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
-//QueueHandle_t ADC_Queue;
 QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
+QueueHandle_t MQTT_Message_Queue;
+
+
+extern void foo(const char *format...);
+
 
 void setup()
 {
@@ -47,7 +53,7 @@ void setup()
   Wire.begin(SDA, SCL);
 
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
+  //Serial.setDebugOutput(true);
   Serial.println("");
   Serial.println("");
 
@@ -67,6 +73,8 @@ void setup()
   Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+
+  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   //get wifi going first as this seems to be problematic
   MQTT_setup();
@@ -94,6 +102,8 @@ void setup()
 
   // Serial.print("SN7 completed in ");
   // Serial.println(millis());
+
+  foo("check me out %i\n", ESP.getEfuseMac());
 }
 
 messageParts processQueueMessage(const std::string msg, const std::string from)
@@ -202,3 +212,17 @@ void loop()
 {
   delay(1000);
 }
+
+int add(int count, ...)
+{
+  int result = 0;
+  va_list args;
+  va_start(args, count);
+  for (int i = 0; i < count; ++i)
+  {
+    result += va_arg(args, int);
+  }
+  va_end(args);
+  return result;
+}
+
