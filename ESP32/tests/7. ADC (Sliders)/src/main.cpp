@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 //https://microcontrollerslab.com/adc-esp32-measuring-voltage-example/
 
 void setup()
