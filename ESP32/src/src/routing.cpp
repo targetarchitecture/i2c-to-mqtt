@@ -39,30 +39,7 @@ void routing_task(void *pvParameters)
         //wait for new BBC command in the queue
         xQueueReceive(Microbit_Receive_Queue, &cmd, portMAX_DELAY);
 
-        Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
-
-        //TODO: Fix parsing by space
-        //auto X = parseUART(msg, " ", false);
-
-        //TODO: Check if parseUART is working with i2c as I'm sure we are not sending \r\n
-        //auto X = parseUART(msg, "\r\n", false);
-
-        // Serial.print("parseUART:");
-        // Serial.println(X.size());
-
-        // for (int i = 0; i < X.size(); i++)
-        // {
-        //     char cmd[MAXESP32MESSAGELENGTH] = {0};
-
-        //     strcpy(cmd, X[i].substr(0, MAXESP32MESSAGELENGTH).c_str());
-
-        //Serial.printf("@@ BBC RX: %s\n", cmd);
-        //Serial.println(cmd);
-
-        //X[i].c_str()[0]
-
         //Serial.printf("Microbit_Receive_Queue: %s\n", cmd);
-        //Serial.println(msg);
 
         if (strncmp(cmd, "RESTART", 7) == 0)
         {

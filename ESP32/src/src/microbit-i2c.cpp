@@ -57,20 +57,13 @@ void i2c_rx_task(void *pvParameter)
 
 void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 {
-    //Serial.print("sendToMicrobit [msg]:");
-    //Serial.println(msg);
-
     //the queue needs to work with a copy
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, msg);
 
     xQueueSend(Microbit_Transmit_Queue, &queuedMsg,  portMAX_DELAY);
 
-
-    Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
-
-    // Serial.print("sendToMicrobit [msg]:");
-    // Serial.println(msg);
+    //Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
 }
 
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
@@ -90,15 +83,9 @@ void receiveEvent(int howMany)
 
     receivedMsg += c;
 
-    //Serial.print("receivedMsg: ");
-    //Serial.println(receivedMsg.c_str());
-
     //need to do something to copy the received message
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, receivedMsg.c_str());
-
-    //Serial.print("strcpy: ");
-    //Serial.println(queuedMsg);
 
     //disgard the 00 ones and not add them to the queue
     if (queuedMsg[0] != '0' && queuedMsg[1] != '0')
