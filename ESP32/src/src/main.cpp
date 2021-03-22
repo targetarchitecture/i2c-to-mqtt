@@ -11,7 +11,6 @@ Rainbow Sparkle Unicorn - SN7
 #include <sstream>
 #include <iostream>
 
-
 #include "globals.h"
 #include "microbit-i2c.h"
 #include "sound.h"
@@ -37,9 +36,7 @@ QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 QueueHandle_t MQTT_Message_Queue;
 
-
 extern void foo(const char *format...);
-
 
 void setup()
 {
@@ -103,7 +100,9 @@ void setup()
   // Serial.print("SN7 completed in ");
   // Serial.println(millis());
 
-  foo("check me out %i\n", ESP.getEfuseMac());
+  // foo("check me out %i\n", ESP.getEfuseMac());
+
+  // foo("SN7 completed in %i\n", millis());
 }
 
 messageParts processQueueMessage(const std::string msg, const std::string from)
@@ -225,4 +224,3 @@ int add(int count, ...)
   va_end(args);
   return result;
 }
-
