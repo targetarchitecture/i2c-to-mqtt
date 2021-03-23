@@ -126,7 +126,7 @@ void checkMQTTconnection()
   {
     Serial.println("MQTTClient NOT Connected :(");
 
-    delay(500);
+    delay(1000);
 
     MQTTClient.connect(MQTT_CLIENTID.c_str(), MQTT_USERNAME.c_str(), MQTT_KEY.c_str());
 
@@ -200,7 +200,7 @@ void setupSubscriptions()
 
 void MQTTClient_task(void *pvParameter)
 {
-  MQTTMessage msg;
+MQTTMessage msg;
 
   for (;;)
   {
@@ -224,23 +224,26 @@ void MQTTClient_task(void *pvParameter)
         {
           //Serial.println("WiFi.isConnected() == true");
 
+          //must call the loop method!
+          MQTTClient.loop();
+
           checkMQTTconnection();
 
-          if (MQTTClient.connected())
+          if (MQTTClient.connected() == true)
           {
             //Serial.println("MQTTClient.connected()");
 
             //check the message queue and if empty just proceed passed
-            if (xQueueReceive(MQTT_Message_Queue, &msg, 0) == pdTRUE)
+            if (xQueueReceive(MQTT_Message_Queue, &msg, 10))
             {
-              // Serial.print("publish topic:");
-              // Serial.print(msg.topic.c_str());
-              // Serial.print("\t\t");
-              // Serial.print("payload:");
-              // Serial.print(msg.payload.c_str());
-              // Serial.println("");
+              Serial.print("publish topic:");
+              Serial.print(msg.topic.c_str());
+              Serial.print("\t\t");
+              Serial.print("payload:");
+              Serial.print(msg.payload.c_str());
+              Serial.println("");
 
-              foo("publish topic:",msg.topic.c_str());
+              //foo("publish message: %1",msg.payload.c_str());
 
               MQTTClient.publish(msg.topic.c_str(), msg.payload.c_str());
             }

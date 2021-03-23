@@ -81,6 +81,66 @@ void switch_task(void *pvParameters)
 
     BaseType_t xResult;
 
+    for (;;)
+    {
+        //On SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
+        if (digitalRead(SWITCH_INT) == LOW)
+        {
+            //delay(1);
+
+            // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+            // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+            // Serial.println(uxHighWaterMark);
+
+            //quickly read all of the pins and save the state
+
+            //wait for the i2c semaphore flag to become available
+            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+            checkI2Cerrors("switch (switch_task start)");
+
+            std::string states = "XXXXXXXXXXXXXXXX";
+
+            for (size_t i = 0; i < 16; i++)
+            {
+                if (switches.digitalRead(i) == LOW)
+                {
+                    states = states.replace(i, 1, "L");
+                }
+                else
+                {
+                    states = states.replace(i, 1, "H");
+                }
+            }
+
+            checkI2Cerrors("switch (switch_task end)");
+
+            //give back the i2c flag for the next task
+            xSemaphoreGive(i2cSemaphore);
+
+            char msgtosend[MAXBBCMESSAGELENGTH];
+            sprintf(msgtosend, "E3,%s", states.c_str());
+
+            sendToMicrobit(msgtosend);
+        }
+
+        // put a delay so it isn't overwhelming
+        delay(50);
+    }
+
+    vTaskDelete(NULL);
+}
+
+void switch_task_old(void *pvParameters)
+{
+    /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    BaseType_t xResult;
+
     std::vector<int> newPinState;
 
     for (size_t i = 0; i < 16; i++)
@@ -136,7 +196,7 @@ void switch_task(void *pvParameters)
 
                     sendToMicrobit(msgtosend);
 
-                  // sendToMicrobit("E1,%i,%i", i, newPinState[i]);
+                    // sendToMicrobit("E1,%i,%i", i, newPinState[i]);
 
                     // Serial.print("msgtosend:");
                     // Serial.println(msgtosend);
@@ -193,7 +253,7 @@ void read_and_send_pin_state()
 
     //sendToMicrobit(msgtosend);
 
-   // sendToMicrobit("E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
+    // sendToMicrobit("E2,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i", pinState[0], pinState[1], pinState[2], pinState[3], pinState[4], pinState[5], pinState[6], pinState[7], pinState[8], pinState[9], pinState[10], pinState[11], pinState[12], pinState[13], pinState[14], pinState[15]);
 
     // Serial.print("switch state :");
     // Serial.println(msgtosend);

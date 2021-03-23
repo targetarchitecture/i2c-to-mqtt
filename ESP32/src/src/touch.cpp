@@ -10,8 +10,8 @@ Adafruit_MPR121 cap = Adafruit_MPR121();
 
 // Keeps track of the last pins touched
 // so we know when buttons are 'released'
-uint16_t lasttouched = 0;
-uint16_t currtouched = 0;
+volatile uint16_t lasttouched = 0;
+volatile uint16_t currtouched = 0;
 
 TaskHandle_t TouchTask;
 
@@ -53,6 +53,76 @@ void IRAM_ATTR handleTouchInterupt()
 }
 
 void touch_task(void *pvParameter)
+{
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xResult;
+
+    unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
+
+    for (;;)
+    {
+        //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+
+        //added a debouncing time delay
+        if (millis() - lastDebounceTime >= debounceDelay)
+        {
+            lastDebounceTime = millis();
+
+            delay(1);
+
+            //wait for the i2c semaphore flag to become available
+            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+            checkI2Cerrors("Touch (start)");
+
+            // Get the currently touched pads
+            uint16_t currtouched = cap.touched();
+
+            checkI2Cerrors("Touch (end)");
+
+            //give back the i2c flag for the next task
+            xSemaphoreGive(i2cSemaphore);
+
+            //only bother sending if the touch changed
+            if (currtouched != lasttouched)
+            {
+                std::string states = "XXXXXXXXXXXX";
+
+                for (uint8_t i = 0; i < 12; i++)
+                {
+                    // it if *is* touched and *wasnt* touched before, alert!
+                    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
+                    {
+                        states = states.replace(i, 1, "H");
+                    }
+
+                    // if it *was* touched and now *isnt*, alert!
+                    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
+                    {
+                        states = states.replace(i, 1, "L");
+                    }
+                }
+
+                char msgtosend[MAXBBCMESSAGELENGTH];
+                sprintf(msgtosend, "B3,%s", states.c_str());
+
+                sendToMicrobit(msgtosend);
+
+                //remember last touch
+                lasttouched = currtouched;
+            }
+        }
+    }
+    vTaskDelete(NULL);
+}
+
+void touch_task_old(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
@@ -136,7 +206,7 @@ void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
     auto parts = processQueueMessage(msg, "TOUCH");
 
-    if (strncmp(parts.identifier, "S1",2) == 0)
+    if (strncmp(parts.identifier, "S1", 2) == 0)
     {
         auto touchThreshold = atoi(parts.value1);
         auto releaseThreshold = atoi(parts.value2);
@@ -145,7 +215,7 @@ void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
     }
 
     //overwrite bounce delay..
-    if (strncmp(parts.identifier, "S2",2) == 0)
+    if (strncmp(parts.identifier, "S2", 2) == 0)
     {
         debounceDelay = atoi(parts.value3);
     }

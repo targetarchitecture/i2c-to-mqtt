@@ -8,7 +8,6 @@ void foo(const char *format...)
   va_list args;
 
   va_start(args, format);
-  // vfprintf(logfp, fmt, args);
 
   char payload[MAXBBCMESSAGELENGTH];
   snprintf(payload, MAXBBCMESSAGELENGTH, format, args);
@@ -16,22 +15,6 @@ void foo(const char *format...)
   Serial.println(payload);
 
   va_end(args);
-
-  if (MQTTClient.connected() == true)
-  {
-    //  char payload[MAXBBCMESSAGELENGTH];
-    //  snprintf(payload,MAXBBCMESSAGELENGTH, format, args);
-
-    auto chipID = ESP.getEfuseMac();
-    std::string topic;
-
-    topic = "debug";
-    //topic += chipID;
-
-    MQTTMessage msg = {topic, payload};
-
-    xQueueSend(MQTT_Message_Queue, &msg, portMAX_DELAY);
-  }
 }
 
 // template <class... Args>
