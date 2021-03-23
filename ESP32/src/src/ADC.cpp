@@ -2,23 +2,16 @@
 #include "ADC.h"
 
 TaskHandle_t ADCTask;
-//QueueHandle_t ADC_Queue;
-
-volatile long ADC1_VALUE;
-volatile long ADC2_VALUE;
 
 volatile uint32_t ADCPollingRate = 500;
 
-volatile bool ADC1Enabled = false;
+volatile bool ADC1Enabled =  false;
 volatile bool ADC2Enabled = false;
 
 void ADC_setup()
 {
     pinMode(ADC1, INPUT);
     pinMode(ADC2, INPUT);
-
-    //ADC1_VALUE = map(analogRead(ADC1), 0, 4095, 0, 100);
-    //ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
 
     xTaskCreatePinnedToCore(
         ADC_task,          /* Task function. */
@@ -40,7 +33,8 @@ void ADC_task(void *pvParameters)
     {
         if (ADC1Enabled == true)
         {
-            ADC1_VALUE = map(analogRead(ADC1), 0, 4095, 0, 100);
+            long ADC1_VALUE = map(analogRead(ADC1), 0, 4095, 0, 100);
+
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C1,%d", ADC1_VALUE);
 
@@ -49,7 +43,7 @@ void ADC_task(void *pvParameters)
 
         if (ADC2Enabled == true)
         {
-            ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
+            long ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C2,%d", ADC2_VALUE);
@@ -66,67 +60,66 @@ void ADC_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void ADC_task_OLD(void *pvParameters)
-{
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+// void ADC_task_OLD(void *pvParameters)
+// {
+//     // UBaseType_t uxHighWaterMark;
+//     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+//     // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
+//     // Serial.println(uxHighWaterMark);
 
-    long newADC1value = 10000;
-    long newADC2value = 10000;
+//     long newADC1value = 10000;
+//     long newADC2value = 10000;
 
-    for (;;)
-    {
-        if (ADC1Enabled == true)
-        {
-            newADC1value = map(analogRead(ADC1), 0, 4095, 0, 100);
+//     for (;;)
+//     {
+//         if (ADC1Enabled == true)
+//         {
+//             newADC1value = map(analogRead(ADC1), 0, 4095, 0, 100);
 
-            if (newADC1value != ADC1_VALUE)
-            {
-                char msg[MAXBBCMESSAGELENGTH] = {0};
-                sprintf(msg, "C1,%d", newADC1value);
+//             if (newADC1value != ADC1_VALUE)
+//             {
+//                 char msg[MAXBBCMESSAGELENGTH] = {0};
+//                 sprintf(msg, "C1,%d", newADC1value);
 
-                sendToMicrobit(msg);
+//                 sendToMicrobit(msg);
 
-                ADC1_VALUE = newADC1value;
-            }
-        }
+//                 ADC1_VALUE = newADC1value;
+//             }
+//         }
 
-        if (ADC2Enabled == true)
-        {
-            newADC2value = map(analogRead(ADC2), 0, 4095, 0, 100);
+//         if (ADC2Enabled == true)
+//         {
+//             newADC2value = map(analogRead(ADC2), 0, 4095, 0, 100);
 
-            if (newADC2value != ADC2_VALUE)
-            {
-                char msg[MAXBBCMESSAGELENGTH] = {0};
-                sprintf(msg, "C2,%d", newADC2value);
+//             if (newADC2value != ADC2_VALUE)
+//             {
+//                 char msg[MAXBBCMESSAGELENGTH] = {0};
+//                 sprintf(msg, "C2,%d", newADC2value);
 
-                //Serial.println(msg);
+//                 //Serial.println(msg);
 
-                sendToMicrobit(msg);
+//                 sendToMicrobit(msg);
 
-                ADC2_VALUE = newADC2value;
-            }
-        }
+//                 ADC2_VALUE = newADC2value;
+//             }
+//         }
 
-        if (ADC1Enabled == false && ADC2Enabled == false)
-        {
-            //take your time to do nothing.
-            delay(1000);
-        }
-        else
-        {
-            delay(500);
-        }
-    }
+//         if (ADC1Enabled == false && ADC2Enabled == false)
+//         {
+//             //take your time to do nothing.
+//             delay(1000);
+//         }
+//         else
+//         {
+//             delay(500);
+//         }
+//     }
 
-    vTaskDelete(NULL);
-}
+//     vTaskDelete(NULL);
+// }
 
 void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 {
-
     if (strncmp(msg, "U1,0", 4) == 0)
     {
         //Serial.println("ADC1Enabled = false");
@@ -155,6 +148,6 @@ void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
 
         messageParts parts = processQueueMessage(X.c_str(), "MOVEMENT");
 
-        ADCPollingRate =atoi(parts.value1);
+        ADCPollingRate = atoi(parts.value1);
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.h"
+#include <driver/adc.h>
 #include "messageParts.h"
 #include "SN7 pins.h"
 
