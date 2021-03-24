@@ -5,8 +5,22 @@ TaskHandle_t ADCTask;
 
 volatile uint32_t ADCPollingRate = 500;
 
-volatile bool ADC1Enabled =  false;
+volatile bool ADC1Enabled = false;
 volatile bool ADC2Enabled = false;
+
+#define ADCWINDOW_SIZE 5
+
+long ADC1INDEX = 0;
+long ADC1VALUE = 0;
+long ADC1SUM = 0;
+long ADC1READINGS[ADCWINDOW_SIZE];
+long ADC1AVERAGED = 0;
+
+long ADC2INDEX = 0;
+long ADC2VALUE = 0;
+long ADC2SUM = 0;
+long ADC2READINGS[ADCWINDOW_SIZE];
+long ADC2AVERAGED = 0;
 
 void ADC_setup()
 {
@@ -22,6 +36,32 @@ void ADC_setup()
         &ADCTask, 1);      /* Task handle to keep track of created task */
 }
 
+long ReadADC2()
+{
+    ADC2SUM = ADC2SUM - ADC2READINGS[ADC2INDEX];        // Remove the oldest entry from the sum
+    ADC2VALUE = map(analogRead(ADC2), 0, 4095, 0, 100); // Read the next sensor value
+    ADC2READINGS[ADC2INDEX] = ADC2VALUE;                // Add the newest reading to the window
+    ADC2SUM = ADC2SUM + ADC2VALUE;                      // Add the newest reading to the sum
+    ADC2INDEX = (ADC2INDEX + 1) % ADCWINDOW_SIZE;       // Increment the index, and wrap to 0 if it exceeds the window size
+
+    ADC2AVERAGED = ADC2SUM / ADCWINDOW_SIZE; // Divide the sum of the window by the window size for the result
+
+    return ADC2AVERAGED;
+}
+
+long ReadADC1()
+{
+    ADC1SUM = ADC1SUM - ADC1READINGS[ADC1INDEX];        // Remove the oldest entry from the sum
+    ADC1VALUE = map(analogRead(ADC1), 0, 4095, 0, 100); // Read the next sensor value
+    ADC1READINGS[ADC1INDEX] = ADC1VALUE;                // Add the newest reading to the window
+    ADC1SUM = ADC1SUM + ADC1VALUE;                      // Add the newest reading to the sum
+    ADC1INDEX = (ADC1INDEX + 1) % ADCWINDOW_SIZE;       // Increment the index, and wrap to 0 if it exceeds the window size
+
+    ADC1AVERAGED = ADC1SUM / ADCWINDOW_SIZE; // Divide the sum of the window by the window size for the result
+
+    return ADC1AVERAGED;
+}
+
 void ADC_task(void *pvParameters)
 {
     // UBaseType_t uxHighWaterMark;
@@ -29,11 +69,20 @@ void ADC_task(void *pvParameters)
     // Serial.print("ADC_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
+    //loop around quickly to populate the arrays
+    for (size_t i = 0; i < 50; i++)
+    {
+        ReadADC1();
+        ReadADC2();
+
+        delay(10);
+    }
+
     for (;;)
     {
         if (ADC1Enabled == true)
         {
-            long ADC1_VALUE = map(analogRead(ADC1), 0, 4095, 0, 100);
+            long ADC1_VALUE = ReadADC1();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C1,%d", ADC1_VALUE);
@@ -43,7 +92,7 @@ void ADC_task(void *pvParameters)
 
         if (ADC2Enabled == true)
         {
-            long ADC2_VALUE = map(analogRead(ADC2), 0, 4095, 0, 100);
+            long ADC2_VALUE = ReadADC2();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C2,%d", ADC2_VALUE);
@@ -146,7 +195,7 @@ void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
         //TODO: see if need this copy of msg
         std::string X = msg;
 
-        messageParts parts = processQueueMessage(X.c_str(), "MOVEMENT");
+        messageParts parts = processQueueMessage(X.c_str(), "ADC");
 
         ADCPollingRate = atoi(parts.value1);
     }
