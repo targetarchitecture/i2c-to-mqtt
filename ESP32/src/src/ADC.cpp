@@ -22,6 +22,7 @@ long ADC2SUM = 0;
 long ADC2READINGS[ADCWINDOW_SIZE];
 long ADC2AVERAGED = 0;
 
+
 void ADC_setup()
 {
     pinMode(ADC1, INPUT);
@@ -82,7 +83,7 @@ void ADC_task(void *pvParameters)
     {
         if (ADC1Enabled == true)
         {
-            long ADC1_VALUE = ReadADC1();
+            long ADC1_VALUE =  ReadADC1();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C1,%d", ADC1_VALUE);
@@ -92,7 +93,7 @@ void ADC_task(void *pvParameters)
 
         if (ADC2Enabled == true)
         {
-            long ADC2_VALUE = ReadADC2();
+            long ADC2_VALUE =  ReadADC2();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C2,%d", ADC2_VALUE);

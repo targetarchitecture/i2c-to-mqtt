@@ -136,8 +136,8 @@ void movement_task(void *pvParameters)
             //not much to do now as we always stop the servos
 
             //Stop servo
-            //auto pin = atol(parts.value1);
-            //stopServo(pin);.
+            auto pin = atol(parts.value1);
+            stopServo(pin);
         }
         else if (strncmp(parts.identifier, "V2",2) == 0)
         {

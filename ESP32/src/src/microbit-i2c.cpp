@@ -63,7 +63,7 @@ void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
 
     xQueueSend(Microbit_Transmit_Queue, &queuedMsg,  portMAX_DELAY);
 
-    Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
+    //Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
 }
 
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
