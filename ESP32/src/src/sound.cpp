@@ -45,6 +45,11 @@ void sound_setup()
         &SoundBusyTask, 1);       /* Task handle to keep track of created task */
 }
 
+void IRAM_ATTR handleSoundInterupt()
+{
+    xTaskNotify(SoundBusyTask, 0, eSetValueWithoutOverwrite);
+}
+
 void sound_busy_task(void *pvParameters)
 {
     /* Inspect our own high water mark on entering the task. */
@@ -56,38 +61,15 @@ void sound_busy_task(void *pvParameters)
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
 
-    int NewBusyPin;
-
     // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
     for (;;)
     {
-        //wait for value to change
+        //wait for value to change due to interupt on pin value change
         xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
         //check for changes to busy pin
-        NewBusyPin = digitalRead(DFPLAYER_BUSY);
-
-        if (BusyPin != NewBusyPin)
-        {
-            // Serial.print("DFPlayer Busy:");
-            // Serial.println(NewBusyPin);
-
-            //TODO: Can this be improved?
-            char msgtosend[MAXBBCMESSAGELENGTH];
-            sprintf(msgtosend, "A1,%d", NewBusyPin);
-
-            sendToMicrobit(msgtosend);
-
-            // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-            // Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
-            // Serial.println(uxHighWaterMark);
-
-            BusyPin = NewBusyPin;
-        }
-
-        //no need for delay aS it now waits for the interupt (13.1.21)
-        //delay(100);
+        BusyPin = digitalRead(DFPLAYER_BUSY);
     }
 
     vTaskDelete(NULL);
@@ -97,8 +79,8 @@ void sound_task(void *pvParameters)
 {
     //TODO: Ask Google if this is the best place to declare variables in an endless task
     messageParts parts;
-    int16_t currentVolume;
-    int16_t currentTrack;
+    //int16_t currentVolume;
+    //int16_t currentTrack;
 
     Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
 
@@ -137,7 +119,7 @@ void sound_task(void *pvParameters)
         // Serial.print("action:");
         // Serial.println(parts.identifier);
 
-        if (strncmp(parts.identifier, "Z1",2) == 0)
+        if (strncmp(parts.identifier, "SVOL",4) == 0)
         {
             auto volume = atoi(parts.value1);
             volume = constrain(volume, 0, 30);
@@ -147,88 +129,31 @@ void sound_task(void *pvParameters)
 
             delay(commandPause);
             sound.volume(volume);
-
             delay(commandPause);
-            currentVolume = sound.readVolume();
 
-            currentVolume = constrain(currentVolume, 0, 30);
-
-            // Serial.print("current vol:");
-            // Serial.println(currentVolume);
-
-            char msgtosend[MAXBBCMESSAGELENGTH];
-            sprintf(msgtosend, "A2,%i", currentVolume);
-
-            sendToMicrobit(msgtosend);
         }
-        else if (strncmp(parts.identifier, "Z2",2) == 0)
-        {
-            delay(commandPause);
-            sound.volumeDown();
-            delay(commandPause);
-        }
-        else if (strncmp(parts.identifier, "Z3",2) == 0)
-        {
-            delay(commandPause);
-            sound.volumeUp();
-            delay(commandPause);
-        }
-        else if (strncmp(parts.identifier, "Z4",2) == 0)
+        else if (strncmp(parts.identifier, "SPLAY",5) == 0)
         {
             auto trackNum = atoi(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
-
-            // Serial.print("DFPlayer.play:");
-            // Serial.println(trackNum);
-
-            // Serial.print("Serial1.getWriteError():");
-            // Serial.println(Serial1.getWriteError());
-
-            //Serial1.flush();..
 
             delay(commandPause);
             sound.play(trackNum);
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z5",2) == 0)
-        {
-            delay(commandPause);
-            sound.next();
-
-            delay(commandPause);
-            currentTrack = sound.readCurrentFileNumber();
-
-            char msgtosend[MAXBBCMESSAGELENGTH];
-            sprintf(msgtosend, "A3,%d", currentTrack);
-
-            sendToMicrobit(msgtosend);
-        }
-        else if (strncmp(parts.identifier, "Z6",2) == 0)
-        {
-            delay(commandPause);
-            sound.previous();
-
-            delay(commandPause);
-            currentTrack = sound.readCurrentFileNumber();
-
-            char msgtosend[MAXBBCMESSAGELENGTH];
-            sprintf(msgtosend, "A3,%d", currentTrack);
-
-            sendToMicrobit(msgtosend);
-        }
-        else if (strncmp(parts.identifier, "Z7",2) == 0)
+        else if (strncmp(parts.identifier, "SPAUSE",6) == 0)
         {
             delay(commandPause);
             sound.pause();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z8",2) == 0)
+        else if (strncmp(parts.identifier, "SRESUME",7) == 0)
         {
             delay(commandPause);
             sound.start();
             delay(commandPause);
         }
-        else if (strncmp(parts.identifier, "Z9",2) == 0)
+        else if (strncmp(parts.identifier, "SSTOP",5) == 0)
         {
             delay(commandPause);
             sound.stop();
@@ -239,9 +164,3 @@ void sound_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void IRAM_ATTR handleSoundInterupt()
-{
-    //int32_t cmd = 1;
-
-    xTaskNotify(SoundBusyTask, 0, eSetValueWithoutOverwrite);
-}
