@@ -55,16 +55,16 @@ void i2c_rx_task(void *pvParameter)
     }
 }
 
-void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
-{
-    //the queue needs to work with a copy
-    char queuedMsg[MAXBBCMESSAGELENGTH];
-    strcpy(queuedMsg, msg);
+// void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH])
+// {
+//     //the queue needs to work with a copy
+//     char queuedMsg[MAXBBCMESSAGELENGTH];
+//     strcpy(queuedMsg, msg);
 
-    xQueueSend(Microbit_Transmit_Queue, &queuedMsg,  portMAX_DELAY);
+//     xQueueSend(Microbit_Transmit_Queue, &queuedMsg,  portMAX_DELAY);
 
-    //Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
-}
+//     //Serial.printf("Microbit_Transmit_Queue: %s\n", msg);
+// }
 
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
 void receiveEvent(int howMany)
@@ -87,12 +87,10 @@ void receiveEvent(int howMany)
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, receivedMsg.c_str());
 
-    //disgard the 00 ones and not add them to the queue
-    if (queuedMsg[0] != '0' && queuedMsg[1] != '0')
-    {
-        //now add these to the routing queue for routing
-        xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
-    }
+    //this bit here needs to set -up the message to send back
+
+    //now add these to the routing queue for routing
+    // xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
 }
 
 void requestEvent()
@@ -100,23 +98,55 @@ void requestEvent()
     char msg[MAXESP32MESSAGELENGTH]; // = {0};
 
     //wait for new BBC command in the queue
-    if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
+    //if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
+    //{
+    // Serial.print("strlen: ");
+    // Serial.println(strlen(msg));
+
+    auto retval = WireSlave1.write(msg);
+
+    // Serial.print("retval: ");
+    // Serial.println(retval);
+
+    // Serial.print("sent: ");
+    // Serial.println(msg);
+    //}
+    //else
+    // {
+    //just send back a blank string
+    //    WireSlave1.print("");
+    //}
+}
+
+void dealWithMessage(const char *message)
+{
+
+    if (strncmp(message, "RESTART", 7) == 0)
     {
-        // Serial.print("strlen: ");
-        // Serial.println(strlen(msg));
+        //Serial.println("RESTART");
 
-        auto retval = WireSlave1.write(msg);
+        //reboot ESP32...
+        ESP.restart();
+    }
+    else if (strncmp(message, "STARTING", 8) == 0)
+    {
+        //Serial.println("STARTING");
 
-        // Serial.print("retval: ");
-        // Serial.println(retval);
-
-        // Serial.print("sent: ");
-        // Serial.println(msg);
+        //clear down the queues
+        xQueueReset(Sound_Queue);
+        xQueueReset(Light_Queue);
+        xQueueReset(DAC_Queue);
+        xQueueReset(Movement_Queue);
+        xQueueReset(MQTT_Queue);
     }
     else
     {
-        //just send back a blank string
-        WireSlave1.print("");
+
+        // xQueueSend(Sound_Queue, &cmd, portMAX_DELAY);
+        // xQueueSend(Light_Queue, &cmd, portMAX_DELAY);
+        // xQueueSend(DAC_Queue, &cmd, portMAX_DELAY);
+        // xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
+        // xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
+        // touch_deal_with_message(cmd);
     }
 }
-

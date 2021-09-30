@@ -392,9 +392,9 @@ void ServoEasingTask(void *pvParameter)
     //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
 
     //send message to microbit to indicate it's moving
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "F3,%i", pin);
-    sendToMicrobit(msgtosend);
+    // char msgtosend[MAXBBCMESSAGELENGTH];
+    // sprintf(msgtosend, "F3,%i", pin);
+    // sendToMicrobit(msgtosend);
 
     for (int i = 0; i <= duration * 20; i++)
     {
@@ -459,20 +459,20 @@ void ServoEasingTask(void *pvParameter)
 
     //servos[pin].isMoving = false;
 
-    if (servos[pin].interuptEasing == false)
-    {
-        //Add event to BBC microbit queue
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F1,%i,%lu", pin, millis() - startTime);
-        sendToMicrobit(msgtosend);
-    }
-    else
-    {
-        //send message to microbit - Servo 0-15 has stopped due STOP command during easing
-        char msgtosend[MAXBBCMESSAGELENGTH];
-        sprintf(msgtosend, "F2,%i,%lu", pin, millis() - startTime);
-        sendToMicrobit(msgtosend);
-    }
+    // if (servos[pin].interuptEasing == false)
+    // {
+    //     //Add event to BBC microbit queue
+    //     char msgtosend[MAXBBCMESSAGELENGTH];
+    //     sprintf(msgtosend, "F1,%i,%lu", pin, millis() - startTime);
+    //     sendToMicrobit(msgtosend);
+    // }
+    // else
+    // {
+    //     //send message to microbit - Servo 0-15 has stopped due STOP command during easing
+    //     char msgtosend[MAXBBCMESSAGELENGTH];
+    //     sprintf(msgtosend, "F2,%i,%lu", pin, millis() - startTime);
+    //     sendToMicrobit(msgtosend);
+    // }
 
     /* The task is going to be deleted. Set the handle to NULL. */
     servos[pin].taskHandle = NULL;

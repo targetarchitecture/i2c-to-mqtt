@@ -32,7 +32,7 @@ struct MQTTSubscription
   bool subscribe;
 };
 
-extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
+//extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t MQTT_Queue;
@@ -40,7 +40,7 @@ extern QueueHandle_t MQTT_Message_Queue;
 
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 
-extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+//extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+//extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
 
 extern void foo(const char *format...);

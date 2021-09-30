@@ -40,12 +40,12 @@ void movement_task(void *pvParameter);
 void movement_i2c_task(void *pvParameter);
 
 extern void checkI2Cerrors(const char *area);
-extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
+//extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void POST(uint8_t flashes);
 
 extern QueueHandle_t Movement_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 
-extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+//extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+//extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

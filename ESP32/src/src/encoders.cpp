@@ -10,9 +10,6 @@ ESP32Encoder encoder2;
 volatile int32_t encoder1Count;
 volatile int32_t encoder2Count;
 
-volatile bool encoder1Enabled = false;
-volatile bool encoder2Enabled = false;
-
 void encoders_setup()
 {
     // Enable the weak pull up/down resistors
@@ -39,26 +36,6 @@ void encoders_setup()
         1);
 }
 
-void encoders_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
-{
-    if (strncmp(msg, "W1,0",4) == 0)
-    { 
-        encoder1Enabled = false;
-    }
-    else if (strncmp(msg, "W1,1",4) == 0)
-    {
-        encoder1Enabled = true;
-    }
-    else if (strncmp(msg, "W2,0",4) == 0)
-    {
-        encoder2Enabled = false;
-    }
-    else if (strncmp(msg, "W2,1",4) == 0)
-    {
-        encoder2Enabled = true;
-    }
-}
-
 void encoders_task(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
@@ -66,58 +43,12 @@ void encoders_task(void *pvParameter)
     // Serial.print("encoders_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    int32_t newEncoder1Count = 0;
-    int32_t newEncoder2Count = 0;
-
     for (;;)
     {
-        if (encoder1Enabled == true)
-        {
-            newEncoder1Count = encoder1.getCount();
+        encoder1Count = encoder1.getCount();
+        encoder2Count = encoder2.getCount();
 
-            if (newEncoder1Count != encoder1Count)
-            {
-                if (newEncoder1Count > encoder1Count)
-                {
-                    sendToMicrobit("D1,+");
-                }
-                else
-                {
-                    sendToMicrobit("D1,-");
-                }
-
-                encoder1Count = newEncoder1Count;
-            }
-        }
-
-        if (encoder2Enabled == true)
-        {
-            newEncoder2Count = encoder2.getCount();
-
-            if (newEncoder2Count != encoder2Count)
-            {
-                if (newEncoder2Count > encoder2Count)
-                {
-                    sendToMicrobit("D2,+");
-                }
-                else
-                {
-                    sendToMicrobit("D2,-");
-                }
-
-                encoder2Count = newEncoder2Count;
-            }
-        }
-
-        if (encoder1Enabled == false && encoder2Enabled == false)
-        {
-            //take your time to do nothing
-            delay(1000);
-        }
-        else
-        {
-            delay(500);
-        }
+        delay(500);
     }
 
     vTaskDelete(NULL);

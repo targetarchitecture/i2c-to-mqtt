@@ -17,6 +17,8 @@ TaskHandle_t TouchTask;
 
 volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
 
+std::string touchStates = "XXXXXXXXXXXX";
+
 void touch_setup()
 {
     //wait for the i2c semaphore flag to become available
@@ -92,113 +94,26 @@ void touch_task(void *pvParameter)
             //only bother sending if the touch changed
             if (currtouched != lasttouched)
             {
-                std::string states = "XXXXXXXXXXXX";
-
                 for (uint8_t i = 0; i < 12; i++)
                 {
                     // it if *is* touched and *wasnt* touched before, alert!
                     if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
                     {
-                        states = states.replace(i, 1, "H");
+                        touchStates = touchStates.replace(i, 1, "H");
                     }
 
                     // if it *was* touched and now *isnt*, alert!
                     if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
                     {
-                        states = states.replace(i, 1, "L");
+                        touchStates = touchStates.replace(i, 1, "L");
                     }
                 }
-
-                char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "B3,%s", states.c_str());
-
-                sendToMicrobit(msgtosend);
 
                 //remember last touch
                 lasttouched = currtouched;
             }
         }
     }
-    vTaskDelete(NULL);
-}
-
-void touch_task_old(void *pvParameter)
-{
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
-
-    uint32_t ulNotifiedValue = 0;
-    BaseType_t xResult;
-
-    //unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
-
-    // the last time each output pin was toggled
-    std::vector<unsigned long> lastDebounceTimes;
-
-    for (uint8_t i = 0; i < 12; i++)
-    {
-        lastDebounceTimes.push_back(0);
-    }
-
-    for (;;)
-    {
-        //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
-
-        delay(1);
-
-        //wait for the i2c semaphore flag to become available
-        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-        checkI2Cerrors("Touch (start)");
-
-        // Get the currently touched pads
-        uint16_t currtouched = cap.touched();
-
-        checkI2Cerrors("Touch (end)");
-
-        //give back the i2c flag for the next task
-        xSemaphoreGive(i2cSemaphore);
-
-        for (uint8_t i = 0; i < 12; i++)
-        {
-            //added a debouncing time delay
-            if (millis() - lastDebounceTimes[i] >= debounceDelay)
-            {
-                // it if *is* touched and *wasnt* touched before, alert!
-                if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
-                {
-                    //  Serial.print(i);
-                    //  Serial.println(" touched");
-
-                    char msgtosend[MAXBBCMESSAGELENGTH];
-                    sprintf(msgtosend, "B1,%d", i);
-
-                    sendToMicrobit(msgtosend);
-                }
-
-                // if it *was* touched and now *isnt*, alert!
-                if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
-                {
-                    //  Serial.print(i);
-                    //  Serial.println(" released");
-
-                    char msgtosend[MAXBBCMESSAGELENGTH];
-                    sprintf(msgtosend, "B2,%d", i);
-
-                    sendToMicrobit(msgtosend);
-                }
-
-                lastDebounceTimes[i] = millis();
-            }
-        }
-
-        // reset our state
-        lasttouched = currtouched;
-    }
-
     vTaskDelete(NULL);
 }
 

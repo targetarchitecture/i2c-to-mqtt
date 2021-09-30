@@ -19,6 +19,6 @@ messageParts processQueueMessage(const std::string msg, const std::string from);
 // extern TaskHandle_t TouchTask;
 // extern TaskHandle_t MovementTask;
 
-  char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-  char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+  //char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+  //char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
 

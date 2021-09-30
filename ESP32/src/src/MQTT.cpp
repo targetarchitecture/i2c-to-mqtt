@@ -75,7 +75,7 @@ void Wifi_connect()
   char msgtosend[MAXBBCMESSAGELENGTH];
   sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str());
 
-  sendToMicrobit(msgtosend);
+  //sendToMicrobit(msgtosend);
 }
 
 // void MQTT_connect2()
@@ -117,7 +117,7 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
 
   char msgtosend[MAXBBCMESSAGELENGTH];
   sprintf(msgtosend, "G3,'%s','%s'", topic, receivedMsg.c_str());
-  sendToMicrobit(msgtosend);
+  //sendToMicrobit(msgtosend);
 }
 
 void checkMQTTconnection()
@@ -159,7 +159,7 @@ void sendMQTTConnectionStatus()
 
     char msgtosend[MAXBBCMESSAGELENGTH];
     sprintf(msgtosend, "G2,1");
-    sendToMicrobit(msgtosend);
+    //sendToMicrobit(msgtosend);
   }
   else
   {
@@ -167,7 +167,7 @@ void sendMQTTConnectionStatus()
 
     char msgtosend[MAXBBCMESSAGELENGTH];
     sprintf(msgtosend, "G2,0");
-    sendToMicrobit(msgtosend);
+    //sendToMicrobit(msgtosend);
   }
 }
 

@@ -15,7 +15,7 @@ Rainbow Sparkle Unicorn - SN7
 #include "microbit-i2c.h"
 #include "sound.h"
 #include "encoders.h"
-#include "routing.h"
+//#include "routing.h"
 #include "touch.h"
 #include "DAC.h"
 #include "ADC.h"
@@ -27,8 +27,8 @@ Rainbow Sparkle Unicorn - SN7
 
 void checkI2Cerrors(const char *area);
 
-QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
-QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
+//QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
+//QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
 QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
@@ -59,17 +59,17 @@ void setup()
   xSemaphoreGive(i2cSemaphore);
 
   //set up the main queues
-  char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-  char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
+  //char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
+  //char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
 
-  Microbit_Transmit_Queue = xQueueCreate(100, sizeof(TXtoBBCmessage));
-  Microbit_Receive_Queue = xQueueCreate(100, sizeof(RXfromBBCmessage));
+  //Microbit_Transmit_Queue = xQueueCreate(100, sizeof(TXtoBBCmessage));
+  //Microbit_Receive_Queue = xQueueCreate(100, sizeof(RXfromBBCmessage));
 
-  Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  Sound_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  DAC_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  Light_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  Movement_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  MQTT_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
 
   MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
@@ -93,7 +93,7 @@ void setup()
 
   movement_setup();
 
-  routing_setup();
+  //routing_setup();
 
   microbit_i2c_setup();
 
@@ -212,15 +212,15 @@ void loop()
   delay(1000);
 }
 
-int add(int count, ...)
-{
-  int result = 0;
-  va_list args;
-  va_start(args, count);
-  for (int i = 0; i < count; ++i)
-  {
-    result += va_arg(args, int);
-  }
-  va_end(args);
-  return result;
-}
+// int add(int count, ...)
+// {
+//   int result = 0;
+//   va_list args;
+//   va_start(args, count);
+//   for (int i = 0; i < count; ++i)
+//   {
+//     result += va_arg(args, int);
+//   }
+//   va_end(args);
+//   return result;
+// }
