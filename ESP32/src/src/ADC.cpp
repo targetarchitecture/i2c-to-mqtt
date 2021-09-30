@@ -3,12 +3,12 @@
 
 TaskHandle_t ADCTask;
 
-volatile uint32_t ADCPollingRate = 500;
+//volatile uint32_t ADCPollingRate = 500;
 
 volatile bool ADC1Enabled = false;
 volatile bool ADC2Enabled = false;
 
-#define ADCWINDOW_SIZE 5
+#define ADCWINDOW_SIZE 20
 
 long ADC1INDEX = 0;
 long ADC1VALUE = 0;
@@ -21,7 +21,6 @@ long ADC2VALUE = 0;
 long ADC2SUM = 0;
 long ADC2READINGS[ADCWINDOW_SIZE];
 long ADC2AVERAGED = 0;
-
 
 void ADC_setup()
 {
@@ -81,9 +80,17 @@ void ADC_task(void *pvParameters)
 
     for (;;)
     {
+        for (size_t i = 0; i < 20; i++)
+        {
+            ReadADC1();
+            ReadADC2();
+
+            delay(25);
+        }
+
         if (ADC1Enabled == true)
         {
-            long ADC1_VALUE =  ReadADC1();
+            long ADC1_VALUE = ReadADC1();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C1,%d", ADC1_VALUE);
@@ -93,7 +100,7 @@ void ADC_task(void *pvParameters)
 
         if (ADC2Enabled == true)
         {
-            long ADC2_VALUE =  ReadADC2();
+            long ADC2_VALUE = ReadADC2();
 
             char msg[MAXBBCMESSAGELENGTH] = {0};
             sprintf(msg, "C2,%d", ADC2_VALUE);
@@ -103,8 +110,8 @@ void ADC_task(void *pvParameters)
             sendToMicrobit(msg);
         }
 
-        //change how this works to if enabled each ADC will send it's value every 1/2 second
-        delay(ADCPollingRate);
+        // //change how this works to if enabled each ADC will send it's value every 1/2 second
+        // delay(ADCPollingRate);
     }
 
     vTaskDelete(NULL);
@@ -191,13 +198,13 @@ void ADC_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
         //Serial.println("ADC2Enabled = true");
     }
 
-    else if (strncmp(msg, "U3", 2) == 0)
-    {
-        //TODO: see if need this copy of msg
-        std::string X = msg;
+    // else if (strncmp(msg, "U3", 2) == 0)
+    // {
+    //     //TODO: see if need this copy of msg
+    //     std::string X = msg;
 
-        messageParts parts = processQueueMessage(X.c_str(), "ADC");
+    //     messageParts parts = processQueueMessage(X.c_str(), "ADC");
 
-        ADCPollingRate = atoi(parts.value1);
-    }
+    //     ADCPollingRate = atoi(parts.value1);
+    // }
 }
