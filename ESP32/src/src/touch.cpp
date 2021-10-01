@@ -117,7 +117,7 @@ void touch_task(void *pvParameter)
     vTaskDelete(NULL);
 }
 
-void touch_deal_with_message(char msg[MAXESP32MESSAGELENGTH])
+void touch_deal_with_message(const char *msg)
 {
     auto parts = processQueueMessage(msg, "TOUCH");
 

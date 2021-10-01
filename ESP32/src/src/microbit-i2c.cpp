@@ -3,6 +3,10 @@
 
 TaskHandle_t Microbiti2cTask;
 
+//char requestMessage[MAXESP32MESSAGELENGTH];
+
+std::string requestMessage;
+
 void microbit_i2c_setup()
 {
     bool success = WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
@@ -88,6 +92,7 @@ void receiveEvent(int howMany)
     strcpy(queuedMsg, receivedMsg.c_str());
 
     //this bit here needs to set -up the message to send back
+    dealWithMessage(queuedMsg);
 
     //now add these to the routing queue for routing
     // xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
@@ -95,43 +100,21 @@ void receiveEvent(int howMany)
 
 void requestEvent()
 {
-    char msg[MAXESP32MESSAGELENGTH]; // = {0};
+    WireSlave1.write(requestMessage.c_str());
 
-    //wait for new BBC command in the queue
-    //if (xQueueReceive(Microbit_Transmit_Queue, &msg, 0))
-    //{
-    // Serial.print("strlen: ");
-    // Serial.println(strlen(msg));
-
-    auto retval = WireSlave1.write(msg);
-
-    // Serial.print("retval: ");
-    // Serial.println(retval);
-
-    // Serial.print("sent: ");
-    // Serial.println(msg);
-    //}
-    //else
-    // {
     //just send back a blank string
-    //    WireSlave1.print("");
-    //}
+    //  WireSlave1.print("");
 }
 
 void dealWithMessage(const char *message)
 {
-
     if (strncmp(message, "RESTART", 7) == 0)
     {
-        //Serial.println("RESTART");
-
         //reboot ESP32...
         ESP.restart();
     }
     else if (strncmp(message, "STARTING", 8) == 0)
     {
-        //Serial.println("STARTING");
-
         //clear down the queues
         xQueueReset(Sound_Queue);
         xQueueReset(Light_Queue);
@@ -139,14 +122,60 @@ void dealWithMessage(const char *message)
         xQueueReset(Movement_Queue);
         xQueueReset(MQTT_Queue);
     }
-    else
+    else if (strncmp(message, "SVOL", 4) == 0 ||
+             strncmp(message, "SPLAY", 5) == 0 || strncmp(message, "SPAUSE", 6) == 0 ||
+             strncmp(message, "SRESUME", 7) == 0 || strncmp(message, "SSTOP", 5) == 0)
     {
-
-        // xQueueSend(Sound_Queue, &cmd, portMAX_DELAY);
-        // xQueueSend(Light_Queue, &cmd, portMAX_DELAY);
-        // xQueueSend(DAC_Queue, &cmd, portMAX_DELAY);
-        // xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
-        // xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
-        // touch_deal_with_message(cmd);
+        xQueueSend(Sound_Queue, &message, portMAX_DELAY);
     }
+    else if (strncmp(message, "SBUSY", 5) == 0)
+    {
+        requestMessage = BusyPin;
+    }
+    else if (strncmp(message, "LBLINK", 6) == 0 || strncmp(message, "LBREATHE", 8) == 0 ||
+             strncmp(message, "LLEDONOFF", 9) == 0 || strncmp(message, "LRESET", 6) == 0 ||
+             strncmp(message, "LLEDALLON", 9) == 0)
+    {
+        xQueueSend(Light_Queue, &message, portMAX_DELAY);
+    }
+    else if (strncmp(message, "DIAL1", 5) == 0 || strncmp(message, "DIAL2", 5) == 0)
+    {
+        xQueueSend(DAC_Queue, &message, portMAX_DELAY);
+    }
+    else if (strncmp(message, "MSTOP", 5) == 0 || strncmp(message, "MANGLE", 6) == 0 ||
+             strncmp(message, "MLINEAR", 7) == 0 || strncmp(message, "MSMOOTH", 7) == 0 ||
+             strncmp(message, "MBOUNCY", 7) == 0 || strncmp(message, "MPWM", 4) == 0)
+    {
+        xQueueSend(Movement_Queue, &message, portMAX_DELAY);
+    }
+    else if (strncmp(message, "ROTARY1", 7) == 0)
+    {
+        requestMessage = encoder1Count;
+    }
+    else if (strncmp(message, "ROTARY2", 7) == 0)
+    {
+        requestMessage = encoder2Count;
+    }
+    else if (strncmp(message, "SLIDER1", 7) == 0)
+    {
+        requestMessage = analogRead(ADC1);
+    }
+    else if (strncmp(message, "SLIDER2", 7) == 0)
+    {
+        requestMessage = analogRead(ADC2);
+    }
+    else if (strncmp(message, "SUPDATE", 7) == 0)
+    {
+        requestMessage = swithStates;
+    }
+    else if (strncmp(message, "TUPDATE", 7) == 0)
+    {
+        requestMessage = touchStates;
+    }
+    else if (strncmp(message, "TTHRSLD", 7) == 0 || strncmp(message, "TBOUNCE", 7) == 0)
+    {
+        touch_deal_with_message(message);
+    }
+
+    // xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);
 }
