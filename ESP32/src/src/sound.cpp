@@ -5,9 +5,9 @@
 DFRobotDFPlayerMini sound;
 
 TaskHandle_t SoundTask;
-TaskHandle_t SoundBusyTask;
+//TaskHandle_t SoundBusyTask;
 
-volatile int BusyPin;
+//volatile int BusyPin;
 const int commandPause = 50;
 
 //QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
@@ -20,9 +20,9 @@ void sound_setup()
     pinMode(DFPLAYER_BUSY, INPUT);
 
     //set-up the interupt
-    attachInterrupt(DFPLAYER_BUSY, handleSoundInterupt, CHANGE);
+    //attachInterrupt(DFPLAYER_BUSY, handleSoundInterupt, CHANGE);
 
-    BusyPin = digitalRead(DFPLAYER_BUSY);
+    int BusyPin = digitalRead(DFPLAYER_BUSY);
 
     //Sound_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
@@ -36,44 +36,44 @@ void sound_setup()
         sound_task_Priority, /* priority of the task */
         &SoundTask, 1);      /* Task handle to keep track of created task */
 
-    xTaskCreatePinnedToCore(
-        sound_busy_task,          /* Task function. */
-        "Sound Busy Task",        /* name of task. */
-        2048,                     /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
-        NULL,                     /* parameter of the task */
-        sound_busy_task_Priority, /* priority of the task */
-        &SoundBusyTask, 1);       /* Task handle to keep track of created task */
+    // xTaskCreatePinnedToCore(
+    //     sound_busy_task,          /* Task function. */
+    //     "Sound Busy Task",        /* name of task. */
+    //     2048,                     /* Stack size of task (uxTaskGetStackHighWaterMark:1756) */
+    //     NULL,                     /* parameter of the task */
+    //     sound_busy_task_Priority, /* priority of the task */
+    //     &SoundBusyTask, 1);       /* Task handle to keep track of created task */
 }
 
-void IRAM_ATTR handleSoundInterupt()
-{
-    xTaskNotify(SoundBusyTask, 0, eSetValueWithoutOverwrite);
-}
+// void IRAM_ATTR handleSoundInterupt()
+// {
+//     xTaskNotify(SoundBusyTask, 0, eSetValueWithoutOverwrite);
+// }
 
-void sound_busy_task(void *pvParameters)
-{
-    /* Inspect our own high water mark on entering the task. */
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+// void sound_busy_task(void *pvParameters)
+// {
+//     /* Inspect our own high water mark on entering the task. */
+//     // UBaseType_t uxHighWaterMark;
+//     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+//     // Serial.print("music_busy_task uxTaskGetStackHighWaterMark:");
+//     // Serial.println(uxHighWaterMark);
 
-    uint32_t ulNotifiedValue = 0;
-    BaseType_t xResult;
+//     uint32_t ulNotifiedValue = 0;
+//     BaseType_t xResult;
 
-    // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
+//     // Serial.printf("Music busy task is on core %i\n", xPortGetCoreID());
 
-    for (;;)
-    {
-        //wait for value to change due to interupt on pin value change
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+//     for (;;)
+//     {
+//         //wait for value to change due to interupt on pin value change
+//         xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
-        //check for changes to busy pin
-        BusyPin = digitalRead(DFPLAYER_BUSY);
-    }
+//         //check for changes to busy pin
+//         BusyPin = digitalRead(DFPLAYER_BUSY);
+//     }
 
-    vTaskDelete(NULL);
-}
+//     vTaskDelete(NULL);
+// }
 
 void sound_task(void *pvParameters)
 {
@@ -109,14 +109,17 @@ void sound_task(void *pvParameters)
         xQueueReceive(Sound_Queue, &msg, portMAX_DELAY);
 
         // Serial.print("Music_Queue:");
-        // Serial.println(msg);
+        //Serial.println(msg);
 
         //TODO: see if need this copy of msg
         std::string X = msg;
 
+              //   Serial.print("Music_Queue:");
+       // Serial.println(X.c_str());
+
         parts = processQueueMessage(X.c_str(), "MUSIC");
 
-        // Serial.print("action:");
+         //Serial.print("action:");
         // Serial.println(parts.identifier);
 
         if (strncmp(parts.identifier, "SVOL",4) == 0)

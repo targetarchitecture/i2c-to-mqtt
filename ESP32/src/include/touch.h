@@ -13,6 +13,6 @@ void touch_deal_with_message(const char *msg);
 //extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 extern void POST(uint8_t flashes);
-extern void checkI2Cerrors(const char *area);
+extern void checkI2Cerrors(std::string area);
 
 extern SemaphoreHandle_t i2cSemaphore;

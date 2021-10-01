@@ -6,7 +6,7 @@ TaskHandle_t DACTask;
 
 void DAC_setup()
 {
-  //DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+    //DAC_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     xTaskCreatePinnedToCore(
         DAC_task,          /* Task function. */
@@ -37,16 +37,16 @@ void DAC_task(void *pvParameters)
         //Serial.printf("DAC_Queue: %s\n", msg);
 
         messageParts parts = processQueueMessage(msg, "DAC");
- 
+
         DACvalue = constrain(atoi(parts.value1), 0, 254);
 
         //Serial.printf("DAC action: %s @ %iV\n", parts.identifier, DACvalue);.
 
-        if (strncmp(parts.identifier, "X1",2) == 0)
+        if (strncmp(parts.identifier, "DIAL1", 5) == 0)
         {
             dacWrite(DAC1, DACvalue);
         }
-        else if (strncmp(parts.identifier, "X2",2) == 0)
+        else if (strncmp(parts.identifier, "DIAL2", 5) == 0)
         {
             dacWrite(DAC2, DACvalue);
         }

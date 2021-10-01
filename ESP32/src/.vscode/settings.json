@@ -45,6 +45,12 @@
         "bitset": "cpp",
         "regex": "cpp",
         "random": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "atomic": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "string_view": "cpp"
     }
 }

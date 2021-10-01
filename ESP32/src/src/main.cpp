@@ -10,8 +10,10 @@ Rainbow Sparkle Unicorn - SN7
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <Streaming.h>
 
-#include "globals.h"
+//#include "globals.h"
+#include "messageParts.h"
 #include "microbit-i2c.h"
 #include "sound.h"
 #include "encoders.h"
@@ -22,21 +24,26 @@ Rainbow Sparkle Unicorn - SN7
 #include "light.h"
 #include "switch.h"
 #include "movement.h"
-#include "MQTT.h"
-#include "debug.h"
+// #include "MQTT.h"
+// #include "debug.h"
 
-void checkI2Cerrors(const char *area);
+//void checkI2Cerrors(const char *area);
+void checkI2Cerrors(std::string area);
+void runTests();
 
 //QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
 //QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
-QueueHandle_t Sound_Queue;             //Queue to store all of the DFPlayer commands from the Microbit
+QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
-QueueHandle_t MQTT_Queue;
-QueueHandle_t MQTT_Message_Queue;
+// QueueHandle_t MQTT_Queue;
+// QueueHandle_t MQTT_Message_Queue;
 
-extern void foo(const char *format...);
+//extern void foo(const char *format...);
+
+extern std::string requestMessage;
+extern SemaphoreHandle_t i2cSemaphore;
 
 void setup()
 {
@@ -65,16 +72,16 @@ void setup()
   //Microbit_Transmit_Queue = xQueueCreate(100, sizeof(TXtoBBCmessage));
   //Microbit_Receive_Queue = xQueueCreate(100, sizeof(RXfromBBCmessage));
 
-  Sound_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
-  DAC_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
-  Light_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
-  Movement_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
-  MQTT_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  Sound_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
+  DAC_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
+  Light_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
+  Movement_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
 
-  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
+  //MQTT_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
+  //MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   //get wifi going first as this seems to be problematic
-  MQTT_setup();
+  //MQTT_setup();
 
   //call the feature setup methods
   sound_setup();
@@ -97,80 +104,70 @@ void setup()
 
   microbit_i2c_setup();
 
-  // Serial.print("SN7 completed in ");
-  // Serial.println(millis());
+  runTests();
 
   // foo("check me out %i\n", ESP.getEfuseMac());
 
   // foo("SN7 completed in %i\n", millis());
 }
 
-messageParts processQueueMessage(const std::string msg, const std::string from)
+void runTests()
 {
-  //std::vector<std::string> strings;
-  std::istringstream f(msg);
-  std::string part;
+  Serial << "SN7 completed in " << millis() << "ms" << endl;
 
-  messageParts mParts = {};
-  strcpy(mParts.fullMessage, msg.c_str());
-  int index = 0;
+  dealWithMessage("STARTING");
+  dealWithMessage("TUPDATE");
 
-  // messageParts2 mParts2 = {};
-  // mParts2.fullMessage = msg;
+  Serial << "Touched: " << requestMessage.c_str() << endl;
 
-  // while (std::getline(f, part, ','))
-  // {
-  //   mParts2.values.push_back(part);
-  // }
+  dealWithMessage("SUPDATE");
 
-  // mParts2.identifier = mParts2.values.front();
-  // mParts2.values.erase(mParts2.values.begin());
+  Serial << "Switched: " << requestMessage.c_str() << endl;
 
-  //Serial.println(msg.c_str());
+  dealWithMessage("ROTARY1");
 
-  while (std::getline(f, part, ','))
-  {
-    //strings.push_back(s);
+  Serial << "ROTARY1: " << requestMessage.c_str() << endl;
 
-    //Serial.println(part.c_str());
+  dealWithMessage("ROTARY2");
 
-    if (index == 0)
-    {
-      strcpy(mParts.identifier, part.c_str());
-    }
-    if (index == 1)
-    {
-      strcpy(mParts.value1, part.c_str());
-    }
-    if (index == 2)
-    {
-      strcpy(mParts.value2, part.c_str());
-    }
-    if (index == 3)
-    {
-      strcpy(mParts.value3, part.c_str());
-    }
-    if (index == 4)
-    {
-      strcpy(mParts.value4, part.c_str());
-    }
-    if (index == 5)
-    {
-      strcpy(mParts.value5, part.c_str());
-    }
-    if (index == 6)
-    {
-      strcpy(mParts.value6, part.c_str());
-    }
-    if (index == 7)
-    {
-      strcpy(mParts.value7, part.c_str());
-    }
+  Serial << "ROTARY2: " << requestMessage.c_str() << endl;
 
-    index++;
-  }
+  dealWithMessage("SLIDER1");
 
-  return mParts;
+  Serial << "SLIDER1: " << requestMessage.c_str() << endl;
+
+  dealWithMessage("SLIDER2");
+
+  Serial << "SLIDER2: " << requestMessage.c_str() << endl;
+
+  delay(1000);
+
+  dealWithMessage("SBUSY");
+
+  Serial << "SBUSY: " << requestMessage.c_str() << endl;
+
+  delay(1000);
+
+  dealWithMessage("SPLAY,1");
+  delay(1000);
+
+  dealWithMessage("SBUSY");
+
+  Serial << "SBUSY: " << requestMessage.c_str() << endl;
+
+  delay(1000);
+  dealWithMessage("SPAUSE");
+  delay(1000);
+  dealWithMessage("SRESUME");
+  delay(1000);
+  dealWithMessage("SSTOP");
+
+  dealWithMessage("SBUSY");
+
+  Serial << "SBUSY: " << requestMessage.c_str() << endl;
+
+  delay(5000);
+  dealWithMessage("SPLAY,3");
 }
 
 void POST(uint8_t flashes)
@@ -196,11 +193,11 @@ void POST(uint8_t flashes)
   }
 }
 
-void checkI2Cerrors(const char *area)
+void checkI2Cerrors(std::string area)
 {
   if (Wire.lastError() != 0)
   {
-    Serial.printf("i2C error @ %s: %s \n", area, Wire.getErrorText(Wire.lastError()));
+    Serial << "i2C error @ " << area.c_str() << ":" << Wire.getErrorText(Wire.lastError()) << endl;
 
     //TODO: Check to see if this is still needed
     // Wire.clearWriteError();
@@ -210,17 +207,9 @@ void checkI2Cerrors(const char *area)
 void loop()
 {
   delay(1000);
+
+  dealWithMessage("TUPDATE");
+
+  Serial << "Touched: " << requestMessage.c_str() << endl;
 }
 
-// int add(int count, ...)
-// {
-//   int result = 0;
-//   va_list args;
-//   va_start(args, count);
-//   for (int i = 0; i < count; ++i)
-//   {
-//     result += va_arg(args, int);
-//   }
-//   va_end(args);
-//   return result;
-// }

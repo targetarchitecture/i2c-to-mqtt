@@ -5,6 +5,8 @@ TaskHandle_t Microbiti2cTask;
 
 //char requestMessage[MAXESP32MESSAGELENGTH];
 
+SemaphoreHandle_t i2cSemaphore;
+
 std::string requestMessage;
 
 void microbit_i2c_setup()
@@ -87,12 +89,8 @@ void receiveEvent(int howMany)
 
     receivedMsg += c;
 
-    //need to do something to copy the received message
-    char queuedMsg[MAXBBCMESSAGELENGTH];
-    strcpy(queuedMsg, receivedMsg.c_str());
-
     //this bit here needs to set -up the message to send back
-    dealWithMessage(queuedMsg);
+    dealWithMessage(receivedMsg);
 
     //now add these to the routing queue for routing
     // xQueueSend(Microbit_Receive_Queue, &queuedMsg, portMAX_DELAY);
@@ -106,75 +104,83 @@ void requestEvent()
     //  WireSlave1.print("");
 }
 
-void dealWithMessage(const char *message)
+void dealWithMessage(std::string message)
 {
-    if (strncmp(message, "RESTART", 7) == 0)
+
+    char queuedMsg[MAXBBCMESSAGELENGTH];
+    strcpy(queuedMsg, message.c_str());
+
+    Serial.printf("dealWithMessage: %s\n", queuedMsg);
+
+    if (strncmp(message.c_str(), "RESTART", 7) == 0)
     {
         //reboot ESP32...
         ESP.restart();
     }
-    else if (strncmp(message, "STARTING", 8) == 0)
+    else if (strncmp(message.c_str(), "STARTING", 8) == 0)
     {
         //clear down the queues
         xQueueReset(Sound_Queue);
         xQueueReset(Light_Queue);
         xQueueReset(DAC_Queue);
         xQueueReset(Movement_Queue);
-        xQueueReset(MQTT_Queue);
+        //xQueueReset(MQTT_Queue);
     }
-    else if (strncmp(message, "SVOL", 4) == 0 ||
-             strncmp(message, "SPLAY", 5) == 0 || strncmp(message, "SPAUSE", 6) == 0 ||
-             strncmp(message, "SRESUME", 7) == 0 || strncmp(message, "SSTOP", 5) == 0)
+    else if (strncmp(message.c_str(), "SVOL", 4) == 0 ||
+             strncmp(message.c_str(), "SPLAY", 5) == 0 || strncmp(message.c_str(), "SPAUSE", 6) == 0 ||
+             strncmp(message.c_str(), "SRESUME", 7) == 0 || strncmp(message.c_str(), "SSTOP", 5) == 0)
     {
-        xQueueSend(Sound_Queue, &message, portMAX_DELAY);
+        xQueueSend(Sound_Queue, &queuedMsg, portMAX_DELAY);
     }
-    else if (strncmp(message, "SBUSY", 5) == 0)
+    else if (strncmp(message.c_str(), "SBUSY", 5) == 0)
     {
-        requestMessage = BusyPin;
+
+       // digitalRead(DFPLAYER_BUSY);
+        requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
     }
-    else if (strncmp(message, "LBLINK", 6) == 0 || strncmp(message, "LBREATHE", 8) == 0 ||
-             strncmp(message, "LLEDONOFF", 9) == 0 || strncmp(message, "LRESET", 6) == 0 ||
-             strncmp(message, "LLEDALLON", 9) == 0)
+    else if (strncmp(message.c_str(), "LBLINK", 6) == 0 || strncmp(message.c_str(), "LBREATHE", 8) == 0 ||
+             strncmp(message.c_str(), "LLEDONOFF", 9) == 0 || strncmp(message.c_str(), "LRESET", 6) == 0 ||
+             strncmp(message.c_str(), "LLEDALLON", 9) == 0)
     {
-        xQueueSend(Light_Queue, &message, portMAX_DELAY);
+        xQueueSend(Light_Queue, &queuedMsg, portMAX_DELAY);
     }
-    else if (strncmp(message, "DIAL1", 5) == 0 || strncmp(message, "DIAL2", 5) == 0)
+    else if (strncmp(message.c_str(), "DIAL1", 5) == 0 || strncmp(message.c_str(), "DIAL2", 5) == 0)
     {
-        xQueueSend(DAC_Queue, &message, portMAX_DELAY);
+        xQueueSend(DAC_Queue, &queuedMsg, portMAX_DELAY);
     }
-    else if (strncmp(message, "MSTOP", 5) == 0 || strncmp(message, "MANGLE", 6) == 0 ||
-             strncmp(message, "MLINEAR", 7) == 0 || strncmp(message, "MSMOOTH", 7) == 0 ||
-             strncmp(message, "MBOUNCY", 7) == 0 || strncmp(message, "MPWM", 4) == 0)
+    else if (strncmp(message.c_str(), "MSTOP", 5) == 0 || strncmp(message.c_str(), "MANGLE", 6) == 0 ||
+             strncmp(message.c_str(), "MLINEAR", 7) == 0 || strncmp(message.c_str(), "MSMOOTH", 7) == 0 ||
+             strncmp(message.c_str(), "MBOUNCY", 7) == 0 || strncmp(message.c_str(), "MPWM", 4) == 0)
     {
-        xQueueSend(Movement_Queue, &message, portMAX_DELAY);
+        xQueueSend(Movement_Queue, &queuedMsg, portMAX_DELAY);
     }
-    else if (strncmp(message, "ROTARY1", 7) == 0)
+    else if (strncmp(message.c_str(), "ROTARY1", 7) == 0)
     {
-        requestMessage = encoder1Count;
+        requestMessage = std::to_string(encoder1Count);
     }
-    else if (strncmp(message, "ROTARY2", 7) == 0)
+    else if (strncmp(message.c_str(), "ROTARY2", 7) == 0)
     {
-        requestMessage = encoder2Count;
+        requestMessage = std::to_string(encoder2Count);
     }
-    else if (strncmp(message, "SLIDER1", 7) == 0)
+    else if (strncmp(message.c_str(), "SLIDER1", 7) == 0)
     {
-        requestMessage = analogRead(ADC1);
+        requestMessage = std::to_string(analogRead(ADC1));
     }
-    else if (strncmp(message, "SLIDER2", 7) == 0)
+    else if (strncmp(message.c_str(), "SLIDER2", 7) == 0)
     {
-        requestMessage = analogRead(ADC2);
+        requestMessage = std::to_string(analogRead(ADC2));
     }
-    else if (strncmp(message, "SUPDATE", 7) == 0)
+    else if (strncmp(message.c_str(), "SUPDATE", 7) == 0)
     {
         requestMessage = swithStates;
     }
-    else if (strncmp(message, "TUPDATE", 7) == 0)
+    else if (strncmp(message.c_str(), "TUPDATE", 7) == 0)
     {
         requestMessage = touchStates;
     }
-    else if (strncmp(message, "TTHRSLD", 7) == 0 || strncmp(message, "TBOUNCE", 7) == 0)
+    else if (strncmp(message.c_str(), "TTHRSLD", 7) == 0 || strncmp(message.c_str(), "TBOUNCE", 7) == 0)
     {
-        touch_deal_with_message(message);
+        touch_deal_with_message(message.c_str());
     }
 
     // xQueueSend(MQTT_Queue, &cmd, portMAX_DELAY);

@@ -12,7 +12,7 @@ void stopLight(long pin);
 //extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 extern void POST(uint8_t flashes);
-extern void checkI2Cerrors(const char *area);
+extern void checkI2Cerrors(std::string area);
 
 extern QueueHandle_t Light_Queue;
 extern SemaphoreHandle_t i2cSemaphore;

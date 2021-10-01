@@ -121,7 +121,7 @@ void touch_deal_with_message(const char *msg)
 {
     auto parts = processQueueMessage(msg, "TOUCH");
 
-    if (strncmp(parts.identifier, "S1", 2) == 0)
+    if (strncmp(parts.identifier, "TTHRSLD", 7) == 0)
     {
         auto touchThreshold = atoi(parts.value1);
         auto releaseThreshold = atoi(parts.value2);
@@ -130,8 +130,8 @@ void touch_deal_with_message(const char *msg)
     }
 
     //overwrite bounce delay..
-    if (strncmp(parts.identifier, "S2", 2) == 0)
+    if (strncmp(parts.identifier, "TBOUNCE", 7) == 0)
     {
-        debounceDelay = atoi(parts.value3);
+        debounceDelay = atoi(parts.value1);
     }
 }
