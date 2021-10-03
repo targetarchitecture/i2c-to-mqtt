@@ -15,7 +15,6 @@ TaskHandle_t MovementTask;
 TaskHandle_t Movementi2cTask;
 
 std::vector<servo> servos;
-//std::vector<TaskHandle_t> servoTasks;
 
 void movement_setup()
 {
@@ -114,13 +113,12 @@ void movement_task(void *pvParameters)
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);
 
-        // Serial.print("Movement_Queue:");
-        // Serial.println(msg);
+        //Serial << "Movement_Queue:" << msg << endl;
 
         //TODO: see if need this copy of msg
         std::string X = msg;
 
-        parts = processQueueMessage(X.c_str(), "MOVEMENT");
+        parts = processQueueMessage(X, "MOVEMENT");
 
         // Serial.print("action:");
         // Serial.print(parts.identifier);
@@ -131,7 +129,7 @@ void movement_task(void *pvParameters)
         auto stopPin = atol(parts.value1);
         stopServo(stopPin);
 
-        if (strncmp(parts.identifier, "V1",2) == 0)
+        if (strncmp(parts.identifier, "MSTOP", 5) == 0)
         {
             //not much to do now as we always stop the servos
 
@@ -139,7 +137,7 @@ void movement_task(void *pvParameters)
             auto pin = atol(parts.value1);
             stopServo(pin);
         }
-        else if (strncmp(parts.identifier, "V2",2) == 0)
+        else if (strncmp(parts.identifier, "MANGLE", 6) == 0)
         {
             //Set servo to angle
             auto pin = atoi(parts.value1);
@@ -147,10 +145,12 @@ void movement_task(void *pvParameters)
             auto minPulse = atoi(parts.value3);
             auto maxPulse = atoi(parts.value4);
 
+            Serial << "setServoAngle(" << pin << "," << angle << "," << minPulse << "," << maxPulse << ")" << endl;
+
             setServoAngle(pin, angle, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V3",2) == 0)
-        { 
+        else if (strncmp(parts.identifier, "MLINEAR", 7) == 0)
+        {
             //Set servo to angle.
             auto pin = atoi(parts.value1);
             auto toDegree = atoi(parts.value2);
@@ -161,7 +161,7 @@ void movement_task(void *pvParameters)
 
             setServoEase(pin, LinearInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V4",2) == 0)
+        else if (strncmp(parts.identifier, "MSMOOTH", 7) == 0)
         {
             //Set servo to angle
             auto pin = atoi(parts.value1);
@@ -173,7 +173,7 @@ void movement_task(void *pvParameters)
 
             setServoEase(pin, QuadraticInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "V5",2) == 0)
+        else if (strncmp(parts.identifier, "MBOUNCY", 7) == 0)
         {
             //Serial.print("BounceInOut on pin ");
 
@@ -188,7 +188,7 @@ void movement_task(void *pvParameters)
             setServoEase(pin, BounceInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
 
-        else if (strncmp(parts.identifier, "V6",2) == 0)
+        else if (strncmp(parts.identifier, "MPWM", 4) == 0)
         {
             //Set servo to PWM
             auto pin = atol(parts.value1);

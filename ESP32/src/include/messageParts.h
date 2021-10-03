@@ -1,9 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <sstream>
 #include <iostream>
-
+#include <string>
 #include "defines.h"
 #include "SN7 pins.h"
 
@@ -22,9 +21,3 @@ struct messageParts
 
 messageParts processQueueMessage( std::string msg,  std::string from);
 
-// struct messageParts2
-// {
-//     std::string fullMessage;
-//     std::string identifier;
-//     std::vector<std::string> values;
-// };

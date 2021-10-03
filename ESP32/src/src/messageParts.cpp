@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "messageParts.h"
 
-messageParts processQueueMessage( std::string msg,  std::string from)
+messageParts processQueueMessage(std::string msg, std::string from)
 {
   std::istringstream f(msg);
   std::string part;

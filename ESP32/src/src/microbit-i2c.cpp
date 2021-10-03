@@ -134,12 +134,10 @@ void dealWithMessage(std::string message)
     }
     else if (strncmp(message.c_str(), "SBUSY", 5) == 0)
     {
-
-       // digitalRead(DFPLAYER_BUSY);
         requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
     }
     else if (strncmp(message.c_str(), "LBLINK", 6) == 0 || strncmp(message.c_str(), "LBREATHE", 8) == 0 ||
-             strncmp(message.c_str(), "LLEDONOFF", 9) == 0 || strncmp(message.c_str(), "LRESET", 6) == 0 ||
+             strncmp(message.c_str(), "LLEDONOFF", 9) == 0 || strncmp(message.c_str(), "LLEDALLOFF", 10) == 0 ||
              strncmp(message.c_str(), "LLEDALLON", 9) == 0)
     {
         xQueueSend(Light_Queue, &queuedMsg, portMAX_DELAY);

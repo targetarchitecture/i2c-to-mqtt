@@ -12,12 +12,10 @@ Rainbow Sparkle Unicorn - SN7
 #include <iostream>
 #include <Streaming.h>
 
-//#include "globals.h"
 #include "messageParts.h"
 #include "microbit-i2c.h"
 #include "sound.h"
 #include "encoders.h"
-//#include "routing.h"
 #include "touch.h"
 #include "DAC.h"
 #include "ADC.h"
@@ -27,12 +25,10 @@ Rainbow Sparkle Unicorn - SN7
 // #include "MQTT.h"
 // #include "debug.h"
 
-//void checkI2Cerrors(const char *area);
 void checkI2Cerrors(std::string area);
 void runTests();
 
-//QueueHandle_t Microbit_Transmit_Queue; //Queue to send messages to the Microbit
-//QueueHandle_t Microbit_Receive_Queue;  //Queue to recieve the messages from the Microbit
+
 QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
@@ -40,7 +36,6 @@ QueueHandle_t Movement_Queue;
 // QueueHandle_t MQTT_Queue;
 // QueueHandle_t MQTT_Message_Queue;
 
-//extern void foo(const char *format...);
 
 extern std::string requestMessage;
 extern SemaphoreHandle_t i2cSemaphore;
@@ -66,12 +61,6 @@ void setup()
   xSemaphoreGive(i2cSemaphore);
 
   //set up the main queues
-  //char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-  //char RXfromBBCmessage[MAXESP32MESSAGELENGTH];
-
-  //Microbit_Transmit_Queue = xQueueCreate(100, sizeof(TXtoBBCmessage));
-  //Microbit_Receive_Queue = xQueueCreate(100, sizeof(RXfromBBCmessage));
-
   Sound_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
   DAC_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
   Light_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
@@ -100,15 +89,9 @@ void setup()
 
   movement_setup();
 
-  //routing_setup();
-
   microbit_i2c_setup();
 
   runTests();
-
-  // foo("check me out %i\n", ESP.getEfuseMac());
-
-  // foo("SN7 completed in %i\n", millis());
 }
 
 void runTests()
@@ -116,6 +99,12 @@ void runTests()
   Serial << "SN7 completed in " << millis() << "ms" << endl;
 
   dealWithMessage("STARTING");
+
+  dealWithMessage("DIAL1,128");
+  dealWithMessage("DIAL2,254");
+
+  dealWithMessage("MANGLE,0,90,771,2740");
+
   dealWithMessage("TUPDATE");
 
   Serial << "Touched: " << requestMessage.c_str() << endl;
@@ -173,7 +162,6 @@ void runTests()
 void POST(uint8_t flashes)
 {
   //TODO: debate which tasks need stopping?
-  //vTaskDelete(ADCTask);
   vTaskSuspendAll(); //added on 31/1/21
 
   pinMode(ONBOARDLED, OUTPUT);
@@ -208,8 +196,8 @@ void loop()
 {
   delay(1000);
 
-  dealWithMessage("TUPDATE");
+  // dealWithMessage("TUPDATE");
 
-  Serial << "Touched: " << requestMessage.c_str() << endl;
+  // Serial << "Touched: " << requestMessage.c_str() << endl;
 }
 

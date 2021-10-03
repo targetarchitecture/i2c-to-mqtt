@@ -1,8 +1,7 @@
-
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -28,9 +27,16 @@ void loop()
 {
   delay(1000);
 
-  for (size_t pin = 0; pin < 16; pin++)
-  {
-    pwm.setPWM(pin, 0, random(101, 500));
-  }
+  // for (size_t pin = 0; pin < 16; pin++)
+  // {
+size_t pin = 15;
+
+
+auto pwm2 = random(280, 440);
+
+    pwm.setPWM(pin, 0,pwm2);
+
+    Serial.println(pwm2);
+//  }
 }
 

@@ -1,10 +1,13 @@
 #pragma once
 
 #include <Wire.h>
+
+
 #include "messageParts.h"
 #include <Adafruit_PWMServoDriver.h>
 #include "easing.h"
 #include "SN7 pins.h"
+#include <Streaming.h>
 
 struct servo
 {
@@ -39,13 +42,10 @@ void movement_setup();
 void movement_task(void *pvParameter);
 void movement_i2c_task(void *pvParameter);
 
+
+extern messageParts processQueueMessage(std::string msg, std::string from);
 extern void checkI2Cerrors(std::string area);
-//extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void POST(uint8_t flashes);
 
 extern QueueHandle_t Movement_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
-extern messageParts processQueueMessage(const std::string msg, const std::string from);
-
-//extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
-//extern char RXfromBBCmessage[MAXESP32MESSAGELENGTH];

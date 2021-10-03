@@ -79,7 +79,7 @@ void light_task(void *pvParameters)
         //TODO: see if need this copy of msg
         std::string X = msg;
 
-        parts = processQueueMessage(X.c_str(), "LIGHT");
+        parts = processQueueMessage(X, "LIGHT");
 
         // Serial.print("action:");
         // Serial.print(parts.identifier);
@@ -92,7 +92,7 @@ void light_task(void *pvParameters)
         ledDriverInit should be called on the pin to be blinked before this.
         */
 
-        if (strncmp(parts.identifier, "Y1",2) == 0)
+        if (strncmp(parts.identifier, "LBLINK",6) == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             long tOn = atol(parts.value2);
@@ -107,7 +107,7 @@ void light_task(void *pvParameters)
             lights.pinMode(pin, OUTPUT);  // Set LED pin to OUTPUT
             lights.blink(pin, tOn, tOff); // Blink the LED pin -- ~1000 ms LOW, ~500 ms HIGH:
 
-            checkI2Cerrors("light Y1");
+            checkI2Cerrors("light blinking");
 
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
@@ -115,7 +115,7 @@ void light_task(void *pvParameters)
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = blink;
         } 
-        else if (strncmp(parts.identifier, "Y2",2) == 0)
+        else if (strncmp(parts.identifier, "LBREATHE",8) == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             long tOn = atol(parts.value2);
@@ -132,7 +132,7 @@ void light_task(void *pvParameters)
             lights.pinMode(pin, ANALOG_OUTPUT);         // To breathe an LED, make sure you set it as an ANALOG_OUTPUT, so we can PWM the pin
             lights.breathe(pin, tOn, tOff, rise, fall); // Breathe an LED: 1000ms LOW, 500ms HIGH, 500ms to rise from low to high, 250ms to fall from high to low
 
-            checkI2Cerrors("light Y2");
+            checkI2Cerrors("light breathing");
 
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
@@ -140,7 +140,7 @@ void light_task(void *pvParameters)
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = breathe;
         }
-        else if (strncmp(parts.identifier, "Y3",2) == 0)
+        else if (strncmp(parts.identifier, "LLEDONOFF",9) == 0)
         {
             byte pin = constrain(atoi(parts.value1), 0, 15);
             int tOnOff = atoi(parts.value2);
@@ -160,13 +160,13 @@ void light_task(void *pvParameters)
                 lights.pinMode(pin, OUTPUT);    // Set LED pin to OUTPUT
                 lights.digitalWrite(pin, HIGH); //set to ON for Ada!
 
-                checkI2Cerrors("light Y3");
+                checkI2Cerrors("light on/off");
 
                 //give back the i2c flag for the next task
                 xSemaphoreGive(i2cSemaphore);
             }
         }
-        else if (strncmp(parts.identifier, "Y4",2) == 0)
+        else if (strncmp(parts.identifier, "LLEDALLOFF",10) == 0)
         {
             //Serial.println("YOYOYO");
 
@@ -183,7 +183,7 @@ void light_task(void *pvParameters)
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
         }
-        else if (strncmp(parts.identifier, "Y5",2) == 0)
+        else if (strncmp(parts.identifier, "LLEDALLON",9) == 0)
         {
             //turn on all LEDs - using the queue
             for (int i = 0; i <= 15; i++)
