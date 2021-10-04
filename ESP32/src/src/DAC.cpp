@@ -25,7 +25,7 @@ void DAC_task(void *pvParameters)
     // Serial.println(uxHighWaterMark);
 
     messageParts parts;
-    int8_t DACvalue;
+    uint8_t DACvalue;
 
     for (;;)
     {
@@ -34,21 +34,34 @@ void DAC_task(void *pvParameters)
         //wait for new DAC commands in the queue
         xQueueReceive(DAC_Queue, &msg, portMAX_DELAY);
 
-        //Serial.printf("DAC_Queue: %s\n", msg);
+        Serial << "DAC_Queue: " << msg << endl;
 
-        messageParts parts = processQueueMessage(msg, "DAC");
+        //TODO: see if need this copy of msg
+        std::string X = msg;
 
-        DACvalue = constrain(atoi(parts.value1), 0, 254);
+        messageParts parts = processQueueMessage(X, "DAC");
 
-        //Serial.printf("DAC action: %s @ %iV\n", parts.identifier, DACvalue);.
+        DACvalue = std::stoi(parts.value1);
+
+        //  constrain(std::stoi(parts.value1), 0, 254);
+
+        // Serial << "DAC action: " << parts.identifier << " : " << DACvalue << " : " << parts.value1 << endl;
+
+        DACvalue = constrain(DACvalue, 0, 254);
+
+        //   Serial << "DAC action 2: " << parts.identifier << " : " << DACvalue << " : " << parts.value1 << endl;
 
         if (strncmp(parts.identifier, "DIAL1", 5) == 0)
         {
             dacWrite(DAC1, DACvalue);
+
+            Serial << "DAC1: " << DACvalue<< endl;
         }
         else if (strncmp(parts.identifier, "DIAL2", 5) == 0)
         {
             dacWrite(DAC2, DACvalue);
+
+             Serial << "DAC2: " << DACvalue<< endl;
         }
     }
 

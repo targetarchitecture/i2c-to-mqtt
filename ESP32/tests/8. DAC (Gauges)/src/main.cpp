@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "SN4 pins.h"
+#include "SN7 pins.h"
 //https://www.xtronical.com/basics/audio/dacs-on-esp32/
 
 int SineValues[256]; // an array to store our values for sine

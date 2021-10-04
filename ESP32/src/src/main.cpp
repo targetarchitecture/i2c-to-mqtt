@@ -28,14 +28,12 @@ Rainbow Sparkle Unicorn - SN7
 void checkI2Cerrors(std::string area);
 void runTests();
 
-
 QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
 // QueueHandle_t MQTT_Queue;
 // QueueHandle_t MQTT_Message_Queue;
-
 
 extern std::string requestMessage;
 extern SemaphoreHandle_t i2cSemaphore;
@@ -91,7 +89,7 @@ void setup()
 
   microbit_i2c_setup();
 
-  runTests();
+  //runTests();
 }
 
 void runTests()
@@ -103,7 +101,8 @@ void runTests()
   dealWithMessage("DIAL1,128");
   dealWithMessage("DIAL2,254");
 
-  dealWithMessage("MANGLE,0,90,771,2740");
+  dealWithMessage("MANGLE,15,45,100,505");
+  dealWithMessage("LLEDALLON");
 
   dealWithMessage("TUPDATE");
 
@@ -200,4 +199,3 @@ void loop()
 
   // Serial << "Touched: " << requestMessage.c_str() << endl;
 }
-

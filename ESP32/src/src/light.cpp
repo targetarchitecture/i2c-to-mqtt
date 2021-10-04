@@ -94,9 +94,9 @@ void light_task(void *pvParameters)
 
         if (strncmp(parts.identifier, "LBLINK",6) == 0)
         {
-            byte pin = constrain(atoi(parts.value1), 0, 15);
-            long tOn = atol(parts.value2);
-            long tOff = atol(parts.value3);
+            byte pin = std::stoi(parts.value1);
+            long tOn = std::stol(parts.value2);
+            long tOff = std::stol(parts.value3);
 
             //stop the LED first
             stopLight(pin);
@@ -117,11 +117,11 @@ void light_task(void *pvParameters)
         } 
         else if (strncmp(parts.identifier, "LBREATHE",8) == 0)
         {
-            byte pin = constrain(atoi(parts.value1), 0, 15);
-            long tOn = atol(parts.value2);
-            long tOff = atol(parts.value3);
-            long rise = atol(parts.value4);
-            long fall = atol(parts.value5);
+            byte pin = constrain(std::stoi(parts.value1), 0, 15);
+            long tOn = std::stol(parts.value2);
+            long tOff = std::stol(parts.value3);
+            long rise = std::stol(parts.value4);
+            long fall = std::stol(parts.value5);
 
             //stop the LED first
             stopLight(pin);
@@ -142,8 +142,8 @@ void light_task(void *pvParameters)
         }
         else if (strncmp(parts.identifier, "LLEDONOFF",9) == 0)
         {
-            byte pin = constrain(atoi(parts.value1), 0, 15);
-            int tOnOff = atoi(parts.value2);
+            byte pin = std::stoi(parts.value1);
+            int tOnOff = std::stoi(parts.value2);
 
             //stop the LED first
             stopLight(pin);
@@ -189,7 +189,7 @@ void light_task(void *pvParameters)
             for (int i = 0; i <= 15; i++)
             {
                 char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "Y3,%i,1", i);
+                sprintf(msgtosend, "LLEDONOFF,%i,1", i);
 
                 xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
             }

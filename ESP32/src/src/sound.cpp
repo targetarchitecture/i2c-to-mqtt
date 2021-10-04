@@ -66,7 +66,7 @@ void sound_task(void *pvParameters)
 
         if (strncmp(parts.identifier, "SVOL",4) == 0)
         {
-            auto volume = atoi(parts.value1);
+            auto volume = std::stoi(parts.value1);
             volume = constrain(volume, 0, 30);
 
             // Serial.print("vol:");
@@ -79,7 +79,7 @@ void sound_task(void *pvParameters)
         }
         else if (strncmp(parts.identifier, "SPLAY",5) == 0)
         {
-            auto trackNum = atoi(parts.value1);
+            auto trackNum = std::stoi(parts.value1);
             trackNum = constrain(trackNum, 0, 2999);
 
             delay(commandPause);

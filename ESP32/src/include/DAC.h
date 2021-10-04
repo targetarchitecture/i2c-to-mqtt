@@ -3,6 +3,8 @@
 #include "messageParts.h"
 #include "defines.h"
 #include "SN7 pins.h"
+#include <Streaming.h>
+#include <sstream>
 
 void DAC_setup();
 void DAC_task(void *pvParameter);
