@@ -22,18 +22,14 @@ Rainbow Sparkle Unicorn - SN7
 #include "light.h"
 #include "switch.h"
 #include "movement.h"
-// #include "MQTT.h"
-// #include "debug.h"
 
 void checkI2Cerrors(std::string area);
 void runTests();
 
-QueueHandle_t Sound_Queue; //Queue to store all of the DFPlayer commands from the Microbit
+QueueHandle_t Sound_Queue;
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
-// QueueHandle_t MQTT_Queue;
-// QueueHandle_t MQTT_Message_Queue;
 
 extern std::string requestMessage;
 extern SemaphoreHandle_t i2cSemaphore;
@@ -59,10 +55,10 @@ void setup()
   xSemaphoreGive(i2cSemaphore);
 
   //set up the main queues
-  Sound_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
-  DAC_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
-  Light_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
-  Movement_Queue = xQueueCreate(50, sizeof(char[MAXESP32MESSAGELENGTH]));
+  Sound_Queue = xQueueCreate(5, sizeof(messageParts));
+  DAC_Queue = xQueueCreate(5, sizeof(messageParts));
+  Light_Queue = xQueueCreate(30, sizeof(messageParts));
+  Movement_Queue = xQueueCreate(30, sizeof(messageParts));
 
   //MQTT_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
   //MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
@@ -89,13 +85,51 @@ void setup()
 
   microbit_i2c_setup();
 
+  Serial << "SN7 completed in " << millis() << "ms" << endl;
+
   //runTests();
+}
+
+
+void POST(uint8_t flashes)
+{
+  //TODO: debate which tasks need stopping?
+  vTaskSuspendAll(); //added on 31/1/21
+
+  pinMode(ONBOARDLED, OUTPUT);
+
+  uint32_t speed = 150;
+
+  for (;;)
+  {
+    for (size_t i = 0; i < flashes; i++)
+    {
+      digitalWrite(ONBOARDLED, HIGH);
+      delay(speed);
+      digitalWrite(ONBOARDLED, LOW);
+      delay(speed);
+    }
+    delay(1000);
+  }
+}
+
+void checkI2Cerrors(std::string area)
+{
+  if (Wire.lastError() != 0)
+  {
+    Serial << "i2C error @ " << area.c_str() << ":" << Wire.getErrorText(Wire.lastError()) << endl;
+
+    Wire.clearWriteError();
+  }
+}
+
+void loop()
+{
+  delay(1000);
 }
 
 void runTests()
 {
-  Serial << "SN7 completed in " << millis() << "ms" << endl;
-
   dealWithMessage("STARTING");
 
   dealWithMessage("DIAL1,128");
@@ -156,46 +190,4 @@ void runTests()
 
   delay(5000);
   dealWithMessage("SPLAY,3");
-}
-
-void POST(uint8_t flashes)
-{
-  //TODO: debate which tasks need stopping?
-  vTaskSuspendAll(); //added on 31/1/21
-
-  pinMode(ONBOARDLED, OUTPUT);
-
-  uint32_t speed = 150;
-
-  for (;;)
-  {
-    for (size_t i = 0; i < flashes; i++)
-    {
-      digitalWrite(ONBOARDLED, HIGH);
-      delay(speed);
-      digitalWrite(ONBOARDLED, LOW);
-      delay(speed);
-    }
-    delay(1000);
-  }
-}
-
-void checkI2Cerrors(std::string area)
-{
-  if (Wire.lastError() != 0)
-  {
-    Serial << "i2C error @ " << area.c_str() << ":" << Wire.getErrorText(Wire.lastError()) << endl;
-
-    //TODO: Check to see if this is still needed
-    // Wire.clearWriteError();
-  }
-}
-
-void loop()
-{
-  delay(1000);
-
-  // dealWithMessage("TUPDATE");
-
-  // Serial << "Touched: " << requestMessage.c_str() << endl;
 }

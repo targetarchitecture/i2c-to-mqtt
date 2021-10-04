@@ -9,7 +9,7 @@ SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
 
-std::string swithStates = "XXXXXXXXXXXXXXXX";
+std::string swithStates = "XXXXXXXXXXXXXXX";
 
 void switch_setup()
 {
@@ -83,9 +83,13 @@ void switch_task(void *pvParameters)
                 {
                     swithStates = swithStates.replace(i, 1, "L");
                 }
-                else
+                else if (switches.digitalRead(i) == HIGH)
                 {
                     swithStates = swithStates.replace(i, 1, "H");
+                }
+                else
+                {
+                    swithStates = swithStates.replace(i, 1, "X");
                 }
             }
 
@@ -101,4 +105,3 @@ void switch_task(void *pvParameters)
 
     vTaskDelete(NULL);
 }
-

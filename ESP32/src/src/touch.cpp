@@ -117,21 +117,21 @@ void touch_task(void *pvParameter)
     vTaskDelete(NULL);
 }
 
-void touch_deal_with_message(const char *msg)
+void touch_deal_with_message(messageParts message)
 {
-    auto parts = processQueueMessage(msg, "TOUCH");
+   std::string identifier = message.identifier;
 
-    if (strncmp(parts.identifier, "TTHRSLD", 7) == 0)
+    if (identifier.compare("TTHRSLD") == 0)
     {
-        auto touchThreshold = std::stoi(parts.value1);
-        auto releaseThreshold = std::stoi(parts.value2);
+        auto touchThreshold = message.value1;
+        auto releaseThreshold = message.value2;
 
         cap.setThresholds(touchThreshold, releaseThreshold);
     }
 
     //overwrite bounce delay..
-    if (strncmp(parts.identifier, "TBOUNCE", 7) == 0)
+    if (identifier.compare("TBOUNCE") == 0)
     {
-        debounceDelay = std::stoi(parts.value1);
+        debounceDelay = message.value1;
     }
 }

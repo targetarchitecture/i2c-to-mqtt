@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Wire.h>
-
-
 #include "messageParts.h"
 #include <Adafruit_PWMServoDriver.h>
 #include "easing.h"
@@ -42,8 +40,6 @@ void movement_setup();
 void movement_task(void *pvParameter);
 void movement_i2c_task(void *pvParameter);
 
-
-extern messageParts processQueueMessage(std::string msg, std::string from);
 extern void checkI2Cerrors(std::string area);
 extern void POST(uint8_t flashes);
 

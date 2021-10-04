@@ -18,7 +18,6 @@ enum pinState
 std::vector<pinState> pinStates;
 
 TaskHandle_t LightTask;
-//QueueHandle_t Light_Queue;
 
 void light_setup()
 {
@@ -39,8 +38,6 @@ void light_setup()
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
-
-    //Light_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
 
     xTaskCreatePinnedToCore(
         light_task,          /* Task function. */
@@ -68,23 +65,10 @@ void light_task(void *pvParameters)
 
     for (;;)
     {
-        char msg[MAXESP32MESSAGELENGTH] = {0};
+        messageParts parts;
 
         //wait for new music command in the queue
-        xQueueReceive(Light_Queue, &msg, portMAX_DELAY);
-
-        //Serial.print("Light_Queue:");
-        //Serial.println(msg);
-
-        //TODO: see if need this copy of msg
-        std::string X = msg;
-
-        parts = processQueueMessage(X, "LIGHT");
-
-        // Serial.print("action:");
-        // Serial.print(parts.identifier);
-        // Serial.print(" @ ");
-        // Serial.println(millis());
+        xQueueReceive(Light_Queue, &parts, portMAX_DELAY);
 
         /*
         The breathable pins are 4, 5, 6, 7, 12, 13, 14, 15 only. If tRise and
@@ -92,11 +76,13 @@ void light_task(void *pvParameters)
         ledDriverInit should be called on the pin to be blinked before this.
         */
 
-        if (strncmp(parts.identifier, "LBLINK",6) == 0)
+        std::string identifier = parts.identifier;
+
+        if (identifier.compare(0, 6, "LBLINK") == 0)
         {
-            byte pin = std::stoi(parts.value1);
-            long tOn = std::stol(parts.value2);
-            long tOff = std::stol(parts.value3);
+            byte pin = parts.value1;
+            long tOn = parts.value2;
+            long tOff = parts.value3;
 
             //stop the LED first
             stopLight(pin);
@@ -114,14 +100,14 @@ void light_task(void *pvParameters)
 
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = blink;
-        } 
-        else if (strncmp(parts.identifier, "LBREATHE",8) == 0)
+        }
+        else if (identifier.compare("LBREATHE") == 0)
         {
-            byte pin = constrain(std::stoi(parts.value1), 0, 15);
-            long tOn = std::stol(parts.value2);
-            long tOff = std::stol(parts.value3);
-            long rise = std::stol(parts.value4);
-            long fall = std::stol(parts.value5);
+            byte pin = constrain(parts.value1, 0, 15);
+            long tOn = parts.value2;
+            long tOff = parts.value3;
+            long rise = parts.value4;
+            long fall = parts.value5;
 
             //stop the LED first
             stopLight(pin);
@@ -140,10 +126,10 @@ void light_task(void *pvParameters)
             //set method for the pins so we can figure out how to turn it off
             pinStates[pin] = breathe;
         }
-        else if (strncmp(parts.identifier, "LLEDONOFF",9) == 0)
+        else if (identifier.compare("LLEDONOFF") == 0)
         {
-            byte pin = std::stoi(parts.value1);
-            int tOnOff = std::stoi(parts.value2);
+            byte pin = parts.value1;
+            int tOnOff = parts.value2;
 
             //stop the LED first
             stopLight(pin);
@@ -166,10 +152,8 @@ void light_task(void *pvParameters)
                 xSemaphoreGive(i2cSemaphore);
             }
         }
-        else if (strncmp(parts.identifier, "LLEDALLOFF",10) == 0)
+        else if (identifier.compare("LLEDALLOFF") == 0)
         {
-            //Serial.println("YOYOYO");
-
             //wait for the i2c semaphore flag to become available
             xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
@@ -183,13 +167,16 @@ void light_task(void *pvParameters)
             //give back the i2c flag for the next task
             xSemaphoreGive(i2cSemaphore);
         }
-        else if (strncmp(parts.identifier, "LLEDALLON",9) == 0)
+        else if (identifier.compare("LLEDALLON") == 0)
         {
             //turn on all LEDs - using the queue
             for (int i = 0; i <= 15; i++)
             {
-                char msgtosend[MAXBBCMESSAGELENGTH];
-                sprintf(msgtosend, "LLEDONOFF,%i,1", i);
+                messageParts msgtosend = {};
+
+                strcpy(msgtosend.identifier, "LLEDONOFF");
+                msgtosend.value1 = i;
+                msgtosend.value2 = 0;
 
                 xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
             }

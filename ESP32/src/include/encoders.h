@@ -1,6 +1,5 @@
 #pragma once
 
-#include "messageParts.h"
 #include "defines.h"
 #include "SN7 pins.h"
 

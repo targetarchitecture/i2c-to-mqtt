@@ -8,7 +8,6 @@ extern SemaphoreHandle_t i2cSemaphore;
 
 Adafruit_PWMServoDriver PCA9685 = Adafruit_PWMServoDriver();
 
-//QueueHandle_t Movement_Queue;
 QueueHandle_t Movement_i2c_Queue;
 
 TaskHandle_t MovementTask;
@@ -68,8 +67,6 @@ void movement_setup()
         //servoTasks.push_back(NULL);
     }
 
-    //Movement_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-
     //create a queue to hold servo PWM values (allows us to kill the servo easing processes at anytime)
     Movement_i2c_Queue = xQueueCreate(100, sizeof(servoPWM));
 
@@ -106,93 +103,81 @@ void movement_task(void *pvParameters)
 
     for (;;)
     {
-        // Serial.println("waiting for Command_Queue");
-
-        char msg[MAXESP32MESSAGELENGTH] = {0};
+        messageParts parts;
 
         //wait for new movement command in the queue
-        xQueueReceive(Movement_Queue, &msg, portMAX_DELAY);
+        xQueueReceive(Movement_Queue, &parts, portMAX_DELAY);
 
-        //Serial << "Movement_Queue:" << msg << endl;
-
-        //TODO: see if need this copy of msg
-        std::string X = msg;
-
-        parts = processQueueMessage(X, "MOVEMENT");
-
-        // Serial.print("action:");
-        // Serial.print(parts.identifier);
-        // Serial.print(" @ ");
-        // Serial.println(millis());
+        std::string identifier = parts.identifier;
 
         //OK OK - What ever your doing stop the servo task first
-        auto stopPin = std::stoi(parts.value1);
+        auto stopPin = parts.value1;
         stopServo(stopPin);
 
-        if (strncmp(parts.identifier, "MSTOP", 5) == 0)
+        if (identifier.compare("MSTOP") == 0)
         {
             //not much to do now as we always stop the servos
 
             //Stop servo
-            auto pin = std::stoi(parts.value1);
+            auto pin = parts.value1;
             stopServo(pin);
         }
-        else if (strncmp(parts.identifier, "MANGLE", 6) == 0)
+        else if (identifier.compare("MANGLE") == 0)
         {
             //Set servo to angle
-            auto pin = std::stoi(parts.value1);
-            auto angle = std::stoi(parts.value2);
-            auto minPulse = std::stoi(parts.value3);
-            auto maxPulse = std::stoi(parts.value4);
+            auto pin = parts.value1;
+            auto angle = parts.value2;
+            auto minPulse = parts.value3;
+            auto maxPulse = parts.value4;
 
             Serial << "setServoAngle(" << pin << "," << angle << "," << minPulse << "," << maxPulse << ")" << endl;
 
             setServoAngle(pin, angle, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "MLINEAR", 7) == 0)
+        else if (identifier.compare("MLINEAR") == 0)
         {
             //Set servo to angle.
-            auto pin = std::stoi(parts.value1);
-            auto toDegree = std::stoi(parts.value2);
-            auto fromDegree = std::stoi(parts.value3);
-            auto duration = std::stoi(parts.value4);
-            auto minPulse = std::stoi(parts.value5);
-            auto maxPulse = std::stoi(parts.value6);
+            auto pin = parts.value1;
+            auto toDegree = parts.value2;
+            auto fromDegree = parts.value3;
+            auto duration = parts.value4;
+            auto minPulse = parts.value5;
+            auto maxPulse = parts.value6;
 
             setServoEase(pin, LinearInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "MSMOOTH", 7) == 0)
+        else if (identifier.compare("MSMOOTH") == 0)
         {
             //Set servo to angle
-            auto pin = std::stoi(parts.value1);
-            auto toDegree = std::stoi(parts.value2);
-            auto fromDegree = std::stoi(parts.value3);
-            auto duration = std::stoi(parts.value4);
-            auto minPulse = std::stoi(parts.value5);
-            auto maxPulse = std::stoi(parts.value6);
+            auto pin = parts.value1;
+            auto toDegree = parts.value2;
+            auto fromDegree = parts.value3;
+            auto duration = parts.value4;
+            auto minPulse = parts.value5;
+            auto maxPulse = parts.value6;
 
             setServoEase(pin, QuadraticInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
-        else if (strncmp(parts.identifier, "MBOUNCY", 7) == 0)
+        else if (identifier.compare("MBOUNCY") == 0)
         {
             //Serial.print("BounceInOut on pin ");
 
             //Set servo to angle
-            auto pin = std::stoi(parts.value1);
-            auto toDegree = std::stoi(parts.value2);
-            auto fromDegree = std::stoi(parts.value3);
-            auto duration = std::stoi(parts.value4);
-            auto minPulse = std::stoi(parts.value5);
-            auto maxPulse = std::stoi(parts.value6);
+            auto pin = parts.value1;
+            auto toDegree = parts.value2;
+            auto fromDegree = parts.value3;
+            auto duration = parts.value4;
+            auto minPulse = parts.value5;
+            auto maxPulse = parts.value6;
 
             setServoEase(pin, BounceInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
 
-        else if (strncmp(parts.identifier, "MPWM", 4) == 0)
+        else if (identifier.compare("MPWM") == 0)
         {
             //Set servo to PWM
-            auto pin = std::stoi(parts.value1);
-            auto PWM = constrain(std::stoi(parts.value2), 0, 4096);
+            auto pin = parts.value1;
+            auto PWM = constrain(parts.value2, 0, 4096);
 
             setServoPWM(pin, PWM);
         }

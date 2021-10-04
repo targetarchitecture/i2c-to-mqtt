@@ -9,7 +9,6 @@ void light_setup();
 void light_task(void *pvParameter);
 void stopLight(long pin);
 
-extern messageParts processQueueMessage( std::string msg,  std::string from);
 extern void POST(uint8_t flashes);
 extern void checkI2Cerrors(std::string area);
 
