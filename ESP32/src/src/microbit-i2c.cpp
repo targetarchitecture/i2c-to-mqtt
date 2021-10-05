@@ -144,7 +144,7 @@ void i2c_tx_task(std::string message)
 
 void dealWithMessage(std::string message)
 {
-    //Serial << "RX: " << message.c_str() << endl;
+    Serial << "RX: " << message.c_str() << endl;
 
     messageParts queuedMsg = processQueueMessage(message);
 

@@ -9,13 +9,13 @@
 typedef struct
 {
     char identifier[20];
-    uint8_t value1;
-    uint8_t value2;
-    uint8_t value3;
-    uint8_t value4;
-    uint8_t value5;
-    uint8_t value6;
-    uint8_t value7;
+    uint32_t value1;
+    uint32_t value2;
+    uint32_t value3;
+    uint32_t value4;
+    uint32_t value5;
+    uint32_t value6;
+    uint32_t value7;
 } messageParts;
 
 messageParts processQueueMessage(std::string msg);
