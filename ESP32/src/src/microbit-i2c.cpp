@@ -4,8 +4,6 @@
 TaskHandle_t Microbiti2cTask;
 SemaphoreHandle_t i2cSemaphore;
 
-
-
 void microbit_i2c_setup()
 {
     bool success = WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
@@ -18,7 +16,7 @@ void microbit_i2c_setup()
     }
 
     WireSlave1.onReceive(receiveEvent);
-    WireSlave1.onRequest(requestEvent);
+    //WireSlave1.onRequest(requestEvent);
 
     pinMode(BBC_INT, INPUT_PULLUP);
     attachInterrupt(BBC_INT, handleBBCi2CInterupt, RISING);
@@ -54,7 +52,28 @@ void i2c_rx_task(void *pvParameter)
 
         delay(1);
 
-        WireSlave1.update();
+        //WireSlave1.update();
+
+        uint8_t inputBuffer[I2C_BUFFER_LENGTH] = {0};
+        int16_t inputLen = 0;
+
+        inputLen = i2c_slave_read_buffer(I2C_NUM_1, inputBuffer, I2C_BUFFER_LENGTH, 1);
+
+        Serial << "inputLen: " << inputLen << endl;
+
+        if (inputLen > 0)
+        {
+            std::string receivedMsg;
+
+            for (size_t i = 0; i < inputLen; i++)
+            {
+                char c = inputBuffer[i]; // receive byte as a character
+
+                receivedMsg += c;
+            }
+
+              Serial << "JRX: " << receivedMsg.c_str() << endl;
+        }
     }
 }
 
@@ -82,20 +101,26 @@ void requestEvent()
 {
     //  Serial << "TX: " << requestMessage.c_str() << endl;
 
-    // WireSlave1.write(requestMessage.c_str());
+    //WireSlave1.write("TEST");
 }
 
 void requestEvent(std::string message)
 {
-    Serial << "TX: " << message.c_str() << endl;
+    uint8_t txBuffer[message.size()] = {0};
 
-    WireSlave1.write(message.c_str());
+    std::copy(message.begin(), message.end(), txBuffer);
+
+    i2c_reset_tx_fifo(I2C_NUM_1);
+    i2c_slave_write_buffer(I2C_NUM_1, txBuffer, sizeof(txBuffer), 2000 / portTICK_RATE_MS); // 0);
+
+    // for (size_t i = 0; i < sizeof(txBuffer); i++)
+    // {
+    //     Serial << "txBuffer[" << i << "]=" << txBuffer[i] << endl;
+    // }
 }
 
 void dealWithMessage(std::string message)
 {
-std::string requestMessage;
-
     Serial << "RX: " << message.c_str() << endl;
 
     messageParts queuedMsg = processQueueMessage(message);
@@ -126,7 +151,7 @@ std::string requestMessage;
     }
     else if (identifier.compare("SBUSY") == 0)
     {
-        requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
+        std::string requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
 
         requestEvent(requestMessage);
     }
@@ -148,37 +173,37 @@ std::string requestMessage;
     }
     else if (identifier.compare("ROTARY1") == 0)
     {
-        requestMessage = std::to_string(encoder1Count);
+        std::string requestMessage = std::to_string(encoder1Count);
 
         requestEvent(requestMessage);
     }
     else if (identifier.compare("ROTARY2") == 0)
     {
-        requestMessage = std::to_string(encoder2Count);
+        std::string requestMessage = std::to_string(encoder2Count);
 
         requestEvent(requestMessage);
     }
     else if (identifier.compare("SLIDER1") == 0)
     {
-        requestMessage = std::to_string(analogRead(ADC1));
+        std::string requestMessage = std::to_string(analogRead(ADC1));
 
         requestEvent(requestMessage);
     }
     else if (identifier.compare("SLIDER2") == 0)
     {
-        requestMessage = std::to_string(analogRead(ADC2));
+        std::string requestMessage = std::to_string(analogRead(ADC2));
 
         requestEvent(requestMessage);
     }
     else if (identifier.compare("SUPDATE") == 0)
     {
-        requestMessage = swithStates;
+        std::string requestMessage = swithStates;
 
         requestEvent(requestMessage);
     }
     else if (identifier.compare("TUPDATE") == 0)
     {
-        requestMessage = touchStates;
+        std::string requestMessage = touchStates;
 
         requestEvent(requestMessage);
     }
