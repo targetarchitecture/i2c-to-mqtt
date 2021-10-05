@@ -14,3 +14,19 @@ extern void checkI2Cerrors(std::string area);
 
 extern QueueHandle_t Light_Queue;
 extern SemaphoreHandle_t i2cSemaphore;
+
+enum pinState
+{
+    on,
+    off,
+    blink,
+    breathe
+};
+
+
+struct LED
+{
+  int16_t pin;
+  pinState state;
+  TaskHandle_t taskHandle;
+};

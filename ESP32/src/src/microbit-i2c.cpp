@@ -6,7 +6,9 @@ SemaphoreHandle_t i2cSemaphore;
 
 void microbit_i2c_setup()
 {
-    bool success = WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
+    // bool success =  WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
+
+    bool success = i2c_begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
 
     if (!success)
     {
@@ -15,7 +17,7 @@ void microbit_i2c_setup()
             delay(100);
     }
 
-    WireSlave1.onReceive(receiveEvent);
+    //WireSlave1.onReceive(receiveEvent);
     //WireSlave1.onRequest(requestEvent);
 
     pinMode(BBC_INT, INPUT_PULLUP);
@@ -59,7 +61,7 @@ void i2c_rx_task(void *pvParameter)
 
         inputLen = i2c_slave_read_buffer(I2C_NUM_1, inputBuffer, I2C_BUFFER_LENGTH, 1);
 
-        Serial << "inputLen: " << inputLen << endl;
+        //Serial << "inputLen: " << inputLen << endl;
 
         if (inputLen > 0)
         {
@@ -72,40 +74,59 @@ void i2c_rx_task(void *pvParameter)
                 receivedMsg += c;
             }
 
-              Serial << "JRX: " << receivedMsg.c_str() << endl;
+            //receivedMsg.find_first_of
+
+            //Serial << "RX (" << inputLen << ") : " << receivedMsg.c_str() << endl;
+
+            std::regex re("(@@)(.*?)(##)");
+
+            std::sregex_iterator next(receivedMsg.begin(), receivedMsg.end(), re);
+            std::sregex_iterator end;
+
+            while (next != end)
+            {
+                std::smatch match = *next;
+
+                //this bit here needs to set -up the message to send back
+                dealWithMessage(match[2].str());
+
+                next++;
+            }
         }
     }
 }
 
 // function that executes whenever a complete and valid packet is received from BBC (i2c Master)
-void receiveEvent(int howMany)
+// void receiveEvent(int howMany)
+// {
+//     std::string receivedMsg;
+
+//     while (1 < WireSlave1.available()) // loop through all but the last byte
+//     {
+//         char c = WireSlave1.read(); // receive byte as a character
+
+//         receivedMsg += c;
+//     }
+
+//     char c = WireSlave1.read(); // receive byte as an integer
+
+//     receivedMsg += c;
+
+//     //this bit here needs to set -up the message to send back
+//     dealWithMessage(receivedMsg);
+// }
+
+// void requestEvent()
+// {
+//     //  Serial << "TX: " << requestMessage.c_str() << endl;
+
+//     //WireSlave1.write("TEST");
+// }
+
+void i2c_tx_task(std::string message)
 {
-    std::string receivedMsg;
+    message = "@@" + message + "##";
 
-    while (1 < WireSlave1.available()) // loop through all but the last byte
-    {
-        char c = WireSlave1.read(); // receive byte as a character
-
-        receivedMsg += c;
-    }
-
-    char c = WireSlave1.read(); // receive byte as an integer
-
-    receivedMsg += c;
-
-    //this bit here needs to set -up the message to send back
-    dealWithMessage(receivedMsg);
-}
-
-void requestEvent()
-{
-    //  Serial << "TX: " << requestMessage.c_str() << endl;
-
-    //WireSlave1.write("TEST");
-}
-
-void requestEvent(std::string message)
-{
     uint8_t txBuffer[message.size()] = {0};
 
     std::copy(message.begin(), message.end(), txBuffer);
@@ -117,11 +138,13 @@ void requestEvent(std::string message)
     // {
     //     Serial << "txBuffer[" << i << "]=" << txBuffer[i] << endl;
     // }
+
+    //Serial << "TX: " << message.c_str() << endl;
 }
 
 void dealWithMessage(std::string message)
 {
-    Serial << "RX: " << message.c_str() << endl;
+    //Serial << "RX: " << message.c_str() << endl;
 
     messageParts queuedMsg = processQueueMessage(message);
 
@@ -153,7 +176,7 @@ void dealWithMessage(std::string message)
     {
         std::string requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("LBLINK") == 0 || identifier.compare("LBREATHE") == 0 ||
              identifier.compare("LLEDONOFF") == 0 || identifier.compare("LLEDALLOFF") == 0 ||
@@ -175,37 +198,37 @@ void dealWithMessage(std::string message)
     {
         std::string requestMessage = std::to_string(encoder1Count);
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("ROTARY2") == 0)
     {
         std::string requestMessage = std::to_string(encoder2Count);
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SLIDER1") == 0)
     {
         std::string requestMessage = std::to_string(analogRead(ADC1));
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SLIDER2") == 0)
     {
         std::string requestMessage = std::to_string(analogRead(ADC2));
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SUPDATE") == 0)
     {
         std::string requestMessage = swithStates;
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("TUPDATE") == 0)
     {
         std::string requestMessage = touchStates;
 
-        requestEvent(requestMessage);
+        i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("TTHRSLD") == 0 || identifier.compare("TBOUNCE") == 0)
     {
@@ -260,4 +283,37 @@ messageParts processQueueMessage(std::string msg)
     }
 
     return mParts;
+}
+
+bool i2c_begin(int sda, int scl, int address)
+{
+    i2c_config_t config = {};
+    config.sda_io_num = gpio_num_t(sda);
+    config.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    config.scl_io_num = gpio_num_t(scl);
+    config.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    config.mode = I2C_MODE_SLAVE;
+    config.slave.addr_10bit_en = 0;
+    config.slave.slave_addr = address & 0x7F;
+
+    esp_err_t res = i2c_param_config(I2C_NUM_1, &config);
+
+    if (res != ESP_OK)
+    {
+        log_e("invalid I2C parameters");
+        return false;
+    }
+
+    res = i2c_driver_install(
+        I2C_NUM_1,
+        config.mode,
+        2 * I2C_BUFFER_LENGTH, // rx buffer length
+        2 * I2C_BUFFER_LENGTH, // tx buffer length
+        0);
+
+    if (res != ESP_OK)
+    {
+        log_e("failed to install I2C driver");
+    }
+    return res == ESP_OK;
 }

@@ -1,8 +1,15 @@
 #pragma once
 
 #include <Wire.h>
-#include <WireSlave.h>
-#include <WirePacker.h>
+// #include <WireSlave.h>
+// #include <WirePacker.h>
+
+#include <regex>
+
+#include <stdint.h>
+#include <driver/i2c.h>
+#include <Stream.h>
+
 #include "driver/uart.h"
 #include "defines.h"
 #include "SN7 pins.h"
@@ -14,6 +21,8 @@
 #include <Streaming.h>
 
 #define I2C_SLAVE_ADDR 4
+
+bool i2c_begin(int sda, int scl, int address);
 
 void microbit_i2c_setup();
 void receiveEvent(int howMany); //when BBC Microbit calls i2cWriteBuffer

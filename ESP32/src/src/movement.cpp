@@ -130,7 +130,7 @@ void movement_task(void *pvParameters)
             auto minPulse = parts.value3;
             auto maxPulse = parts.value4;
 
-            Serial << "setServoAngle(" << pin << "," << angle << "," << minPulse << "," << maxPulse << ")" << endl;
+            //Serial << "setServoAngle(" << pin << "," << angle << "," << minPulse << "," << maxPulse << ")" << endl;
 
             setServoAngle(pin, angle, minPulse, maxPulse);
         }

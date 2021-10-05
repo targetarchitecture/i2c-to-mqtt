@@ -7,15 +7,8 @@
 
 SX1509 lights; // Create an SX1509 object to be used throughout
 
-enum pinState
-{
-    on,
-    off,
-    blink,
-    breathe
-};
-
-std::vector<pinState> pinStates;
+//std::vector<pinState> pinStates;
+std::vector<LED> LEDs;
 
 TaskHandle_t LightTask;
 
@@ -32,7 +25,7 @@ void light_setup()
     }
 
     // Use the internal 2MHz oscillator.
-    //lights.clock(INTERNAL_CLOCK_2MHZ, 4);
+    lights.clock(INTERNAL_CLOCK_2MHZ, 4);
 
     checkI2Cerrors("light");
 
@@ -60,7 +53,15 @@ void light_task(void *pvParameters)
 
     for (int pin = 0; pin < 16; pin++)
     {
-        pinStates.push_back(off);
+        LED l;
+
+        l.pin = pin;
+        l.state = pinState::off;
+        l.taskHandle = NULL; //create the task handles
+
+        LEDs.push_back(l);
+
+        //pinStates.push_back(off);
     }
 
     for (;;)
@@ -83,6 +84,9 @@ void light_task(void *pvParameters)
             byte pin = parts.value1;
             long tOn = parts.value2;
             long tOff = parts.value3;
+
+
+            
 
             //stop the LED first
             stopLight(pin);
@@ -155,17 +159,29 @@ void light_task(void *pvParameters)
         else if (identifier.compare("LLEDALLOFF") == 0)
         {
             //wait for the i2c semaphore flag to become available
-            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+            //xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-            lights.reset(0);
+            //lights.reset(1);
+
+            //turn on all LEDs - using the queue
+            for (int i = 0; i <= 15; i++)
+            {
+                messageParts msgtosend = {};
+
+                strcpy(msgtosend.identifier, "LLEDONOFF");
+                msgtosend.value1 = i;
+                msgtosend.value2 = 0;
+
+                xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
+            }
 
             // Set the clock to a default of 2MHz using internal
-            lights.clock(INTERNAL_CLOCK_2MHZ);
+            //lights.clock(INTERNAL_CLOCK_2MHZ);
 
-            checkI2Cerrors("light Y4");
+            //checkI2Cerrors("light Y4");
 
             //give back the i2c flag for the next task
-            xSemaphoreGive(i2cSemaphore);
+            //xSemaphoreGive(i2cSemaphore);
         }
         else if (identifier.compare("LLEDALLON") == 0)
         {
@@ -176,7 +192,7 @@ void light_task(void *pvParameters)
 
                 strcpy(msgtosend.identifier, "LLEDONOFF");
                 msgtosend.value1 = i;
-                msgtosend.value2 = 0;
+                msgtosend.value2 = 1;
 
                 xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
             }
