@@ -50,7 +50,8 @@ void i2c_rx_task(void *pvParameter)
     for (;;)
     {
         //10/12/20 - Just wait around to see if we get hailed to send
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+        //06/10/21 - or continue after 50ms to see what's happened
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, 50 / portTICK_PERIOD_MS); //  portMAX_DELAY);
 
         delay(1);
 
@@ -76,7 +77,7 @@ void i2c_rx_task(void *pvParameter)
 
             //receivedMsg.find_first_of
 
-            //Serial << "RX (" << inputLen << ") : " << receivedMsg.c_str() << endl;
+            //Serial << "i2c RX (" << inputLen << ") : " << receivedMsg.c_str() << endl;
 
             std::regex re("(@@)(.*?)(##)");
 
@@ -144,13 +145,13 @@ void i2c_tx_task(std::string message)
 
 void dealWithMessage(std::string message)
 {
-    Serial << "RX: " << message.c_str() << endl;
+    //Serial << "RX: " << message.c_str() << endl;
 
     messageParts queuedMsg = processQueueMessage(message);
 
     std::string identifier = queuedMsg.identifier;
 
-    //Serial << "queuedMsg: " << identifier.c_str() << endl;
+    //Serial << "identifier: " << identifier.c_str() << endl;
 
     if (identifier.compare("RESTART") == 0)
     {

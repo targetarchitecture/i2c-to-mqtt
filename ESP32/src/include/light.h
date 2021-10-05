@@ -8,7 +8,6 @@
 
 void light_setup();
 void light_task(void *pvParameter);
-void stopLight(long pin);
 
 void LEDBlinkingTask(void *pvParameter);
 void LEDBreathingTask(void *pvParameter);
@@ -37,3 +36,7 @@ struct LED
     uint32_t FallTimeMS;
     TaskHandle_t taskHandle;
 };
+
+//LED
+#define LEDON 0
+#define LEDOFF 255

@@ -58,10 +58,11 @@ void light_task(void *pvParameters)
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-        lights.pinMode(pin, OUTPUT); // Set LED pin to OUTPUT as a default
-        lights.digitalWrite(pin, LOW);
+        lights.pinMode(pin, ANALOG_OUTPUT); // Set LED pin to ANALOG as a default
+        lights.ledDriverInit(pin);
+        lights.analogWrite(pin, LEDOFF);
 
-        checkI2Cerrors("light on/off");
+        checkI2Cerrors("light");
 
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
@@ -144,10 +145,15 @@ void light_task(void *pvParameters)
         }
         else if (identifier.compare("LLEDONOFF") == 0)
         {
-            int tOnOff = parts.value2;
+            //stop any previous tasks
+            if (LEDs[parts.value1].taskHandle != NULL)
+            {
+                vTaskDelete(LEDs[parts.value1].taskHandle);
+                delay(1);
+                LEDs[parts.value1].taskHandle = NULL;
+            }
 
-            //stop the LED first
-            stopLight(parts.value1);
+            int tOnOff = parts.value2;
 
             //see what state we need
             if (tOnOff == 1)
@@ -158,10 +164,24 @@ void light_task(void *pvParameters)
                 //wait for the i2c semaphore flag to become available
                 xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-                lights.pinMode(parts.value1, OUTPUT);    // Set LED pin to OUTPUT
-                lights.digitalWrite(parts.value1, HIGH); //set to ON for Ada!
+                lights.analogWrite(parts.value1, LEDON); //set to ON for Ada!
 
                 checkI2Cerrors("light on/off");
+
+                //give back the i2c flag for the next task
+                xSemaphoreGive(i2cSemaphore);
+            }
+            else
+            {
+                //set method for the pins so we can figure out how to turn it off
+                LEDs[parts.value1].state = off;
+
+                //wait for the i2c semaphore flag to become available
+                xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+                lights.analogWrite(parts.value1, LEDOFF); //set to ON for Ada!
+
+                    checkI2Cerrors("light on/off");
 
                 //give back the i2c flag for the next task
                 xSemaphoreGive(i2cSemaphore);
@@ -200,40 +220,6 @@ void light_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void stopLight(long pin)
-{
-    //stop any previous tasks
-    if (LEDs[pin].taskHandle != NULL)
-    {
-        vTaskDelete(LEDs[pin].taskHandle);
-        delay(1);
-        LEDs[pin].taskHandle = NULL;
-    }
-
-    //wait for the i2c semaphore flag to become available
-    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-      lights.pinMode(pin, ANALOG_OUTPUT); // Set LED pin to ANALOG
-      lights.analogWrite(pin, 255); //set to OFF
-
-    // if (LEDs[pin].state == on || LEDs[pin].state == blink)
-    // {
-    //     lights.digitalWrite(pin, LOW); //set to OFF
-    // }
-    // if (LEDs[pin].state == breathe)
-    // {
-    //     lights.analogWrite(pin, 0); //set to OFF
-    // }
-
-    checkI2Cerrors("light (stop)");
-
-    //give back the i2c flag for the next task
-    xSemaphoreGive(i2cSemaphore);
-
-    //set method for the pins so we can figure out how to turn it
-    LEDs[pin].state = off;
-}
-
 void LEDBlinkingTask(void *pvParameter)
 {
     /* Inspect our own high water mark on entering the task. */
@@ -257,8 +243,7 @@ void LEDBlinkingTask(void *pvParameter)
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    lights.pinMode(pin, OUTPUT);   // Set LED pin to OUTPUT
-    lights.digitalWrite(pin, LOW); //always turn off the light
+    lights.analogWrite(pin, LEDOFF); //always turn off the light
 
     checkI2Cerrors("light blinking");
 
@@ -270,7 +255,7 @@ void LEDBlinkingTask(void *pvParameter)
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-        lights.digitalWrite(pin, HIGH); //set to ON
+        lights.analogWrite(pin, LEDON); //set to ON
 
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
@@ -280,7 +265,7 @@ void LEDBlinkingTask(void *pvParameter)
         //wait for the i2c semaphore flag to become available
         xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-        lights.digitalWrite(pin, LOW); //set to OFF
+        lights.analogWrite(pin, LEDOFF); //set to OFF
 
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
@@ -318,9 +303,7 @@ void LEDBreathingTask(void *pvParameter)
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    lights.pinMode(pin, ANALOG_OUTPUT); // Set LED pin to ANALOG
-    lights.analogWrite(pin, 0);         //always turn off the light
-    //lights.ledDriverInit()
+    lights.analogWrite(pin, LEDOFF); //always turn off the light
 
     checkI2Cerrors("light breathing");
 
@@ -329,12 +312,12 @@ void LEDBreathingTask(void *pvParameter)
 
     for (;;)
     {
-        for (int i = 0; i <= 255; i++)
+        for (int i = 255; i >= 0; i--)
         {
             //wait for the i2c semaphore flag to become available
             xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-            // PWM the LED from 0 to 255
+            // PWM the LED from 255 to 0
             lights.analogWrite(pin, i);
 
             //give back the i2c flag for the next task
@@ -345,12 +328,12 @@ void LEDBreathingTask(void *pvParameter)
 
         delay(LEDs[pin].OnTimeMS);
 
-        for (int i = 255; i >= 0; i--)
+        for (int i = 0; i <= 255; i++)
         {
             //wait for the i2c semaphore flag to become available
             xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-            // PWM the LED from 255 to 0
+            // PWM the LED from 0 to 255
             lights.analogWrite(pin, i);
 
             //give back the i2c flag for the next task
