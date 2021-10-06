@@ -6,8 +6,6 @@ SemaphoreHandle_t i2cSemaphore;
 
 void microbit_i2c_setup()
 {
-    // bool success =  WireSlave1.begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
-
     bool success = i2c_begin(MICROBIT_SDA, MICROBIT_SCL, I2C_SLAVE_ADDR);
 
     if (!success)
@@ -17,11 +15,9 @@ void microbit_i2c_setup()
             delay(100);
     }
 
-    //WireSlave1.onReceive(receiveEvent);
-    //WireSlave1.onRequest(requestEvent);
-
     pinMode(BBC_INT, INPUT_PULLUP);
-    attachInterrupt(BBC_INT, handleBBCi2CInterupt, RISING);
+
+    attachInterrupt(BBC_INT, handleBBCi2CInterupt, CHANGE);
 
     xTaskCreatePinnedToCore(
         i2c_rx_task,          /* Task function. */
@@ -46,28 +42,20 @@ void i2c_rx_task(void *pvParameter)
 
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
+                std::string receivedMsg;
 
     for (;;)
     {
-        //10/12/20 - Just wait around to see if we get hailed to send
-        //06/10/21 - or continue after 50ms to see what's happened
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, 50 / portTICK_PERIOD_MS); //  portMAX_DELAY);
-
-        delay(1);
-
-        //WireSlave1.update();
-
         uint8_t inputBuffer[I2C_BUFFER_LENGTH] = {0};
         int16_t inputLen = 0;
 
-        inputLen = i2c_slave_read_buffer(I2C_NUM_1, inputBuffer, I2C_BUFFER_LENGTH, 1);
+        //10/12/20 - Just wait around to see if we get hailed to send
+        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
-        //Serial << "inputLen: " << inputLen << endl;
+        inputLen = i2c_slave_read_buffer(I2C_NUM_1, inputBuffer, I2C_BUFFER_LENGTH, 1);
 
         if (inputLen > 0)
         {
-            std::string receivedMsg;
-
             for (size_t i = 0; i < inputLen; i++)
             {
                 char c = inputBuffer[i]; // receive byte as a character
@@ -75,9 +63,7 @@ void i2c_rx_task(void *pvParameter)
                 receivedMsg += c;
             }
 
-            //receivedMsg.find_first_of
-
-            //Serial << "i2c RX (" << inputLen << ") : " << receivedMsg.c_str() << endl;
+            //Serial << "i2c RX (" << inputLen << ") : " << receivedMsg.c_str() << " @ " << millis() << endl;
 
             std::regex re("(@@)(.*?)(##)");
 
@@ -93,6 +79,13 @@ void i2c_rx_task(void *pvParameter)
 
                 next++;
             }
+
+            //clear down the string
+            receivedMsg.clear();
+        }
+        else
+        {
+            //Serial << "i2c RX (" << inputLen << ")" << endl;
         }
     }
 }
