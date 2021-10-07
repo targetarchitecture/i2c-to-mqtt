@@ -42,7 +42,7 @@ void i2c_rx_task(void *pvParameter)
 
     uint32_t ulNotifiedValue = 0;
     BaseType_t xResult;
-                std::string receivedMsg;
+    std::string receivedMsg;
 
     for (;;)
     {
@@ -148,6 +148,8 @@ void dealWithMessage(std::string message)
 
     if (identifier.compare("RESTART") == 0)
     {
+        Serial << "ESP.restart()" << endl;
+
         //reboot ESP32...
         ESP.restart();
     }
@@ -159,6 +161,8 @@ void dealWithMessage(std::string message)
         xQueueReset(DAC_Queue);
         xQueueReset(Movement_Queue);
         //xQueueReset(MQTT_Queue);
+
+        Serial << "STARTING" << endl;
     }
     else if (identifier.compare("SVOL") == 0 ||
              identifier.compare("SPLAY") == 0 || identifier.compare("SPAUSE") == 0 ||
