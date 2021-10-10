@@ -17,7 +17,9 @@ TaskHandle_t TouchTask;
 
 volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
 
-std::string touchStates = "XXXXXXXXXXXX";
+//volatile std::string touchStates = "XXXXXXXXXXXX";
+
+volatile int touchArray[12] = {};
 
 void touch_setup()
 {
@@ -99,13 +101,15 @@ void touch_task(void *pvParameter)
                     // it if *is* touched and *wasnt* touched before, alert!
                     if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
                     {
-                        touchStates = touchStates.replace(i, 1, "H");
+                          touchArray[i] =1;
+                       // touchStates = touchStates.replace(i, 1, "H");
                     }
 
                     // if it *was* touched and now *isnt*, alert!
                     if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
                     {
-                        touchStates = touchStates.replace(i, 1, "L");
+                            touchArray[i] =0;
+                        //touchStates = touchStates.replace(i, 1, "L");
                     }
                 }
 

@@ -65,11 +65,14 @@ void sound_task(void *pvParameters)
         }
         else if (identifier.compare("SPLAY") == 0)
         {
-            auto trackNum = parts.value1;
-            trackNum = constrain(trackNum, 0, 2999);
+            auto folderNum = parts.value1;
+            folderNum = constrain(folderNum, 1, 99);
+
+            auto trackNum = parts.value2;
+            trackNum = constrain(trackNum, 1, 999);
 
             delay(commandPause);
-            sound.play(trackNum);
+            sound.playFolder(folderNum, trackNum);
             delay(commandPause);
         }
         else if (identifier.compare("SPAUSE") == 0)

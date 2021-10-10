@@ -4,12 +4,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 
 SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
 
-std::string swithStates = "XXXXXXXXXXXXXXX";
+//volatile std::string swithStates = "XXXXXXXXXXXXXXX";
+
+volatile int switchArray[16] = {};
 
 void switch_setup()
 {
@@ -79,18 +82,7 @@ void switch_task(void *pvParameters)
             //quickly read all of the pins and save the state
             for (size_t i = 0; i < 16; i++)
             {
-                if (switches.digitalRead(i) == LOW)
-                {
-                    swithStates = swithStates.replace(i, 1, "L");
-                }
-                else if (switches.digitalRead(i) == HIGH)
-                {
-                    swithStates = swithStates.replace(i, 1, "H");
-                }
-                else
-                {
-                    swithStates = swithStates.replace(i, 1, "X");
-                }
+                switchArray[i] = switches.digitalRead(i);
             }
 
             checkI2Cerrors("switch (switch_task end)");

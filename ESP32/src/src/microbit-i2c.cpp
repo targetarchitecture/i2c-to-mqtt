@@ -90,33 +90,6 @@ void i2c_rx_task(void *pvParameter)
     }
 }
 
-// function that executes whenever a complete and valid packet is received from BBC (i2c Master)
-// void receiveEvent(int howMany)
-// {
-//     std::string receivedMsg;
-
-//     while (1 < WireSlave1.available()) // loop through all but the last byte
-//     {
-//         char c = WireSlave1.read(); // receive byte as a character
-
-//         receivedMsg += c;
-//     }
-
-//     char c = WireSlave1.read(); // receive byte as an integer
-
-//     receivedMsg += c;
-
-//     //this bit here needs to set -up the message to send back
-//     dealWithMessage(receivedMsg);
-// }
-
-// void requestEvent()
-// {
-//     //  Serial << "TX: " << requestMessage.c_str() << endl;
-
-//     //WireSlave1.write("TEST");
-// }
-
 void i2c_tx_task(std::string message)
 {
     message = "@@" + message + "##";
@@ -127,11 +100,6 @@ void i2c_tx_task(std::string message)
 
     i2c_reset_tx_fifo(I2C_NUM_1);
     i2c_slave_write_buffer(I2C_NUM_1, txBuffer, sizeof(txBuffer), 2000 / portTICK_RATE_MS); // 0);
-
-    // for (size_t i = 0; i < sizeof(txBuffer); i++)
-    // {
-    //     Serial << "txBuffer[" << i << "]=" << txBuffer[i] << endl;
-    // }
 
     //Serial << "TX: " << message.c_str() << endl;
 }
@@ -218,15 +186,40 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("SUPDATE") == 0)
     {
-        std::string requestMessage = swithStates;
+        std::string swithStates;
 
-        i2c_tx_task(requestMessage);
+        for (size_t i = 0; i < 16; i++)
+        {
+            if (switchArray[i] == LOW)
+            {
+                swithStates.append("L");
+            }
+            else
+            {
+                swithStates.append("H");
+            }
+        }
+
+        i2c_tx_task(swithStates);
     }
     else if (identifier.compare("TUPDATE") == 0)
     {
-        std::string requestMessage = touchStates;
+        std::string touchStates;
 
-        i2c_tx_task(requestMessage);
+        for (uint8_t i = 0; i < 12; i++)
+        {
+            // it if *is* touched and *wasnt* touched before, alert!
+            if (touchArray[i] == 1)
+            {
+                touchStates.append("H");
+            }
+            else
+            {
+                touchStates.append("L");
+            }
+        }
+
+        i2c_tx_task(touchStates);
     }
     else if (identifier.compare("TTHRSLD") == 0 || identifier.compare("TBOUNCE") == 0)
     {

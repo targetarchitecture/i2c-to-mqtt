@@ -34,7 +34,7 @@ void DAC_task(void *pvParameters)
 
         //Serial << "DAC_Queue: " << identifier.c_str() << endl;
 
-        DACvalue = constrain(parts.value1, 0, 254);
+        DACvalue = constrain(parts.value1, 0, 255);
 
         if (identifier.compare("DIAL1") == 0)
         {

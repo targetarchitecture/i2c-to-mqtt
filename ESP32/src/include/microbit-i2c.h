@@ -33,8 +33,8 @@ void dealWithMessage(std::string message);
 
 extern void touch_deal_with_message(messageParts message);
 
-extern std::string swithStates;
-extern std::string touchStates;
+extern volatile int switchArray[16];
+extern volatile int touchArray[12];
 extern volatile int32_t encoder2Count;
 extern volatile int32_t encoder1Count;
 extern volatile int BusyPin;
