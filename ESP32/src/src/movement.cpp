@@ -108,7 +108,7 @@ void movement_task(void *pvParameters)
         //wait for new movement command in the queue
         xQueueReceive(Movement_Queue, &parts, portMAX_DELAY);
 
-        std::string identifier = parts.identifier;
+        std::string identifier = parts.identifier;       
 
         //OK OK - What ever your doing stop the servo task first
         auto stopPin = parts.value1;
@@ -125,10 +125,10 @@ void movement_task(void *pvParameters)
         else if (identifier.compare("MANGLE") == 0)
         {
             //Set servo to angle
-            auto pin = parts.value1;
-            auto angle = parts.value2;
-            auto minPulse = parts.value3;
-            auto maxPulse = parts.value4;
+            int16_t pin = parts.value1;
+            int16_t angle = parts.value2;
+            int16_t minPulse = parts.value3;
+            int16_t maxPulse = parts.value4;
 
             //Serial << "setServoAngle(" << pin << "," << angle << "," << minPulse << "," << maxPulse << ")" << endl;
 
@@ -137,12 +137,14 @@ void movement_task(void *pvParameters)
         else if (identifier.compare("MLINEAR") == 0)
         {
             //Set servo to angle.
-            auto pin = parts.value1;
-            auto toDegree = parts.value2;
-            auto fromDegree = parts.value3;
-            auto duration = parts.value4;
-            auto minPulse = parts.value5;
-            auto maxPulse = parts.value6;
+            int16_t pin = parts.value1;
+            int16_t toDegree = parts.value2;
+            int16_t fromDegree = parts.value3;
+            int16_t duration = parts.value4;
+            int16_t minPulse = parts.value5;
+            int16_t maxPulse = parts.value6;
+
+            //Serial << "motion: " << identifier.c_str() << endl;
 
             setServoEase(pin, LinearInOut, toDegree, fromDegree, duration, minPulse, maxPulse);
         }
@@ -412,7 +414,7 @@ void ServoEasingTask(void *pvParameter)
             PWM = fromDegreeMapped + easedPosition;
         }
 
-        //Serial.printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, servos[0].PWM, t, servos[0]._change, servos[0]._duration);
+        //Serial.printf("i: %d \t easedPosition: %f \t PWM: %i \t t: %f \t %f \t %f \n", i, easedPosition, PWM, t, servos[0].toDegree, servos[0].fromDegree);
 
         //only send if a differance to reduce i2c traffic
         if (PWM != previousPWM)

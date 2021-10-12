@@ -12,6 +12,10 @@ Rainbow Sparkle Unicorn - SN7
 #include <iostream>
 #include <Streaming.h>
 
+#include "FS.h"
+#include <LITTLEFS.h>
+#include <WiFi.h>
+
 #include "messageParts.h"
 #include "microbit-i2c.h"
 #include "sound.h"
@@ -22,6 +26,7 @@ Rainbow Sparkle Unicorn - SN7
 #include "light.h"
 #include "switch.h"
 #include "movement.h"
+#include "IoT.h"
 
 void checkI2Cerrors(std::string area);
 void runTests();
@@ -125,6 +130,10 @@ void checkI2Cerrors(std::string area)
 
 void loop()
 {
+
+
+
+
   delay(1000);
 }
 

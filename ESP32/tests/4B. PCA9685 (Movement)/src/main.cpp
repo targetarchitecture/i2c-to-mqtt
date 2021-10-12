@@ -34,7 +34,7 @@ void setup()
 
   char cmd[MAXBBCMESSAGELENGTH];
 
-  sprintf(cmd, "V2,0,110,100,500");
+  sprintf(cmd, "V2,8,110,100,500");
   xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
 
   // delay(500);
@@ -56,11 +56,11 @@ void loop()
 {
   char cmd[MAXBBCMESSAGELENGTH];
 
-  sprintf(cmd, "V3,0,90,130,5,100,500");
+  sprintf(cmd, "V3,8,90,130,5,100,500");
   xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
   delay(6000);
 
-  sprintf(cmd, "V3,0,130,90,5,100,500");
+  sprintf(cmd, "V3,8,130,90,5,100,500");
   xQueueSend(Movement_Queue, &cmd, portMAX_DELAY);
   delay(6000);
 }
