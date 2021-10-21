@@ -17,7 +17,7 @@ void microbit_i2c_setup()
 
     pinMode(BBC_INT, INPUT_PULLUP);
 
-    attachInterrupt(BBC_INT, handleBBCi2CInterupt, CHANGE);
+    attachInterrupt(BBC_INT, handleBBCi2CInterupt, RISING); //CHANGE
 
     xTaskCreatePinnedToCore(
         i2c_rx_task,          /* Task function. */
@@ -98,8 +98,9 @@ void i2c_tx_task(std::string message)
 
     std::copy(message.begin(), message.end(), txBuffer);
 
-    i2c_reset_tx_fifo(I2C_NUM_1);
-    i2c_slave_write_buffer(I2C_NUM_1, txBuffer, sizeof(txBuffer), 2000 / portTICK_RATE_MS); // 0);
+    //removed reset 12.10.21
+    //i2c_reset_tx_fifo(I2C_NUM_1);
+    i2c_slave_write_buffer(I2C_NUM_1, txBuffer, sizeof(txBuffer), 1); //2000 / portTICK_RATE_MS); // 0);
 
     //Serial << "TX: " << message.c_str() << endl;
 }
@@ -140,7 +141,7 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("SBUSY") == 0)
     {
-        std::string requestMessage = std::to_string(digitalRead(DFPLAYER_BUSY));
+        std::string requestMessage = "SBUSY:" + std::to_string(digitalRead(DFPLAYER_BUSY));
 
         i2c_tx_task(requestMessage);
     }
@@ -162,31 +163,31 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("ROTARY1") == 0)
     {
-        std::string requestMessage = std::to_string(encoder1Count);
+        std::string requestMessage = "ROTARY1:" + std::to_string(encoder1Count);
 
         i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("ROTARY2") == 0)
     {
-        std::string requestMessage = std::to_string(encoder2Count);
+        std::string requestMessage = "ROTARY2:" + std::to_string(encoder2Count);
 
         i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SLIDER1") == 0)
     {
-        std::string requestMessage = std::to_string(analogRead(ADC1));
+        std::string requestMessage = "SLIDER1:" + std::to_string(analogRead(ADC1));
 
         i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SLIDER2") == 0)
     {
-        std::string requestMessage = std::to_string(analogRead(ADC2));
+        std::string requestMessage = "SLIDER2:" + std::to_string(analogRead(ADC2));
 
         i2c_tx_task(requestMessage);
     }
     else if (identifier.compare("SUPDATE") == 0)
     {
-        std::string swithStates;
+        std::string swithStates = "SUPDATE:";
 
         for (size_t i = 0; i < 16; i++)
         {
@@ -204,7 +205,7 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("TUPDATE") == 0)
     {
-        std::string touchStates;
+        std::string touchStates = "TUPDATE:";;
 
         for (uint8_t i = 0; i < 12; i++)
         {
