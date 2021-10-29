@@ -1,0 +1,175 @@
+#include <Arduino.h>
+#include "microbit-uart.h"
+
+TaskHandle_t MicrobitRXTask;
+TaskHandle_t MicrobitTXTask;
+
+QueueHandle_t Microbit_Receive_Queue;
+QueueHandle_t Microbit_Transmit_Queue;
+
+void microbit_setup()
+{
+    Microbit_Transmit_Queue = xQueueCreate(50, MAXBBCMESSAGELENGTH);
+
+    /* Configure parameters of an UART driver, communication pins and install the driver */
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+    uart_param_config(UART_NUM_2, &uart_config);
+
+    //Set UART pins to the BBC Microbit (UART2)
+    uart_set_pin(BBC_UART_NUM, ESP_TX_MICROBIT_RX, ESP_RX_MICROBIT_TX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    //Install UART driver, and get the queue (buffer size = 1024)
+    uart_driver_install(BBC_UART_NUM, RX_BUF_SIZE, TX_BUF_SIZE, 50, &Microbit_Receive_Queue, 0);
+
+    //define the pattern (0x7f) to look for in the UART RX buffer
+    //uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0);
+
+    uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0);
+
+    uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
+
+    //Create a task to handler UART event from ISR
+    xTaskCreate(microbit_receive_task, "Microbit RX Task", 2048, NULL, BBC_RX_Priority, &MicrobitRXTask);
+
+    //Create a task to handle send UART data to Microbit
+    xTaskCreatePinnedToCore(microbit_transmit_task, "Microbit TX Task", 2048, NULL, BBC_TX_Priority, &MicrobitTXTask, 1);
+}
+
+void microbit_receive_task(void *pvParameters)
+{
+    uart_event_t uart_event;
+    uint8_t *received_buffer = (uint8_t *)malloc(RX_BUF_SIZE);
+
+    std::string receivedMsg;
+
+    size_t datalen;
+
+    while (true)
+    {
+        if (xQueueReceive(Microbit_Receive_Queue, &uart_event, portMAX_DELAY))
+        {
+            switch (uart_event.type)
+            {
+            case UART_DATA:
+            {
+                ESP_LOGI(TAG, "UART_DATA");
+                uart_read_bytes(UART_NUM_2, received_buffer, uart_event.size, portMAX_DELAY);
+
+
+                receivedMsg.clear();
+
+                for (size_t i = 0; i < uart_event.size; i++)
+                {
+                    char c = received_buffer[i]; // receive byte as a character
+
+                    receivedMsg += c;
+                }
+
+                //Serial << "RX:" << receivedMsg.c_str() << endl;
+
+                dealWithMessage(receivedMsg);
+            }
+            break;
+            case UART_BREAK:
+            {
+                ESP_LOGI(TAG, "UART_BREAK");
+            }
+            break;
+            case UART_BUFFER_FULL:
+            {
+                ESP_LOGI(TAG, "UART_BUFFER_FULL");
+            }
+            break;
+            case UART_FIFO_OVF:
+            {
+                ESP_LOGI(TAG, "UART_FIFO_OVF");
+                uart_flush_input(UART_NUM_2);
+                xQueueReset(Microbit_Receive_Queue);
+            }
+            break;
+            case UART_FRAME_ERR:
+            {
+                ESP_LOGI(TAG, "UART_FRAME_ERR");
+            }
+            break;
+            case UART_PARITY_ERR:
+            {
+                ESP_LOGI(TAG, "UART_PARITY_ERR");
+            }
+            break;
+            case UART_DATA_BREAK:
+            {
+                ESP_LOGI(TAG, "UART_DATA_BREAK");
+            }
+            break;
+            case UART_PATTERN_DET:
+            {
+                ESP_LOGI(TAG, "UART_PATTERN_DET");
+                uart_get_buffered_data_len(BBC_UART_NUM, &datalen);
+                int pos = uart_pattern_pop_pos(BBC_UART_NUM);
+                ESP_LOGI(TAG, "Detected %d pos %d", datalen, pos);
+                uart_read_bytes(BBC_UART_NUM, received_buffer, datalen - PATTERN_LEN, pdMS_TO_TICKS(100));
+                uint8_t pat[PATTERN_LEN + 1];
+                memset(pat, 0, sizeof(pat));
+                uart_read_bytes(BBC_UART_NUM, pat, PATTERN_LEN, pdMS_TO_TICKS(100));
+                printf("data: %.*s === pattern: %s\n", datalen - PATTERN_LEN, received_buffer, pat);
+            }
+            break;
+            default:
+            {
+            }
+            break;
+            }
+        }
+    }
+
+    vTaskDelete(NULL);
+}
+
+void sendToMicrobit(std::string msg)
+{
+    //Serial << "sendToMicrobit [msg]:" << msg.c_str() << endl;
+
+    //the queue needs to work with a copy
+    char queuedMsg[MAXBBCMESSAGELENGTH];
+    strcpy(queuedMsg, msg.c_str());
+
+    xQueueSend(Microbit_Transmit_Queue, &queuedMsg, portMAX_DELAY);
+}
+
+void microbit_transmit_task(void *pvParameters)
+{
+    // Serial.printf("Microbit TX task is on core %i\n", xPortGetCoreID());
+
+    for (;;)
+    {
+        char msg[MAXBBCMESSAGELENGTH + 1] = {0};
+
+        if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
+        {
+
+            //Serial << "TX:" << msg << endl;
+
+            //append # to the end so the microbit knows the end of the line
+            strcat(msg, "\n");
+
+            int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
+
+            //Serial.printf(">> BBC TX: %s @ %i @ %i @ %i\n", msg, bytes, strlen(msg), millis());
+
+            //Serial.printf(">> BBC TX: %s\n", msg);
+
+            //Serial << ">> BBC TX:" << msg << endl;
+
+            //Added on 1/12/20 to try to stop flooding
+            delay(10);
+        }
+    }
+
+    vTaskDelete(NULL);
+}
