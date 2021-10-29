@@ -2,6 +2,13 @@
 #include "sound.h"
 #include "DFRobotDFPlayerMini.h"
 
+/*
+Mode 1: Files in root directory: Played in create date order, file names do not matter
+Mode 2: Files in /01…/99 directories: Uses THREE digit file names (001.mp3)
+Mode 3: Files in /mp3 directory: Uses FOUR digit files (0001.mp3) names played in that order (this is what I needed)
+*/
+ 
+
 DFRobotDFPlayerMini sound;
 
 TaskHandle_t SoundTask;
