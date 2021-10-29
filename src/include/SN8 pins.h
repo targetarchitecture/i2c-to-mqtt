@@ -34,4 +34,4 @@
 
 //interupts
 #define TOUCH_INT 36
-#define SWITCH_INT 34
+//#define SWITCH_INT 34

@@ -102,6 +102,8 @@ void dealWithMessage(std::string message)
             }
         }
 
+        //Serial << swithStates.c_str() << endl;
+
         sendToMicrobit(swithStates);
     }
     else if (identifier.compare("TUPDATE") == 0)
