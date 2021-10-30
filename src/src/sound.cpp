@@ -27,7 +27,7 @@ void sound_setup()
         &SoundTask, 1);      /* Task handle to keep track of created task */
 
     xTaskCreatePinnedToCore(
-        busy_task,
+        sound_busy_task,
         "Busy Task",
         2048,
         NULL,
@@ -36,7 +36,7 @@ void sound_setup()
         1);
 }
 
-void busy_task(void *pvParameter)
+void sound_busy_task(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);

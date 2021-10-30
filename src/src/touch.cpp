@@ -10,11 +10,11 @@ Adafruit_MPR121 cap = Adafruit_MPR121();
 
 // Keeps track of the last pins touched, so we know when buttons are 'released'
 volatile uint16_t lasttouched = 0;
-volatile uint16_t currtouched = 0;
+//volatile uint16_t currtouched = 0;
 
 TaskHandle_t TouchTask;
 
-volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
+//volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
 
 volatile int touchArray[12] = {};
 
@@ -34,10 +34,6 @@ void touch_setup()
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    //set-up the interupt
-    //pinMode(TOUCH_INT, INPUT_PULLUP);
-    //attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
-
     xTaskCreatePinnedToCore(
         &touch_task,
         "Touch Task",
@@ -48,10 +44,6 @@ void touch_setup()
         1);
 }
 
-// void IRAM_ATTR handleTouchInterupt()
-// {
-//     xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
-// }
 
 void touch_task(void *pvParameter)
 {
@@ -60,24 +52,11 @@ void touch_task(void *pvParameter)
     // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    //uint32_t ulNotifiedValue = 0;
-    //BaseType_t xResult;
-
-    //unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
-
     //read once and set array as the baseline
     readAndSetArray();
 
     for (;;)
     {
-        //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
-        //xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
-
-        //added a debouncing time delay
-        //if (millis() - lastDebounceTime >= debounceDelay)
-        //{
-        //lastDebounceTime = millis();
-
         delay(100);
 
         //read and set array returning the current touched
@@ -128,9 +107,9 @@ void touch_deal_with_message(messageParts message)
     }
 }
 
+//function to set the device and set the array
 uint16_t readAndSetArray()
 {
-
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 

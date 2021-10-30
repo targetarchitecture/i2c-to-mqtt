@@ -51,25 +51,29 @@ void switch_task(void *pvParameters)
 
     for (;;)
     {
-        //wait for the i2c semaphore flag to become available
-        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-        checkI2Cerrors("switch (switch_task start)");
-
-        //quickly read all of the pins and save the state
-        for (size_t i = 0; i < 16; i++)
-        {
-            switchArray[i] = switches.digitalRead(i);
-        }
-
-        checkI2Cerrors("switch (switch_task end)");
-
-        //give back the i2c flag for the next task
-        xSemaphoreGive(i2cSemaphore);
-
         // put a delay so it isn't overwhelming
         delay(100);
     }
 
     vTaskDelete(NULL);
+}
+
+//function to set the device and set the array
+uint16_t readAndSetArray()
+{
+    //wait for the i2c semaphore flag to become available
+    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+    checkI2Cerrors("switch (switch_task start)");
+
+    //quickly read all of the pins and save the state
+    for (size_t i = 0; i < 16; i++)
+    {
+        switchArray[i] = switches.digitalRead(i);
+    }
+
+    checkI2Cerrors("switch (switch_task end)");
+
+    //give back the i2c flag for the next task
+    xSemaphoreGive(i2cSemaphore);
 }
