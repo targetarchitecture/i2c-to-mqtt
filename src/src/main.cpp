@@ -145,11 +145,11 @@ void runTests()
   dealWithMessage("MANGLE,15,45,100,505");
   dealWithMessage("LLEDALLON");
 
-  dealWithMessage("TUPDATE");
+  dealWithMessage("TSTATE");
 
   Serial << "Touched: " << requestMessage.c_str() << endl;
 
-  dealWithMessage("SUPDATE");
+  dealWithMessage("SSTATE");
 
   Serial << "Switched: " << requestMessage.c_str() << endl;
 

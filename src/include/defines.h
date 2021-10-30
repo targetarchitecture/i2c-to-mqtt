@@ -18,6 +18,7 @@
 #define encoders_task_Priority 1
 #define light_task_Priority 1
 #define sound_task_Priority 1
+#define sound_busy_task_Priority 1
 
 #define BBC_RX_Priority 10
 #define BBC_TX_Priority 2

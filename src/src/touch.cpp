@@ -35,8 +35,8 @@ void touch_setup()
     xSemaphoreGive(i2cSemaphore);
 
     //set-up the interupt
-    pinMode(TOUCH_INT, INPUT_PULLUP);
-    attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
+    //pinMode(TOUCH_INT, INPUT_PULLUP);
+    //attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
 
     xTaskCreatePinnedToCore(
         &touch_task,
@@ -48,10 +48,10 @@ void touch_setup()
         1);
 }
 
-void IRAM_ATTR handleTouchInterupt()
-{
-    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
-}
+// void IRAM_ATTR handleTouchInterupt()
+// {
+//     xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
+// }
 
 void touch_task(void *pvParameter)
 {
@@ -60,58 +60,51 @@ void touch_task(void *pvParameter)
     // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    uint32_t ulNotifiedValue = 0;
-    BaseType_t xResult;
+    //uint32_t ulNotifiedValue = 0;
+    //BaseType_t xResult;
 
-    unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
+    //unsigned long lastDebounceTime = 0; // the last time each output pin was toggled
+
+    //read once and set array as the baseline
+    readAndSetArray();
 
     for (;;)
     {
         //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
-        xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+        //xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
 
         //added a debouncing time delay
-        if (millis() - lastDebounceTime >= debounceDelay)
+        //if (millis() - lastDebounceTime >= debounceDelay)
+        //{
+        //lastDebounceTime = millis();
+
+        delay(100);
+
+        //read and set array returning the current touched
+        auto currtouched = readAndSetArray();
+
+        //only bother sending a touch update command if the touch changed
+        if (currtouched != lasttouched)
         {
-            lastDebounceTime = millis();
+            std::string touchStates = "TUPDATE:";
 
-            delay(1);
-
-            //wait for the i2c semaphore flag to become available
-            xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-            checkI2Cerrors("Touch (start)");
-
-            // Get the currently touched pads
-            uint16_t currtouched = cap.touched();
-
-            checkI2Cerrors("Touch (end)");
-
-            //give back the i2c flag for the next task
-            xSemaphoreGive(i2cSemaphore);
-
-            //only bother sending if the touch changed
-            if (currtouched != lasttouched)
+            for (uint8_t i = 0; i < 12; i++)
             {
-                for (uint8_t i = 0; i < 12; i++)
+                if (touchArray[i] == 1)
                 {
-                    // it if *is* touched and *wasnt* touched before, alert!
-                    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
-                    {
-                        touchArray[i] = 1;
-                    }
-
-                    // if it *was* touched and now *isnt*, alert!
-                    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
-                    {
-                        touchArray[i] = 0;
-                    }
+                    touchStates.append("H");
                 }
-
-                //remember last touch
-                lasttouched = currtouched;
+                else
+                {
+                    touchStates.append("L");
+                }
             }
+
+            sendToMicrobit(touchStates);
         }
+
+        //remember last touch
+        lasttouched = currtouched;
     }
     vTaskDelete(NULL);
 }
@@ -133,4 +126,39 @@ void touch_deal_with_message(messageParts message)
     {
         debounceDelay = message.value1;
     }
+}
+
+uint16_t readAndSetArray()
+{
+
+    //wait for the i2c semaphore flag to become available
+    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+    checkI2Cerrors("Touch (start)");
+
+    // Get the currently touched pads
+    uint16_t currtouched = cap.touched();
+
+    checkI2Cerrors("Touch (end)");
+
+    //give back the i2c flag for the next task
+    xSemaphoreGive(i2cSemaphore);
+
+    //always update the array for the touch state command
+    for (uint8_t i = 0; i < 12; i++)
+    {
+        // it if *is* touched and *wasnt* touched before, alert!
+        if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
+        {
+            touchArray[i] = 1;
+        }
+
+        // if it *was* touched and now *isnt*, alert!
+        if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
+        {
+            touchArray[i] = 0;
+        }
+    }
+
+    return currtouched;
 }

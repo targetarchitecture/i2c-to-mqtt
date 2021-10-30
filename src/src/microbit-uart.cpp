@@ -60,7 +60,6 @@ void microbit_receive_task(void *pvParameters)
                 ESP_LOGI(TAG, "UART_DATA");
                 uart_read_bytes(UART_NUM_2, received_buffer, uart_event.size, portMAX_DELAY);
 
-
                 receivedMsg.clear();
 
                 for (size_t i = 0; i < uart_event.size; i++)
@@ -133,8 +132,6 @@ void microbit_receive_task(void *pvParameters)
 
 void sendToMicrobit(std::string msg)
 {
-    //Serial << "sendToMicrobit [msg]:" << msg.c_str() << endl;
-
     //the queue needs to work with a copy
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, msg.c_str());
@@ -144,8 +141,6 @@ void sendToMicrobit(std::string msg)
 
 void microbit_transmit_task(void *pvParameters)
 {
-    // Serial.printf("Microbit TX task is on core %i\n", xPortGetCoreID());
-
     for (;;)
     {
         char msg[MAXBBCMESSAGELENGTH + 1] = {0};
@@ -159,12 +154,6 @@ void microbit_transmit_task(void *pvParameters)
             strcat(msg, "\n");
 
             int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
-
-            //Serial.printf(">> BBC TX: %s @ %i @ %i @ %i\n", msg, bytes, strlen(msg), millis());
-
-            //Serial.printf(">> BBC TX: %s\n", msg);
-
-            //Serial << ">> BBC TX:" << msg << endl;
 
             //Added on 1/12/20 to try to stop flooding
             delay(10);

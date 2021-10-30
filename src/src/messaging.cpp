@@ -86,9 +86,9 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(requestMessage);
     }
-    else if (identifier.compare("SUPDATE") == 0)
+    else if (identifier.compare("SSTATE") == 0)
     {
-        std::string swithStates = "SUPDATE:";
+        std::string swithStates = "SSTATE:";
 
         for (size_t i = 0; i < 16; i++)
         {
@@ -106,13 +106,12 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(swithStates);
     }
-    else if (identifier.compare("TUPDATE") == 0)
+    else if (identifier.compare("TSTATE") == 0)
     {
-        std::string touchStates = "TUPDATE:";
+        std::string touchStates = "TSTATE:";
 
         for (uint8_t i = 0; i < 12; i++)
         {
-            // it if *is* touched and *wasnt* touched before, alert!
             if (touchArray[i] == 1)
             {
                 touchStates.append("H");

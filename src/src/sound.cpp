@@ -7,20 +7,16 @@ Mode 1: Files in root directory: Played in create date order, file names do not 
 Mode 2: Files in /01…/99 directories: Uses THREE digit file names (001.mp3)
 Mode 3: Files in /mp3 directory: Uses FOUR digit files (0001.mp3) names played in that order (this is what I needed)
 */
- 
 
 DFRobotDFPlayerMini sound;
 
 TaskHandle_t SoundTask;
+TaskHandle_t SoundBusyTask;
 
 const int commandPause = 50;
 
 void sound_setup()
 {
-    //Configure serial port pins and busy pin
-    pinMode(DFPLAYER_BUSY, INPUT);
-
-    int BusyPin = digitalRead(DFPLAYER_BUSY);
 
     xTaskCreatePinnedToCore(
         sound_task,          /* Task function. */
@@ -29,6 +25,39 @@ void sound_setup()
         NULL,                /* parameter of the task */
         sound_task_Priority, /* priority of the task */
         &SoundTask, 1);      /* Task handle to keep track of created task */
+
+    xTaskCreatePinnedToCore(
+        busy_task,
+        "Busy Task",
+        2048,
+        NULL,
+        sound_busy_task_Priority,
+        &SoundBusyTask,
+        1);
+}
+
+void busy_task(void *pvParameter)
+{
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("busy_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    //Configure serial port pins and busy pin
+    pinMode(DFPLAYER_BUSY, INPUT);
+
+    int BusyPin = digitalRead(DFPLAYER_BUSY);
+
+    for (;;)
+    {
+        std::string requestMessage = "SBUSY:" + std::to_string(digitalRead(DFPLAYER_BUSY));
+
+        sendToMicrobit(requestMessage);
+
+        delay(500);
+    }
+
+    vTaskDelete(NULL);
 }
 
 void sound_task(void *pvParameters)
@@ -82,9 +111,9 @@ void sound_task(void *pvParameters)
             delay(commandPause);
 
             //Serial << fileCount << endl;
-            
+
             std::string requestMessage = "FILECOUNT:" + std::to_string(fileCount);
-            
+
             //Serial << requestMessage.c_str() << endl;
 
             sendToMicrobit(requestMessage);
