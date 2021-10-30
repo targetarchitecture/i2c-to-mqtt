@@ -1,9 +1,9 @@
 #pragma once
 
- #include "messaging.h"
+#include "messaging.h"
 #include "defines.h"
- #include "SN8 pins.h"
- #include <Streaming.h>
+#include "SN8 pins.h"
+#include <Streaming.h>
 
 void DAC_setup();
 void DAC_task(void *pvParameter);

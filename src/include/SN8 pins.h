@@ -33,5 +33,5 @@
 #define ONBOARDLED 2
 
 //interupts
-#define TOUCH_INT 36
+//#define TOUCH_INT 36
 //#define SWITCH_INT 34

@@ -69,7 +69,7 @@ void microbit_receive_task(void *pvParameters)
                     receivedMsg += c;
                 }
 
-                //Serial << "RX:" << receivedMsg.c_str() << endl;
+                Serial << "RX:" << receivedMsg.c_str() << endl;
 
                 dealWithMessage(receivedMsg);
             }
@@ -148,7 +148,7 @@ void microbit_transmit_task(void *pvParameters)
         if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
         {
 
-            //Serial << "TX:" << msg << endl;
+            Serial << "TX:" << msg << endl;
 
             //append # to the end so the microbit knows the end of the line
             strcat(msg, "\n");

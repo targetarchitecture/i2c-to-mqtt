@@ -17,7 +17,6 @@ const int commandPause = 50;
 
 void sound_setup()
 {
-
     xTaskCreatePinnedToCore(
         sound_task,          /* Task function. */
         "Sound Task",        /* name of task. */
@@ -29,7 +28,7 @@ void sound_setup()
     xTaskCreatePinnedToCore(
         sound_busy_task,
         "Busy Task",
-        2048,
+        4096,
         NULL,
         sound_busy_task_Priority,
         &SoundBusyTask,
@@ -50,7 +49,8 @@ void sound_busy_task(void *pvParameter)
 
     for (;;)
     {
-        std::string requestMessage = "SBUSY:" + std::to_string(digitalRead(DFPLAYER_BUSY));
+        std::string requestMessage = "SBUSY:";
+        requestMessage.append(std::to_string(digitalRead(DFPLAYER_BUSY)));
 
         sendToMicrobit(requestMessage);
 

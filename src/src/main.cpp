@@ -75,6 +75,8 @@ void setup()
   //MQTT_setup();
 
   //call the feature setup methods
+  microbit_setup();
+
   sound_setup();
 
   touch_setup();
@@ -90,8 +92,6 @@ void setup()
   switch_setup();
 
   movement_setup();
-
-  microbit_setup();
 
   //Serial << "SN8 completed in " << millis() << "ms" << endl;
 
