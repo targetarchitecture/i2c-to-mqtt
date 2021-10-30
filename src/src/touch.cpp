@@ -53,14 +53,14 @@ void touch_task(void *pvParameter)
     // Serial.println(uxHighWaterMark);
 
     //read once and set array as the baseline
-    readAndSetArray();
+  lasttouched=  readAndSetTouchArray();
 
     for (;;)
     {
         delay(100);
 
         //read and set array returning the current touched
-        auto currtouched = readAndSetArray();
+        auto currtouched = readAndSetTouchArray();
 
         //only bother sending a touch update command if the touch changed
         if (currtouched != lasttouched)
@@ -99,16 +99,10 @@ void touch_deal_with_message(messageParts message)
 
         cap.setThresholds(touchThreshold, releaseThreshold);
     }
-
-    //overwrite bounce delay..
-    if (identifier.compare("TBOUNCE") == 0)
-    {
-        debounceDelay = message.value1;
-    }
 }
 
 //function to set the device and set the array
-uint16_t readAndSetArray()
+uint16_t readAndSetTouchArray()
 {
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);

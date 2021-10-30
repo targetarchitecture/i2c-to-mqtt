@@ -126,7 +126,7 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(touchStates);
     }
-    else if (identifier.compare("TTHRSLD") == 0 || identifier.compare("TBOUNCE") == 0)
+    else if (identifier.compare("TTHRSLD") == 0 ) //|| identifier.compare("TBOUNCE") == 0)
     {
         touch_deal_with_message(queuedMsg);
     }

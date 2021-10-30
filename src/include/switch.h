@@ -9,9 +9,11 @@
 #include <string>
 #include <vector>
 #include <array>
+#include "messaging.h"
 
 void switch_setup();
 void switch_task(void *pvParameter);
+std::string readAndSetSwitchArray();
 
 extern void POST(uint8_t flashes);
 extern void checkI2Cerrors(std::string area);

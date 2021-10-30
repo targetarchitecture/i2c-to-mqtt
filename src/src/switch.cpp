@@ -6,6 +6,8 @@ SX1509 switches; // Create an SX1509 object to be used throughout
 
 TaskHandle_t SwitchTask;
 
+std::string previousSwitchStates;
+
 volatile byte switchArray[16] = {};
 
 void switch_setup()
@@ -47,19 +49,35 @@ void switch_task(void *pvParameters)
     // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    BaseType_t xResult;
+    previousSwitchStates = readAndSetSwitchArray();
+
+    // BaseType_t xResult;
 
     for (;;)
     {
         // put a delay so it isn't overwhelming
         delay(100);
+
+        std::string SwitchStates = readAndSetSwitchArray();
+
+        //only bother sending a touch update command if the touch changed
+        if (SwitchStates.compare(previousSwitchStates) != 0)
+        {
+            std::string msg = "SUPDATE:";
+            msg.append(SwitchStates);
+
+            sendToMicrobit(msg);
+        }
+
+        //remember last switch states
+        previousSwitchStates = SwitchStates;
     }
 
     vTaskDelete(NULL);
 }
 
 //function to set the device and set the array
-uint16_t readAndSetArray()
+std::string readAndSetSwitchArray()
 {
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
@@ -76,4 +94,21 @@ uint16_t readAndSetArray()
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
+
+    //build the switch states string
+    std::string swithStates;
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        if (switchArray[i] == LOW)
+        {
+            swithStates.append("L");
+        }
+        else
+        {
+            swithStates.append("H");
+        }
+    }
+
+    return swithStates;
 }
