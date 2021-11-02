@@ -23,6 +23,7 @@ typedef struct
     uint32_t value5;
     uint32_t value6;
     uint32_t value7;
+    char part1[100];
 } messageParts;
 
 messageParts processQueueMessage(std::string msg);
