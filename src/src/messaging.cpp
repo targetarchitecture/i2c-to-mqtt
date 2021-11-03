@@ -155,14 +155,14 @@ messageParts processQueueMessage(std::string msg)
         }
         if (index == 1)
         {
-          try
-          {
-          mParts.value1 = std::stoi(part);
-          }
-          catch(const std::exception& e)
-          {
-               strcpy(mParts.part1, part.c_str());
-          }
+            try
+            {
+                mParts.value1 = std::stoi(part);
+            }
+            catch (const std::exception &e)
+            {
+                strcpy(mParts.part1, part.c_str());
+            }
         }
         if (index == 2)
         {

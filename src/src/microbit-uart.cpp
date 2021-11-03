@@ -7,6 +7,11 @@ TaskHandle_t MicrobitTXTask;
 QueueHandle_t Microbit_Receive_Queue;
 QueueHandle_t Microbit_Transmit_Queue;
 
+//#define SHOW_SERIAL 1
+
+
+
+
 void microbit_setup()
 {
     Microbit_Transmit_Queue = xQueueCreate(50, MAXBBCMESSAGELENGTH);
@@ -69,7 +74,9 @@ void microbit_receive_task(void *pvParameters)
                     receivedMsg += c;
                 }
 
+#if SHOW_SERIAL 
                 Serial << "RX:" << receivedMsg.c_str() << endl;
+#endif
 
                 dealWithMessage(receivedMsg);
             }
@@ -147,8 +154,9 @@ void microbit_transmit_task(void *pvParameters)
 
         if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
         {
-
+#if SHOW_SERIAL 
             Serial << "TX:" << msg << endl;
+#endif
 
             //append # to the end so the microbit knows the end of the line
             strcat(msg, "\n");

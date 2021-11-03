@@ -95,7 +95,7 @@ void setup()
 
   //Serial << "SN8 completed in " << millis() << "ms" << endl;
 
-  //runTests();
+ // runTests();
 }
 
 void POST(uint8_t flashes)
@@ -137,64 +137,10 @@ void loop()
 
 void runTests()
 {
-  dealWithMessage("STARTING");
+ // dealWithMessage("STARTING ");
+ // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
 
-  dealWithMessage("DIAL1,128");
-  dealWithMessage("DIAL2,254");
-
-  dealWithMessage("MANGLE,15,45,100,505");
-  dealWithMessage("LLEDALLON");
-
-  dealWithMessage("TSTATE");
-
-  Serial << "Touched: " << requestMessage.c_str() << endl;
-
-  dealWithMessage("SSTATE");
-
-  Serial << "Switched: " << requestMessage.c_str() << endl;
-
-  dealWithMessage("ROTARY1");
-
-  Serial << "ROTARY1: " << requestMessage.c_str() << endl;
-
-  dealWithMessage("ROTARY2");
-
-  Serial << "ROTARY2: " << requestMessage.c_str() << endl;
-
-  dealWithMessage("SLIDER1");
-
-  Serial << "SLIDER1: " << requestMessage.c_str() << endl;
-
-  dealWithMessage("SLIDER2");
-
-  Serial << "SLIDER2: " << requestMessage.c_str() << endl;
-
-  delay(1000);
-
-  dealWithMessage("SBUSY");
-
-  Serial << "SBUSY: " << requestMessage.c_str() << endl;
-
-  delay(1000);
-
-  dealWithMessage("SPLAY,1");
-  delay(1000);
-
-  dealWithMessage("SBUSY");
-
-  Serial << "SBUSY: " << requestMessage.c_str() << endl;
-
-  delay(1000);
-  dealWithMessage("SPAUSE");
-  delay(1000);
-  dealWithMessage("SRESUME");
-  delay(1000);
-  dealWithMessage("SSTOP");
-
-  dealWithMessage("SBUSY");
-
-  Serial << "SBUSY: " << requestMessage.c_str() << endl;
-
-  delay(5000);
-  dealWithMessage("SPLAY,3");
+ // dealWithMessage("MPWM,8,500 ");
 }
+
+//80,530

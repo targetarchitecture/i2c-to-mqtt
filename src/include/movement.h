@@ -30,7 +30,8 @@ struct servoPWM
   int pin;
 };
 
-void ServoEasingTask(void *pvParameter);
+void ServoEasingTaskV2(void *pvParameter);
+void ServoEasingTaskV1(void *pvParameter);
 double mapAngles(double x, double in_min, double in_max, double out_min, double out_max);
 void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse);
 void stopServo(const int16_t pin);
