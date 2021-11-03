@@ -9,9 +9,6 @@ QueueHandle_t Microbit_Transmit_Queue;
 
 //#define SHOW_SERIAL 1
 
-
-
-
 void microbit_setup()
 {
     Microbit_Transmit_Queue = xQueueCreate(50, MAXBBCMESSAGELENGTH);

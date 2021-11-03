@@ -126,14 +126,13 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(touchStates);
     }
-    else if (identifier.compare("TTHRSLD") == 0) //|| identifier.compare("TBOUNCE") == 0)
+    else if (identifier.compare("TTHRSLD") == 0)
     {
         touch_deal_with_message(queuedMsg);
     }
-    else if (identifier.compare("DEBUG") == 0) //|| identifier.compare("TBOUNCE") == 0)
+    else if (identifier.compare("DEBUG") == 0)
     {
-        Serial << queuedMsg.part1 << endl;
-        //  touch_deal_with_message(queuedMsg);
+        Serial << queuedMsg.part1 << queuedMsg.value1 << endl;
     }
 }
 
@@ -157,11 +156,16 @@ messageParts processQueueMessage(std::string msg)
         {
             try
             {
+                // Serial << msg.c_str() << endl;
+                // Serial << part.c_str() << endl;
+
                 mParts.value1 = std::stoi(part);
             }
             catch (const std::exception &e)
             {
                 strcpy(mParts.part1, part.c_str());
+
+                //Serial << mParts.part1 << endl;
             }
         }
         if (index == 2)
