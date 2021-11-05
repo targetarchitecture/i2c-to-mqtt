@@ -26,7 +26,8 @@ Rainbow Sparkle Unicorn - SN8
 #include "light.h"
 #include "switch.h"
 #include "movement.h"
-#include "IoT.h"
+//#include "IoT.h"
+#include "WifiMgr.h"
 
 void checkI2Cerrors(std::string area);
 void runTests();
@@ -47,11 +48,11 @@ void setup()
 {
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
 
-  //Set UART log level
-  esp_log_level_set("SN8", ESP_LOG_VERBOSE);
-
   //stop bluetooth
   btStop();
+
+  //Set UART log level
+  esp_log_level_set("SN8", ESP_LOG_VERBOSE);
 
   //start i2c
   Wire.begin(SDA, SCL);
@@ -71,15 +72,15 @@ void setup()
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
 
-  MQTT_Queue = xQueueCreate(50, sizeof(UARTMESSAGELENGTH));
-  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
+  //MQTT_Queue = xQueueCreate(50, sizeof(UARTMESSAGELENGTH));
+  //MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   //get wifi going first as this seems to be problematic
-  MQTT_setup();
+  Wifi_setup();
+  //MQTT_setup();
 
   //call the feature setup methods
   microbit_setup();
-
 
   sound_setup();
 
@@ -97,7 +98,7 @@ void setup()
 
   movement_setup();
 
-  //Serial << "SN8 completed in " << millis() << "ms" << endl;
+  Serial << "SN9 completed in " << millis() << "ms" << endl;
 
  // runTests();
 }

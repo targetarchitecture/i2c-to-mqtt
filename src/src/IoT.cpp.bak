@@ -43,7 +43,7 @@ void MQTT_setup()
 {
   pinMode(ONBOARDLED, OUTPUT);
 
-  //MQTT_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
+  MQTT_Publish_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
   MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   xTaskCreatePinnedToCore(

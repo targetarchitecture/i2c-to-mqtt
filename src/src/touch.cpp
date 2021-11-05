@@ -28,8 +28,8 @@ void touch_setup()
     {
         Serial.println("MPR121 not found, check wiring?");
 
-        POST(3);
-    }
+        POST(3);    
+    } 
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
