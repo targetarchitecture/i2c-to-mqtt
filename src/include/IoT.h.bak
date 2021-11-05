@@ -13,14 +13,17 @@ void MQTT_setup();
 void checkMQTTconnection();
 void Wifi_connect();
 
+void subscribe(std::string topic);
+void unsubscribe(std::string topic);
+
 void MQTT_deal_with_message(char msg[UARTMESSAGELENGTH]);
 void MQTT_task(void *pvParameter);
 void setupSubscriptions();
 void recieveMessage(char *topic, byte *payload, unsigned int length);
-void MQTTClient_task(void *pvParameter);
-void sendMQTTConnectionStatus();
+void MQTT_Publish_task(void *pvParameter);
+//void sendMQTTConnectionStatus();
 
-extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
+//extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
 extern QueueHandle_t MQTT_Queue;
@@ -28,3 +31,5 @@ extern messageParts processQueueMessage(const std::string msg, const std::string
 
 extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
 extern char RXfromBBCmessage[UARTMESSAGELENGTH];
+
+extern void Wifi_setup();

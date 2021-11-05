@@ -21,17 +21,6 @@ void dealWithMessage(std::string message)
         //reboot ESP32...
         ESP.restart();
     }
-    else if (identifier.compare("STARTING") == 0)
-    {
-        //clear down the queues
-        xQueueReset(Sound_Queue);
-        xQueueReset(Light_Queue);
-        xQueueReset(DAC_Queue);
-        xQueueReset(Movement_Queue);
-        //xQueueReset(MQTT_Queue);
-
-        //Serial << "STARTING COMPLETED" << endl;
-    }
     else if (identifier.compare("SVOL") == 0 || identifier.compare("SFILECOUNT") == 0 ||
              identifier.compare("SPLAY") == 0 || identifier.compare("SPAUSE") == 0 ||
              identifier.compare("SRESUME") == 0 || identifier.compare("SSTOP") == 0)
@@ -51,6 +40,11 @@ void dealWithMessage(std::string message)
              identifier.compare("LLEDALLON") == 0)
     {
         xQueueSend(Light_Queue, &queuedMsg, portMAX_DELAY);
+    }
+    else if (identifier.compare("PUBLISH") == 0 || identifier.compare("SUBSCRIBE") == 0 ||
+             identifier.compare("UNSUBSCRIBE")== 0)
+    {
+        xQueueSend(MQTT_Queue, &queuedMsg, portMAX_DELAY);
     }
     else if (identifier.compare("DIAL1") == 0 || identifier.compare("DIAL2") == 0)
     {
@@ -170,7 +164,16 @@ messageParts processQueueMessage(std::string msg)
         }
         if (index == 2)
         {
-            mParts.value2 = std::stoi(part);
+            try
+            {
+                mParts.value2 = std::stoi(part);
+            }
+            catch (const std::exception &e)
+            {
+                strcpy(mParts.part2, part.c_str());
+
+                //Serial << mParts.part1 << endl;
+            }
         }
         if (index == 3)
         {

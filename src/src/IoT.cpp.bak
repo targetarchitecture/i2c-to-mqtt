@@ -1,50 +1,38 @@
 #include <Arduino.h>
-#include "IoT.h"
+//#include "IoT.h"
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+#include <iostream>
 
 WiFiClient client;
 PubSubClient MQTTClient;
 
-std::string MQTT_SERVER = "";
-std::string MQTT_CLIENTID = "";
-std::string MQTT_USERNAME = "";
-std::string MQTT_KEY = "";
-std::string WIFI_SSID = "";
-std::string WIFI_PASSPHRASE = "";
+extern std::string mqtt_server;
+extern std::string mqtt_user;
+extern std::string mqtt_password;
+extern std::string mqtt_client;
 
-std::string IP_ADDRESS = "";
+QueueHandle_t MQTT_Publish_Queue;
 
-//QueueHandle_t MQTT_Queue;
-QueueHandle_t MQTT_Message_Queue;
-
-unsigned long lastMQTTStatusSent = 0;
-
-struct MQTTMessage
+struct MessageToPublish
 {
-  std::string topic;
-  std::string payload;
-};
-
-struct MQTTSubscription
-{
-  std::string topic;
-  bool subscribe;
+  char topic[100];
+  char payload[100];
 };
 
 TaskHandle_t MQTTTask;
 TaskHandle_t MQTTClientTask;
 
-volatile bool ConnectWifi = false;
-volatile bool ConnectMQTT = false;
 volatile bool ConnectSubscriptions = false;
 
-std::list<MQTTSubscription> MQTTSubscriptions;
+std::vector<std::string> SubscribedTopics;
+std::vector<std::string> UnsubscribedTopics;
 
 void MQTT_setup()
 {
-  pinMode(ONBOARDLED, OUTPUT);
-
-  MQTT_Publish_Queue = xQueueCreate(50, sizeof(RXfromBBCmessage));
-  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
+  MQTT_Publish_Queue = xQueueCreate(50, sizeof(MessageToPublish));
 
   xTaskCreatePinnedToCore(
       MQTT_task,          /* Task function. */
@@ -56,8 +44,8 @@ void MQTT_setup()
       1);
 
   xTaskCreatePinnedToCore(
-      MQTTClient_task,           /* Task function. */
-      "MQTTClient Task",         /* name of task. */
+      MQTT_Publish_task,         /* Task function. */
+      "MQTT Client Task",        /* name of task. */
       17000,                     /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
       NULL,                      /* parameter of the task */
       MQTT_client_task_Priority, /* priority of the task */
@@ -67,59 +55,21 @@ void MQTT_setup()
 
 void Wifi_connect()
 {
-  Serial.println("Connecting to Wifi");
-  Serial.println(WIFI_SSID.c_str());
-  Serial.println(WIFI_PASSPHRASE.c_str());
+  Serial.println(F("Connecting to Wifi"));
 
-  WiFi.mode(WIFI_OFF);
-  delay(500);
-  WiFi.mode(WIFI_STA);
-  delay(500);
+  Wifi_setup();
 
-  //connect
-  uint32_t speed = 500;
   while (WiFi.status() != WL_CONNECTED)
   {
-    WiFi.begin(WIFI_SSID.c_str(), WIFI_PASSPHRASE.c_str());
-
-    digitalWrite(ONBOARDLED, HIGH);
-    delay(speed);
-    digitalWrite(ONBOARDLED, LOW);
-    delay(speed);
-
     Serial.println(WiFi.status());
+
+    delay(100);
   }
-
-  char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "G1,%s", WiFi.localIP().toString().c_str());
-
-  sendToMicrobit(msgtosend);
 }
-
-// void MQTT_connect2()
-// {
-//   MQTTClient.setClient(client);
-//   MQTTClient.setServer(MQTT_SERVER.c_str(), 1883);
-//   MQTTClient.setCallback(recieveMessage);
-
-//   checkMQTTconnection(true);
-
-// //connect
-// uint32_t speed = 250;
-// for (size_t i = 0; i < 4; i++)
-// {
-//   digitalWrite(ONBOARDLED, HIGH);
-//   delay(speed);
-//   digitalWrite(ONBOARDLED, LOW);
-//   delay(speed);
-// }
-//}
 
 void recieveMessage(char *topic, byte *payload, unsigned int length)
 {
-  // Serial.print("Message arrived [");
-  // Serial.print(topic);
-  // Serial.print("] ");
+  Serial << "Message arrived [" << topic << "]" << endl;
 
   std::string receivedMsg;
 
@@ -134,7 +84,7 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
   //Serial.println();
 
   char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "G3,'%s','%s'", topic, receivedMsg.c_str());
+  sprintf(msgtosend, "MQTT,'%s','%s'", topic, receivedMsg.c_str());
   sendToMicrobit(msgtosend);
 }
 
@@ -142,272 +92,175 @@ void checkMQTTconnection()
 {
   if (MQTTClient.connected() == false)
   {
-    Serial.println("MQTTClient NOT Connected :(");
+    Serial.println(F("MQTTClient NOT Connected :("));
 
     delay(500);
 
-    MQTTClient.connect(MQTT_CLIENTID.c_str(), MQTT_USERNAME.c_str(), MQTT_KEY.c_str());
+    MQTTClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
 
-    if (MQTTClient.connected() == true)
-    {
-      //set to true to get the subscriptions setup again
-      ConnectSubscriptions = true;
-    }
-  }
-
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - lastMQTTStatusSent >= 1000)
-  {
-    lastMQTTStatusSent = currentMillis;
-
-    sendMQTTConnectionStatus();
-  }
-}
-
-void sendMQTTConnectionStatus()
-{
-  if (MQTTClient.connected() == true)
-  {
-    //Serial.println("G2,1");
-
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "G2,1");
-    sendToMicrobit(msgtosend);
-  }
-  else
-  {
-    //Serial.println("G2,0");
-
-    char msgtosend[MAXBBCMESSAGELENGTH];
-    sprintf(msgtosend, "G2,0");
-    sendToMicrobit(msgtosend);
+    //set to true to get the subscriptions setup again
+    ConnectSubscriptions = true;
   }
 }
 
 void setupSubscriptions()
 {
-  std::list<MQTTSubscription>::iterator it;
-
-  for (it = MQTTSubscriptions.begin(); it != MQTTSubscriptions.end(); it++)
+  for (std::string &e : SubscribedTopics)
   {
-    // Access the object through iterator
-    //auto topic = it->topic.c_str();
-    auto subscribe = it->subscribe;
+    Serial.print(F("subscribing to:"));
+    Serial.println(e.c_str());
 
-    if (subscribe == true)
-    {
-      Serial.print("subscribing to:");
-      Serial.println(it->topic.c_str());
+    MQTTClient.subscribe(e.c_str());
+  }
 
-      MQTTClient.subscribe(it->topic.c_str());
-    }
-    else
-    {
-      Serial.print("unsubscribing to:");
-      Serial.println(it->topic.c_str());
+  for (std::string &e : UnsubscribedTopics)
+  {
+    Serial.print(F("unsubscribing to:"));
+    Serial.println(e.c_str());
 
-      MQTTClient.unsubscribe(it->topic.c_str());
-    }
+    MQTTClient.unsubscribe(e.c_str());
   }
 }
 
-void MQTTClient_task(void *pvParameter)
+void MQTT_Publish_task(void *pvParameter)
 {
-  MQTTMessage msg;
+  Serial << "waiting for wifi" << endl;
+
+  while (WiFi.isConnected() == false)
+  {
+    Serial << ".";
+
+    delay(1000);
+  }
+
+  Serial << "XXX" << endl;
+
+  //set this up as early as possible
+  MQTTClient.setClient(client);
+  MQTTClient.setServer(mqtt_server.c_str(), 1883);
+  MQTTClient.setCallback(recieveMessage);
+
+  Serial << "@" << mqtt_server.c_str() << endl;
 
   for (;;)
   {
-    if (ConnectWifi == true)
+    if (WiFi.isConnected() == false)
     {
-      //Serial.println("ConnectWifi == true");
+      Serial.println("WiFi.isConnected() == false");
 
-      if (WiFi.isConnected() == false)
-      {
-        //Serial.println("WiFi.isConnected() == false");
-
-        Wifi_connect();
-      }
-
-      if (ConnectMQTT == true)
-      {
-        //Serial.println("ConnectMQTT == true");
-
-        //only bother if actually connected to internet!!
-        if (WiFi.isConnected() == true)
-        {
-          //Serial.println("WiFi.isConnected() == true");
-
-          checkMQTTconnection();
-
-          if (MQTTClient.connected())
-          {
-            //Serial.println("MQTTClient.connected()");
-
-            //check the message queue and if empty just proceed passed
-            if (xQueueReceive(MQTT_Message_Queue, &msg, 0) == pdTRUE)
-            {
-              // Serial.print("publish topic:");
-              // Serial.print(msg.topic.c_str());
-              // Serial.print("\t\t");
-              // Serial.print("payload:");
-              // Serial.print(msg.payload.c_str());
-              // Serial.println("");
-
-              MQTTClient.publish(msg.topic.c_str(), msg.payload.c_str());
-            }
-
-            //check to see if we need to remake the subscriptions
-            if (ConnectSubscriptions == true)
-            {
-              //Serial.println("ConnectSubscriptions == true");
-
-              //set up subscription topics
-              setupSubscriptions();
-
-              ConnectSubscriptions = false;
-            }
-
-            //must call the loop method!
-            MQTTClient.loop();
-
-            //https://github.com/256dpi/arduino-mqtt/blob/master/examples/ESP32DevelopmentBoard/ESP32DevelopmentBoard.ino
-            delay(10); // <- fixes some issues with WiFi stability ???
-          }
-        }
-        else
-        {
-          Serial.println("WiFi not connected,cannot send MQTT message");
-        }
-      }
+      Wifi_connect();
     }
+    else
+    {
+      if (MQTTClient.connected() == false)
+      {
+        Serial.println("checkMQTTconnection");
 
-    delay(100);
+        checkMQTTconnection();
+      }
+      else
+      {
+        //check to see if we need to remake the subscriptions
+        if (ConnectSubscriptions == true)
+        {
+          Serial.println("ConnectSubscriptions == true");
+
+          //set up subscription topics
+          setupSubscriptions();
+
+          ConnectSubscriptions = false;
+        }
+
+        MessageToPublish msg;
+
+        //check the message queue and if empty just proceed passed
+        if (xQueueReceive(MQTT_Publish_Queue, &msg, 0) == pdTRUE)
+        {
+          Serial.print("publish topic:");
+          Serial.print(msg.topic);
+          Serial.print("\t\t");
+          Serial.print("payload:");
+          Serial.print(msg.payload);
+          Serial.println("");
+
+          MQTTClient.publish(msg.topic, msg.payload);
+        }
+
+        Serial.println("MQTTClient.loop()");
+
+        //must always call the loop method - if we have wifi and a connection
+        MQTTClient.loop();
+      }
+
+      delay(100);
+    }
   }
-
   vTaskDelete(NULL);
 }
 
 void MQTT_task(void *pvParameter)
 {
-  messageParts parts;
-
   // UBaseType_t uxHighWaterMark;
   // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
   // Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
   // Serial.println(uxHighWaterMark);
 
-  //set this up as early as possible
-  MQTTClient.setClient(client);
-  MQTTClient.setServer(MQTT_SERVER.c_str(), 1883);
-  MQTTClient.setCallback(recieveMessage);
-
-  //send status to try to get the BBC loop to stop if it senses it's connected
-  sendMQTTConnectionStatus();
-
   for (;;)
   {
-    char msg[UARTMESSAGELENGTH] = {0};
-
-    //show WiFi connection
-    if (WiFi.isConnected() == true)
-    {
-      digitalWrite(ONBOARDLED, HIGH);
-    }
-    else
-    {
-      digitalWrite(ONBOARDLED, LOW);
-    }
+    messageParts parts;
 
     //wait for new MQTT command in the queue
-    xQueueReceive(MQTT_Queue, &msg, portMAX_DELAY);
+    xQueueReceive(MQTT_Queue, &parts, portMAX_DELAY);
 
-    // Serial.print("MQTT_Queue:");
-    // Serial.println(msg);
+    Serial.print("MQTT_Queue:");
+    Serial.println(parts.identifier);
 
-    //TODO: see if need this copy of msg.
-    std::string X = msg;
+    std::string identifier = parts.identifier;
 
-    if (strncmp(parts.identifier, "T9", 2) == 0)
+    if (identifier.compare("PUBLISH") == 0)
     {
-      std::string topic(parts.value1);
-      std::string payload(parts.value2);
+      struct MessageToPublish msg;
+      strcpy(msg.topic, parts.part1);
+      strcpy(msg.payload, parts.part2);
 
-      MQTTMessage msg = {topic, payload};
+      Serial.print("queue message:");
+      Serial.print(msg.topic);
+      Serial.print("\t\t");
+      Serial.print("payload:");
+      Serial.print(msg.payload);
+      Serial.println("");
 
-      xQueueSend(MQTT_Message_Queue, &msg, portMAX_DELAY);
+      xQueueSend(MQTT_Publish_Queue, &msg, portMAX_DELAY);
     }
-    else if (strncmp(parts.identifier, "T10", 3) == 0)
+    else if (identifier.compare("SUBSCRIBE") == 0)
     {
-      //add to the list (if it doesn't exist)
-      std::string topic(parts.value1);
-      bool found = false;
+      std::string topic(parts.part1);
 
-      std::list<MQTTSubscription>::iterator it;
-
-      for (it = MQTTSubscriptions.begin(); it != MQTTSubscriptions.end(); it++)
-      {
-        // Access the object through iterator
-        auto MQTTSubscriptionTopic = it->topic;
-
-        if (topic == MQTTSubscriptionTopic)
-        {
-          //Serial.print("Update to subscription list: ");
-          //Serial.println(parts.value1);
-
-          it->subscribe = true;
-          found = true;
-        }
-      }
-
-      if (found == false)
-      {
-        MQTTSubscriptions.push_back({topic, true});
-
-        //Serial.print("Add to subscription list: ");
-        //Serial.println(parts.value1);
-      }
-
-      //set to true to get the subscriptions setup again
-      ConnectSubscriptions = true;
+      subscribe(topic);
     }
-    else if (strncmp(parts.identifier, "T11", 3) == 0)
+    else if (identifier.compare("UNSUBSCRIBE") == 0)
     {
-      std::string topic(parts.value1);
+      std::string topic(parts.part1);
 
-      std::list<MQTTSubscription>::iterator it;
-
-      for (it = MQTTSubscriptions.begin(); it != MQTTSubscriptions.end(); it++)
-      {
-        // Access the object through iterator
-        auto MQTTSubscriptionTopic = it->topic;
-
-        if (topic == MQTTSubscriptionTopic)
-        {
-          // Serial.print("Update to unsubsripton list: ");
-          // Serial.println(parts.value1);
-
-          it->subscribe = false;
-        }
-      }
-
-      //set to true to get the subscriptions setup again
-      ConnectSubscriptions = true;
-    }
-    else if (strncmp(parts.identifier, "T12", 3) == 0)
-    {
-      //reset variables
-      ConnectMQTT = false;
-      ConnectWifi = false;
-
-      //turn off WiFi
-      WiFi.mode(WIFI_OFF);
-      delay(500);
-
-      //turn off LED
-      digitalWrite(ONBOARDLED, LOW);
+      unsubscribe(topic);
     }
   }
 
   vTaskDelete(NULL);
+}
+
+void unsubscribe(std::string topic)
+{
+  UnsubscribedTopics.push_back(topic);
+
+  //set to true to get the subscriptions setup again
+  ConnectSubscriptions = true;
+}
+
+void subscribe(std::string topic)
+{
+  SubscribedTopics.push_back(topic);
+
+  //set to true to get the subscriptions setup again
+  ConnectSubscriptions = true;
 }

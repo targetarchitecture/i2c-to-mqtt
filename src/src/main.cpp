@@ -1,5 +1,5 @@
 /* 
-Rainbow Sparkle Unicorn - SN8
+Rainbow Sparkle Unicorn - SN9
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -52,7 +52,7 @@ void setup()
   btStop();
 
   //Set UART log level
-  esp_log_level_set("SN8", ESP_LOG_VERBOSE);
+  esp_log_level_set("SN9", ESP_LOG_VERBOSE);
 
   //start i2c
   Wire.begin(SDA, SCL);
@@ -71,13 +71,10 @@ void setup()
   DAC_Queue = xQueueCreate(5, sizeof(messageParts));
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
-
-  //MQTT_Queue = xQueueCreate(50, sizeof(UARTMESSAGELENGTH));
-  //MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
+  MQTT_Queue = xQueueCreate(30, sizeof(messageParts));
 
   //get wifi going first as this seems to be problematic
   Wifi_setup();
-  //MQTT_setup();
 
   //call the feature setup methods
   microbit_setup();
@@ -100,7 +97,7 @@ void setup()
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 
- // runTests();
+  runTests();
 }
 
 void POST(uint8_t flashes)
@@ -142,10 +139,10 @@ void loop()
 
 void runTests()
 {
- // dealWithMessage("STARTING ");
- // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
+  dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
- // dealWithMessage("MPWM,8,500 ");
+  // dealWithMessage("STARTING ");
+  // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
+
+  // dealWithMessage("MPWM,8,500 ");
 }
-
-//80,530
