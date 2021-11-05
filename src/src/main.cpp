@@ -35,6 +35,7 @@ QueueHandle_t Sound_Queue;
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
+QueueHandle_t MQTT_Queue;
 
 SemaphoreHandle_t i2cSemaphore;
 
@@ -44,6 +45,8 @@ extern void dealWithMessage(std::string message);
 
 void setup()
 {
+  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+
   //Set UART log level
   esp_log_level_set("SN8", ESP_LOG_VERBOSE);
 
@@ -68,14 +71,15 @@ void setup()
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
 
-  //MQTT_Queue = xQueueCreate(50, sizeof(MAXESP32MESSAGELENGTH));
-  //MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
+  MQTT_Queue = xQueueCreate(50, sizeof(UARTMESSAGELENGTH));
+  MQTT_Message_Queue = xQueueCreate(50, sizeof(struct MQTTMessage));
 
   //get wifi going first as this seems to be problematic
-  //MQTT_setup();
+  MQTT_setup();
 
   //call the feature setup methods
   microbit_setup();
+
 
   sound_setup();
 
