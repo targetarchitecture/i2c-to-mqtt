@@ -5,13 +5,10 @@
 #include "messaging.h"
 #include <list>
 #include "esp_wifi.h"
-#include "esp_system.h"
-#include "nvs_flash.h"
-#include "esp_event_loop.h"
 
-void MQTT_setup();
+void MQTT_setup(std::string RainbowSparkleUnicornName);
 void checkMQTTconnection();
-void Wifi_connect();
+//void Wifi_connect();
 
 void subscribe(std::string topic);
 void unsubscribe(std::string topic);
@@ -32,4 +29,8 @@ extern messageParts processQueueMessage(const std::string msg, const std::string
 extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
 extern char RXfromBBCmessage[UARTMESSAGELENGTH];
 
-extern void Wifi_setup();
+//extern void Wifi_setup();
+
+//extern SemaphoreHandle_t wifiSemaphore;
+
+extern std::string RainbowSparkleUnicornName;

@@ -39,14 +39,17 @@ QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
 SemaphoreHandle_t i2cSemaphore;
+//SemaphoreHandle_t wifiSemaphore;
 
 extern std::string requestMessage;
 
 extern void dealWithMessage(std::string message);
 
+std::string RainbowSparkleUnicornName;
+
 void setup()
 {
-  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+  //WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
 
   //stop bluetooth
   btStop();
@@ -66,12 +69,21 @@ void setup()
   i2cSemaphore = xSemaphoreCreateBinary();
   xSemaphoreGive(i2cSemaphore);
 
+  //create WiFi Semaphore , and set to useable
+  // wifiSemaphore = xSemaphoreCreateBinary();
+  // xSemaphoreGive(wifiSemaphore);
+
   //set up the main queues
   Sound_Queue = xQueueCreate(5, sizeof(messageParts));
   DAC_Queue = xQueueCreate(5, sizeof(messageParts));
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
   MQTT_Queue = xQueueCreate(30, sizeof(messageParts));
+
+  //get the unique id into a variable (once)
+  std::ostringstream getEfuseMac;
+  getEfuseMac << "SN9_" << ESP.getEfuseMac();
+  RainbowSparkleUnicornName = getEfuseMac.str();
 
   //get wifi going first as this seems to be problematic
   Wifi_setup();
@@ -94,6 +106,8 @@ void setup()
   switch_setup();
 
   movement_setup();
+
+  MQTT_setup(RainbowSparkleUnicornName);
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 

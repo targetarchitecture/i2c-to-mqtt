@@ -1,5 +1,5 @@
 #include <Arduino.h>
-//#include "IoT.h"
+#include "IoT.h"
 #include <iostream>
 #include <map>
 #include <string>
@@ -9,10 +9,10 @@
 WiFiClient client;
 PubSubClient MQTTClient;
 
-extern std::string mqtt_server;
-extern std::string mqtt_user;
-extern std::string mqtt_password;
-extern std::string mqtt_client;
+std::string mqtt_server = "192.168.1.189";
+std::string mqtt_user = "public";
+std::string mqtt_password = "public";
+std::string mqtt_client;
 
 QueueHandle_t MQTT_Publish_Queue;
 
@@ -23,16 +23,32 @@ struct MessageToPublish
 };
 
 TaskHandle_t MQTTTask;
-TaskHandle_t MQTTClientTask;
+TaskHandle_t MQTTPublishTask;
 
 volatile bool ConnectSubscriptions = false;
 
 std::vector<std::string> SubscribedTopics;
 std::vector<std::string> UnsubscribedTopics;
 
-void MQTT_setup()
+void MQTT_setup(std::string RainbowSparkleUnicornName)
 {
-  MQTT_Publish_Queue = xQueueCreate(50, sizeof(MessageToPublish));
+  MQTT_Publish_Queue = xQueueCreate(10, sizeof(MessageToPublish));
+
+  mqtt_client = RainbowSparkleUnicornName;
+
+  //set this up as early as possible
+  MQTTClient.setClient(client);
+  MQTTClient.setServer(mqtt_server.c_str(), 1883);
+  MQTTClient.setCallback(recieveMessage);
+
+  xTaskCreatePinnedToCore(
+      MQTT_Publish_task,         /* Task function. */
+      "MQTT Publish Task",       /* name of task. */
+      17000,                     /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+      NULL,                      /* parameter of the task */
+      MQTT_client_task_Priority, /* priority of the task */
+      &MQTTPublishTask,          /* Task handle to keep track of created task */
+      1);
 
   xTaskCreatePinnedToCore(
       MQTT_task,          /* Task function. */
@@ -42,29 +58,6 @@ void MQTT_setup()
       MQTT_task_Priority, /* priority of the task */
       &MQTTTask,          /* Task handle to keep track of created task */
       1);
-
-  xTaskCreatePinnedToCore(
-      MQTT_Publish_task,         /* Task function. */
-      "MQTT Client Task",        /* name of task. */
-      17000,                     /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
-      NULL,                      /* parameter of the task */
-      MQTT_client_task_Priority, /* priority of the task */
-      &MQTTClientTask,           /* Task handle to keep track of created task */
-      1);
-}
-
-void Wifi_connect()
-{
-  Serial.println(F("Connecting to Wifi"));
-
-  Wifi_setup();
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println(WiFi.status());
-
-    delay(100);
-  }
 }
 
 void recieveMessage(char *topic, byte *payload, unsigned int length)
@@ -90,65 +83,61 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
 
 void checkMQTTconnection()
 {
-  if (MQTTClient.connected() == false)
-  {
-    Serial.println(F("MQTTClient NOT Connected :("));
+  Serial.println(F("MQTTClient NOT Connected :("));
 
-    delay(500);
+  do
+  {
+    if (MQTTClient.connected() == true)
+    {
+      break;
+    }
+
+    //Serial << mqtt_client.c_str() << mqtt_user.c_str() << mqtt_password.c_str();
 
     MQTTClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
 
-    //set to true to get the subscriptions setup again
-    ConnectSubscriptions = true;
-  }
+    delay(500);
+
+  } while (1);
+
+  Serial.println(F("MQTTClient now Connected :)"));
+
+  //set to true to get the subscriptions setup again
+  ConnectSubscriptions = true;
 }
 
 void setupSubscriptions()
 {
-  for (std::string &e : SubscribedTopics)
-  {
-    Serial.print(F("subscribing to:"));
-    Serial.println(e.c_str());
+  Serial.print(F("setupSubscriptions"));
 
-    MQTTClient.subscribe(e.c_str());
+  for (int i = 0; i < SubscribedTopics.size(); i++)
+  {
+    Serial << "subscribing to:" << SubscribedTopics[i].c_str() << endl;
+
+    MQTTClient.subscribe(SubscribedTopics[i].c_str());
   }
 
-  for (std::string &e : UnsubscribedTopics)
+  for (int i = 0; i < UnsubscribedTopics.size(); i++)
   {
-    Serial.print(F("unsubscribing to:"));
-    Serial.println(e.c_str());
+    Serial << "unsubscribing to:" << UnsubscribedTopics[i].c_str() << endl;
 
-    MQTTClient.unsubscribe(e.c_str());
+    MQTTClient.unsubscribe(UnsubscribedTopics[i].c_str());
   }
 }
 
 void MQTT_Publish_task(void *pvParameter)
 {
-  Serial << "waiting for wifi" << endl;
-
-  while (WiFi.isConnected() == false)
-  {
-    Serial << ".";
-
-    delay(1000);
-  }
-
-  Serial << "XXX" << endl;
-
-  //set this up as early as possible
-  MQTTClient.setClient(client);
-  MQTTClient.setServer(mqtt_server.c_str(), 1883);
-  MQTTClient.setCallback(recieveMessage);
-
-  Serial << "@" << mqtt_server.c_str() << endl;
+  UBaseType_t uxHighWaterMark;
+  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+  Serial.print("MQTT_Publish_task uxTaskGetStackHighWaterMark:");
+  Serial.println(uxHighWaterMark);
 
   for (;;)
   {
     if (WiFi.isConnected() == false)
     {
-      Serial.println("WiFi.isConnected() == false");
-
-      Wifi_connect();
+      //Serial.println("WiFi.isConnected() == false");
+      delay(500);
     }
     else
     {
@@ -186,7 +175,7 @@ void MQTT_Publish_task(void *pvParameter)
           MQTTClient.publish(msg.topic, msg.payload);
         }
 
-        Serial.println("MQTTClient.loop()");
+        //Serial.println("MQTTClient.loop()");
 
         //must always call the loop method - if we have wifi and a connection
         MQTTClient.loop();
@@ -200,10 +189,10 @@ void MQTT_Publish_task(void *pvParameter)
 
 void MQTT_task(void *pvParameter)
 {
-  // UBaseType_t uxHighWaterMark;
-  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  // Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
-  // Serial.println(uxHighWaterMark);
+  UBaseType_t uxHighWaterMark;
+  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+  Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
+  Serial.println(uxHighWaterMark);
 
   for (;;)
   {
@@ -234,13 +223,14 @@ void MQTT_task(void *pvParameter)
     }
     else if (identifier.compare("SUBSCRIBE") == 0)
     {
-      std::string topic(parts.part1);
+      std::string topic = parts.part1;
+    //  strcpy(topic, parts.part1);
 
       subscribe(topic);
     }
     else if (identifier.compare("UNSUBSCRIBE") == 0)
     {
-      std::string topic(parts.part1);
+   std::string topic = parts.part1;
 
       unsubscribe(topic);
     }
@@ -251,7 +241,14 @@ void MQTT_task(void *pvParameter)
 
 void unsubscribe(std::string topic)
 {
+  Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
+
+  // char t[100];
+  // strcpy(t, topic);
+
   UnsubscribedTopics.push_back(topic);
+
+  Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
 
   //set to true to get the subscriptions setup again
   ConnectSubscriptions = true;
@@ -259,7 +256,15 @@ void unsubscribe(std::string topic)
 
 void subscribe(std::string topic)
 {
+  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+
+  // char t[100];
+
+  // strcpy(t, topic);
+
   SubscribedTopics.push_back(topic);
+
+  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
   //set to true to get the subscriptions setup again
   ConnectSubscriptions = true;
