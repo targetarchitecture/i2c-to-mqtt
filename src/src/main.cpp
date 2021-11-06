@@ -107,7 +107,7 @@ void setup()
 
   movement_setup();
 
-  MQTT_setup(RainbowSparkleUnicornName);
+  //MQTT_setup(RainbowSparkleUnicornName);
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 
@@ -148,7 +148,18 @@ void checkI2Cerrors(std::string area)
 
 void loop()
 {
-  delay(1000);
+  //Serial << "WiFi.isConnected() == " << WiFi.isConnected() << endl;
+
+  if (WiFi.isConnected() == true)
+  {
+    digitalWrite(ONBOARDLED, HIGH);
+  }
+  else
+  {
+    digitalWrite(ONBOARDLED, LOW);
+  }
+  
+  delay(5000);
 }
 
 void runTests()
