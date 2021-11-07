@@ -1,14 +1,13 @@
 #include <Arduino.h>
 #include "encoders.h"
-#include <ESP32Encoder.h>
 
 TaskHandle_t EncodersTask;
 
 ESP32Encoder encoder1;
 ESP32Encoder encoder2;
 
-volatile int32_t encoder1Count=0;
-volatile int32_t encoder2Count=0;
+volatile int32_t encoder1Count = 0;
+volatile int32_t encoder2Count = 0;
 
 void encoders_setup()
 {

@@ -2,7 +2,7 @@
 
 #include "messaging.h"
 #include "defines.h"
-#include "SN8 pins.h"
+#include "SN9 pins.h"
 #include <Streaming.h>
 
 void DAC_setup();

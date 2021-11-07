@@ -3,11 +3,11 @@
 #include <Wire.h>
 #include "messaging.h"
 #include "defines.h"
-#include "SN8 pins.h"
+#include "SN9 pins.h"
+#include "Adafruit_MPR121.h"
 
 void touch_setup();
 void touch_task(void *pvParameter);
-//void IRAM_ATTR handleTouchInterupt();
 void touch_deal_with_message(messageParts message);
 uint16_t readAndSetTouchArray();
 

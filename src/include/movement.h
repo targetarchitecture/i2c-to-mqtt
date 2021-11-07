@@ -4,21 +4,16 @@
 #include "messaging.h"
 #include <Adafruit_PWMServoDriver.h>
 #include "easing.h"
-#include "SN8 pins.h"
-#include <Streaming.h>
+#include "SN9 pins.h"
 
 struct servo
 {
   int16_t pin;
-  //int16_t PWM;
-  //double _change;
   double duration;
   int16_t toDegree;
   int16_t fromDegree;
-  //int16_t setDegree;
   int16_t minPulse; // This is the 'minimum' pulse length count (out of 4096) - normally around 100
   int16_t maxPulse; // This is the 'maximum' pulse length count (out of 4096) - normally around 500
-  //bool isMoving;
   easingCurves easingCurve;
   bool interuptEasing; //https://esp32.com/viewtopic.php?t=10855;
   TaskHandle_t taskHandle;

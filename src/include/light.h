@@ -3,11 +3,8 @@
 #include <Wire.h>
 #include "messaging.h"
 #include "defines.h"
-#include "SN8 pins.h"
-#include <Streaming.h>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "SN9 pins.h"
+#include <SparkFunSX1509.h> // Include SX1509 library
 
 void light_setup();
 void light_task(void *pvParameter);

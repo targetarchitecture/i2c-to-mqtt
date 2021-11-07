@@ -6,15 +6,6 @@ Rainbow Sparkle Unicorn - SN9
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "esp_log.h"
-#include <vector>
-#include <sstream>
-#include <iostream>
-#include <Streaming.h>
-
-#include "FS.h"
-#include <LITTLEFS.h>
-#include <WiFi.h>
 
 #include "messaging.h"
 #include "microbit-uart.h"

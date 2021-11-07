@@ -1,8 +1,7 @@
 #pragma once
 
 #include <driver/adc.h>
-#include "SN8 pins.h"
-//#include "defines.h"
+#include "SN9 pins.h"
 
 void ADC_setup();
 

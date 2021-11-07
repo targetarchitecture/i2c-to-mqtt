@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include <WiFi.h>
 #include "WifiMgr.h"
-#include <Stream.h>
-#include <sstream>
 
 std::string ssid = "152 2.4GHz";
 std::string wifi_password = "derwenthorpe";
@@ -134,34 +131,10 @@ void WiFiEvent(WiFiEvent_t event)
     }
 }
 
-// void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
-// {
-//   Serial.println("WiFi connected");
-//   Serial.println("IP address: ");
-//   Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
-// }
-
 void Wifi_setup()
 {
-    // delete old config
-    //WiFi.disconnect(true);
-
-    // delay(1000);
-
     // Examples of different ways to register wifi events
     WiFi.onEvent(WiFiEvent);
-
-    //   WiFi.onEvent(WiFiGotIP, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
-
-    //   WiFiEventId_t eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-    //     Serial.print("WiFi lost connection. Reason: ");
-    //     Serial.println(info.disconnected.reason);
-    //   }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
-
-    // Remove WiFi event
-    //   Serial.print("WiFi Event ID: ");
-    //   Serial.println(eventID);
-    // WiFi.removeEvent(eventID);
 
     WiFi.begin(ssid.c_str(), wifi_password.c_str());
 

@@ -2,7 +2,8 @@
 
 #include "messaging.h"
 #include "defines.h"
-#include "SN8 pins.h"
+#include "SN9 pins.h"
+#include "DFRobotDFPlayerMini.h"
 
 void sound_setup();
 void sound_task(void *pvParameters);

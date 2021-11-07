@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "touch.h"
-#include "Adafruit_MPR121.h"
 
 #ifndef _BV
 #define _BV(bit) (1 << (bit))

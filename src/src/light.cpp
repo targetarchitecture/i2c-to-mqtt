@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include "light.h"
-#include <SparkFunSX1509.h> // Include SX1509 library
-
 
 SX1509 lights; // Create an SX1509 object to be used throughout
 

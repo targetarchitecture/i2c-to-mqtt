@@ -1,10 +1,5 @@
 #include <Arduino.h>
 #include "IoT.h"
-#include <iostream>
-#include <map>
-#include <string>
-#include <vector>
-#include <iostream>
 
 WiFiClient client;
 PubSubClient MQTTClient;

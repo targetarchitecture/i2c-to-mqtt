@@ -1,5 +1,8 @@
 #pragma once
 
-void Wifi_setup();
+#include <Stream.h>
+#include <sstream>
+#include <WiFi.h>
 
-extern void MQTT_setup(std::string RainbowSparkleUnicornName);
+void Wifi_setup();
+void WiFiEvent(WiFiEvent_t event);

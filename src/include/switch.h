@@ -1,14 +1,8 @@
 #pragma once
 
 #include <Wire.h>
-#include <sstream>
-#include <iostream>
-#include <Streaming.h>
 #include "defines.h"
-#include "SN8 pins.h"
-#include <string>
-#include <vector>
-#include <array>
+#include "SN9 pins.h"
 #include "messaging.h"
 
 void switch_setup();

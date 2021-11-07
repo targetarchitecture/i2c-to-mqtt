@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include "movement.h"
-#include <iostream>
-#include <string>
-#include <vector>
+
 
 extern SemaphoreHandle_t i2cSemaphore;
 
