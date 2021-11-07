@@ -14,7 +14,7 @@ void subscribe(std::string topic);
 void unsubscribe(std::string topic);
 
 void MQTT_deal_with_message(char msg[UARTMESSAGELENGTH]);
-void MQTT_task(void *pvParameter);
+void MQTT_command_task(void *pvParameter);
 void setupSubscriptions();
 void recieveMessage(char *topic, byte *payload, unsigned int length);
 void MQTT_Publish_task(void *pvParameter);
@@ -23,7 +23,8 @@ void MQTT_Publish_task(void *pvParameter);
 //extern void sendToMicrobit(char msg[MAXBBCMESSAGELENGTH]);
 extern void checkI2Cerrors(const char *area);
 
-extern QueueHandle_t MQTT_Queue;
+extern QueueHandle_t MQTT_Command_Queue;
+
 extern messageParts processQueueMessage(const std::string msg, const std::string from);
 
 extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];

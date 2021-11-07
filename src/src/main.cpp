@@ -26,7 +26,7 @@ Rainbow Sparkle Unicorn - SN9
 #include "light.h"
 #include "switch.h"
 #include "movement.h"
-//#include "IoT.h"
+#include "IoT.h"
 #include "WifiMgr.h"
 
 void checkI2Cerrors(std::string area);
@@ -36,7 +36,7 @@ QueueHandle_t Sound_Queue;
 QueueHandle_t DAC_Queue;
 QueueHandle_t Light_Queue;
 QueueHandle_t Movement_Queue;
-QueueHandle_t MQTT_Queue;
+QueueHandle_t MQTT_Command_Queue;
 
 SemaphoreHandle_t i2cSemaphore;
 
@@ -73,7 +73,7 @@ void setup()
   DAC_Queue = xQueueCreate(5, sizeof(messageParts));
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
-  MQTT_Queue = xQueueCreate(30, sizeof(messageParts));
+  MQTT_Command_Queue = xQueueCreate(30, sizeof(messageParts));
 
   //get the unique id into a variable (once)
   std::ostringstream getEfuseMac;
@@ -102,7 +102,7 @@ void setup()
 
   movement_setup();
 
-  //MQTT_setup(RainbowSparkleUnicornName);
+  MQTT_setup(RainbowSparkleUnicornName);
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 
@@ -141,18 +141,9 @@ void checkI2Cerrors(std::string area)
 
 void loop()
 {
-// digitalWrite(ONBOARDLED, WiFi.isConnected());
-
-  if (WiFi.isConnected() == true)
-  {
-    digitalWrite(ONBOARDLED, HIGH);
-  }
-  else
-  {
-    digitalWrite(ONBOARDLED, LOW);
-  }
+ digitalWrite(ONBOARDLED, WiFi.isConnected());
   
-  delay(5000);
+  delay(1000);
 }
 
 void runTests()

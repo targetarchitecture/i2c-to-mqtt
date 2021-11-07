@@ -143,7 +143,6 @@ void WiFiEvent(WiFiEvent_t event)
 
 void Wifi_setup()
 {
-
     // delete old config
     //WiFi.disconnect(true);
 
@@ -166,7 +165,6 @@ void Wifi_setup()
 
     WiFi.begin(ssid.c_str(), wifi_password.c_str());
 
-    Serial.println();
     Serial.println();
     Serial.println("Wait for WiFi... ");
 }

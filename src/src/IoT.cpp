@@ -22,10 +22,10 @@ struct MessageToPublish
   char payload[100];
 };
 
-TaskHandle_t MQTTTask;
+TaskHandle_t MQTTCommandTask;
 TaskHandle_t MQTTPublishTask;
 
-volatile bool ConnectSubscriptions = false;
+volatile bool ConnectSubscriptions = true;
 
 std::vector<std::string> SubscribedTopics;
 std::vector<std::string> UnsubscribedTopics;
@@ -42,21 +42,21 @@ void MQTT_setup(std::string RainbowSparkleUnicornName)
   MQTTClient.setCallback(recieveMessage);
 
   xTaskCreatePinnedToCore(
-      MQTT_Publish_task,         /* Task function. */
-      "MQTT Publish Task",       /* name of task. */
-      17000,                     /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
-      NULL,                      /* parameter of the task */
-      MQTT_client_task_Priority, /* priority of the task */
-      &MQTTPublishTask,          /* Task handle to keep track of created task */
+      MQTT_command_task,   /* Task function. */
+      "MQTT Command Task", /* name of task. */
+      2046,                /* Stack size of task (uxTaskGetStackHighWaterMark:1336) */
+      NULL,                /* parameter of the task */
+      MQTT_task_Priority,  /* priority of the task */
+      &MQTTCommandTask,    /* Task handle to keep track of created task */
       1);
 
   xTaskCreatePinnedToCore(
-      MQTT_task,          /* Task function. */
-      "MQTT Task",        /* name of task. */
-      17000,              /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
-      NULL,               /* parameter of the task */
-      MQTT_task_Priority, /* priority of the task */
-      &MQTTTask,          /* Task handle to keep track of created task */
+      MQTT_Publish_task,         /* Task function. */
+      "MQTT Publish Task",       /* name of task. */
+      5000,                      /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+      NULL,                      /* parameter of the task */
+      MQTT_client_task_Priority, /* priority of the task */
+      &MQTTPublishTask,          /* Task handle to keep track of created task */
       1);
 }
 
@@ -110,6 +110,8 @@ void setupSubscriptions()
 {
   Serial.print(F("setupSubscriptions"));
 
+  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+
   for (int i = 0; i < SubscribedTopics.size(); i++)
   {
     Serial << "subscribing to:" << SubscribedTopics[i].c_str() << endl;
@@ -136,7 +138,8 @@ void MQTT_Publish_task(void *pvParameter)
   {
     if (WiFi.isConnected() == false)
     {
-      //Serial.println("WiFi.isConnected() == false");
+      Serial.println("WiFi.isConnected() == false");
+
       delay(500);
     }
     else
@@ -187,11 +190,11 @@ void MQTT_Publish_task(void *pvParameter)
   vTaskDelete(NULL);
 }
 
-void MQTT_task(void *pvParameter)
+void MQTT_command_task(void *pvParameter)
 {
   UBaseType_t uxHighWaterMark;
   uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  Serial.print("MQTT_task uxTaskGetStackHighWaterMark:");
+  Serial.print("MQTT_command_task uxTaskGetStackHighWaterMark:");
   Serial.println(uxHighWaterMark);
 
   for (;;)
@@ -199,9 +202,9 @@ void MQTT_task(void *pvParameter)
     messageParts parts;
 
     //wait for new MQTT command in the queue
-    xQueueReceive(MQTT_Queue, &parts, portMAX_DELAY);
+    xQueueReceive(MQTT_Command_Queue, &parts, portMAX_DELAY);
 
-    Serial.print("MQTT_Queue:");
+    Serial.print("MQTT_Command_Queue:");
     Serial.println(parts.identifier);
 
     std::string identifier = parts.identifier;
@@ -224,13 +227,13 @@ void MQTT_task(void *pvParameter)
     else if (identifier.compare("SUBSCRIBE") == 0)
     {
       std::string topic = parts.part1;
-    //  strcpy(topic, parts.part1);
+      //  strcpy(topic, parts.part1);
 
       subscribe(topic);
     }
     else if (identifier.compare("UNSUBSCRIBE") == 0)
     {
-   std::string topic = parts.part1;
+      std::string topic = parts.part1;
 
       unsubscribe(topic);
     }

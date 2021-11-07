@@ -11,7 +11,7 @@ void dealWithMessage(std::string message)
 
     std::string identifier = queuedMsg.identifier;
 
-    //Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
+    Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
     //Serial << "identifier.compare('SFILECOUNT'): " << identifier.compare("SFILECOUNT") << endl;
 
     if (identifier.compare("RESTART") == 0)
@@ -44,7 +44,7 @@ void dealWithMessage(std::string message)
     else if (identifier.compare("PUBLISH") == 0 || identifier.compare("SUBSCRIBE") == 0 ||
              identifier.compare("UNSUBSCRIBE")== 0)
     {
-        xQueueSend(MQTT_Queue, &queuedMsg, portMAX_DELAY);
+        xQueueSend(MQTT_Command_Queue, &queuedMsg, portMAX_DELAY);
     }
     else if (identifier.compare("DIAL1") == 0 || identifier.compare("DIAL2") == 0)
     {
