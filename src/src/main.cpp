@@ -39,7 +39,6 @@ QueueHandle_t Movement_Queue;
 QueueHandle_t MQTT_Queue;
 
 SemaphoreHandle_t i2cSemaphore;
-//SemaphoreHandle_t wifiSemaphore;
 
 extern std::string requestMessage;
 
@@ -49,13 +48,13 @@ std::string RainbowSparkleUnicornName;
 
 void setup()
 {
-  //WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-
   //stop bluetooth
   btStop();
 
   //Set UART log level
   esp_log_level_set("SN9", ESP_LOG_VERBOSE);
+
+  pinMode(ONBOARDLED, OUTPUT);
 
   //start i2c
   Wire.begin(SDA, SCL);
@@ -68,10 +67,6 @@ void setup()
   //create i2c Semaphore , and set to useable
   i2cSemaphore = xSemaphoreCreateBinary();
   xSemaphoreGive(i2cSemaphore);
-
-  //create WiFi Semaphore , and set to useable
-  // wifiSemaphore = xSemaphoreCreateBinary();
-  // xSemaphoreGive(wifiSemaphore);
 
   //set up the main queues
   Sound_Queue = xQueueCreate(5, sizeof(messageParts));
@@ -119,8 +114,6 @@ void POST(uint8_t flashes)
   //TODO: debate which tasks need stopping?
   vTaskSuspendAll(); //added on 31/1/21
 
-  pinMode(ONBOARDLED, OUTPUT);
-
   uint32_t speed = 150;
 
   for (;;)
@@ -148,7 +141,7 @@ void checkI2Cerrors(std::string area)
 
 void loop()
 {
-  //Serial << "WiFi.isConnected() == " << WiFi.isConnected() << endl;
+// digitalWrite(ONBOARDLED, WiFi.isConnected());
 
   if (WiFi.isConnected() == true)
   {
