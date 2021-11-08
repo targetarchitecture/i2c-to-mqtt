@@ -36,7 +36,7 @@ void microbit_setup()
     uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
 
     //Create a task to handler UART event from ISR
-    xTaskCreate(microbit_receive_task, "Microbit RX Task", 2048, NULL, BBC_RX_Priority, &MicrobitRXTask);
+    xTaskCreate(microbit_receive_task, "Microbit RX Task", 4096, NULL, BBC_RX_Priority, &MicrobitRXTask);
 
     //Create a task to handle send UART data to Microbit
     xTaskCreatePinnedToCore(microbit_transmit_task, "Microbit TX Task", 2048, NULL, BBC_TX_Priority, &MicrobitTXTask, 1);
@@ -44,6 +44,11 @@ void microbit_setup()
 
 void microbit_receive_task(void *pvParameters)
 {
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("microbit_receive_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
     uart_event_t uart_event;
     uint8_t *received_buffer = (uint8_t *)malloc(RX_BUF_SIZE);
 
@@ -161,7 +166,7 @@ void microbit_transmit_task(void *pvParameters)
             int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
 
             //Added on 1/12/20 to try to stop flooding
-            delay(10);
+            delay(5);
         }
     }
 

@@ -31,6 +31,8 @@ QueueHandle_t MQTT_Command_Queue;
 
 SemaphoreHandle_t i2cSemaphore;
 
+bool POSTerror = false;
+
 extern std::string requestMessage;
 
 extern void dealWithMessage(std::string message);
@@ -71,11 +73,11 @@ void setup()
   getEfuseMac << "SN9_" << ESP.getEfuseMac();
   RainbowSparkleUnicornName = getEfuseMac.str();
 
-  //get wifi going first as this seems to be problematic
-  Wifi_setup();
-
   //call the feature setup methods
   microbit_setup();
+
+  //get wifi going first as this seems to be problematic
+  Wifi_setup();
 
   sound_setup();
 
@@ -97,13 +99,16 @@ void setup()
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 
-  runTests();
+  //runTests();
 }
 
 void POST(uint8_t flashes)
 {
   //TODO: debate which tasks need stopping?
   vTaskSuspendAll(); //added on 31/1/21
+
+  //take back control of LED
+  POSTerror = true;
 
   uint32_t speed = 150;
 
@@ -132,14 +137,17 @@ void checkI2Cerrors(std::string area)
 
 void loop()
 {
- digitalWrite(ONBOARDLED, WiFi.isConnected());
-  
+  if (POSTerror == false)
+  {
+    digitalWrite(ONBOARDLED, WiFi.isConnected());
+  }
+
   delay(1000);
 }
 
 void runTests()
 {
-  dealWithMessage("SUBSCRIBE,ps2/buttons ");
+  //dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
   // dealWithMessage("STARTING ");
   // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");

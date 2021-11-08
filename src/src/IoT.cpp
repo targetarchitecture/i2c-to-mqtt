@@ -57,7 +57,7 @@ void MQTT_setup(std::string RainbowSparkleUnicornName)
 
 void recieveMessage(char *topic, byte *payload, unsigned int length)
 {
-  Serial << "Message arrived [" << topic << "]" << endl;
+  //Serial << "Message arrived [" << topic << "]" << endl;
 
   std::string receivedMsg;
 
@@ -72,7 +72,7 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
   //Serial.println();
 
   char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "MQTT,'%s','%s'", topic, receivedMsg.c_str());
+  sprintf(msgtosend, "MQTT:'%s','%s'", topic, receivedMsg.c_str());
   sendToMicrobit(msgtosend);
 }
 

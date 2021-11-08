@@ -11,7 +11,7 @@ void dealWithMessage(std::string message)
 
     std::string identifier = queuedMsg.identifier;
 
-    Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
+    //Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
     //Serial << "identifier.compare('SFILECOUNT'): " << identifier.compare("SFILECOUNT") << endl;
 
     if (identifier.compare("RESTART") == 0)

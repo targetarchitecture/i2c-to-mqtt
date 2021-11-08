@@ -1,27 +1,27 @@
 #pragma once
 
-//RTOS task priorities
-#define MQTT_task_Priority 2
-#define MQTT_client_task_Priority 6
+//RTOS task priorities (highest is 24)
+#define MQTT_task_Priority 12
+#define MQTT_client_task_Priority 12
 
-#define switch_task_Priority 4
-#define touch_task_Priority 4
+#define switch_task_Priority 5 
+#define touch_task_Priority 7
 
-#define MovementTask_Priority 1
-#define Movementi2cTask_Priority 2
-#define ServoEasingTask_Priority 3
+#define MovementTask_Priority 14
+#define Movementi2cTask_Priority 15
+#define ServoEasingTask_Priority 14
 
-#define LEDBlinkingTask_Priority 5
-#define LEDBreathingTask_Priority 5
+#define LEDBlinkingTask_Priority 10
+#define LEDBreathingTask_Priority 10
 
-#define DAC_task_Priority 1
-#define encoders_task_Priority 1
-#define light_task_Priority 1
-#define sound_task_Priority 1
-#define sound_busy_task_Priority 1
+#define DAC_task_Priority 5
+#define encoders_task_Priority 5 
+#define light_task_Priority 5
+#define sound_task_Priority 5
+#define sound_busy_task_Priority 5
 
-#define BBC_RX_Priority 10
-#define BBC_TX_Priority 2
+#define BBC_RX_Priority 20
+#define BBC_TX_Priority 19
 
 //UART variables
 #define BBC_UART_NUM UART_NUM_2
