@@ -103,9 +103,9 @@ void checkMQTTconnection()
 
 void setupSubscriptions()
 {
-  Serial.print(F("setupSubscriptions"));
+ // Serial.print(F("setupSubscriptions"));
 
-  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+ // Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
   for (int i = 0; i < SubscribedTopics.size(); i++)
   {
@@ -133,7 +133,7 @@ void MQTT_Publish_task(void *pvParameter)
   {
     if (WiFi.isConnected() == false)
     {
-      Serial.println("WiFi.isConnected() == false");
+    //  Serial.println("WiFi.isConnected() == false");
 
       delay(500);
     }
@@ -141,7 +141,7 @@ void MQTT_Publish_task(void *pvParameter)
     {
       if (MQTTClient.connected() == false)
       {
-        Serial.println("checkMQTTconnection");
+       // Serial.println("checkMQTTconnection");
 
         checkMQTTconnection();
       }
@@ -150,7 +150,7 @@ void MQTT_Publish_task(void *pvParameter)
         //check to see if we need to remake the subscriptions
         if (ConnectSubscriptions == true)
         {
-          Serial.println("ConnectSubscriptions == true");
+       //   Serial.println("ConnectSubscriptions == true");
 
           //set up subscription topics
           setupSubscriptions();
@@ -199,8 +199,8 @@ void MQTT_command_task(void *pvParameter)
     //wait for new MQTT command in the queue
     xQueueReceive(MQTT_Command_Queue, &parts, portMAX_DELAY);
 
-    Serial.print("MQTT_Command_Queue:");
-    Serial.println(parts.identifier);
+    //Serial.print("MQTT_Command_Queue:");
+    //Serial.println(parts.identifier);
 
     std::string identifier = parts.identifier;
 
