@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "movement.h"
 
-
 extern SemaphoreHandle_t i2cSemaphore;
 
 Adafruit_PWMServoDriver PCA9685 = Adafruit_PWMServoDriver();
@@ -221,15 +220,20 @@ void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toD
     servos[pin].easingCurve = easingCurve;
     servos[pin].interuptEasing = false;
 
-    //Serial.printf(">>> \t fromDegree %i \t toDegree %i \n",  servos[pin].fromDegree, servos[pin].toDegree);
-    // Serial.println("setServoEase");
+    // Serial << "pin:" << pin << endl;
+    // Serial << "duration:" << duration << endl;
+    // Serial << "toDegree:" << toDegree << endl;
+    // Serial << "fromDegree:" << fromDegree << endl;
+    // Serial << "minPulse:" << minPulse << endl;
+    // Serial << "maxPulse:" << maxPulse << endl;
+    // Serial << "easingCurve:" << easingCurve << endl;
 
     const char *taskName = "Servo Task " + pin;
 
     xTaskCreatePinnedToCore(
         &ServoEasingTaskV2,
-        taskName, //"Servo Task",
-        10000,
+        taskName,
+        2000, //10000,
         NULL,
         ServoEasingTask_Priority,
         &servos[pin].taskHandle,
@@ -302,8 +306,7 @@ void stopServo(const int16_t pin)
     //Serial.printf("\nSTOPPING SERVO PIN: %i COMPLETED\n", pin);
 }
 
-[[deprecated]]
-void ServoEasingTaskV1(void *pvParameter)
+[[deprecated]] void ServoEasingTaskV1(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
@@ -441,7 +444,7 @@ void ServoEasingTaskV2(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("ServoEasingTask uxTaskGetStackHighWaterMark:");
+    // Serial.print("ServoEasingTaskV2 uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
     uint32_t pin = 0;
@@ -469,13 +472,11 @@ void ServoEasingTaskV2(void *pvParameter)
     uint16_t PWM;
     uint16_t previousPWM;
 
-    //Serial.printf("_change %f \t fromDegreeMapped %f \t toDegreeMapped %f \t fromDegree %i \t toDegree %i \n", _change, fromDegreeMapped, toDegreeMapped, fromDegree, toDegree);
-    //Serial.printf("minPulse %i \t maxPulse %i \n", minPulse, maxPulse);
+    //Serial << "ServoEasing starting pin:" << pin << " durationMillis:" << durationMillis << "ms, change:" << _change << endl;
+    Serial << "ServoEasing starting pin:" << pin << " fromDegreeMapped:" << fromDegreeMapped << " toDegreeMapped:" << toDegreeMapped << endl;
 
-    //send message to microbit to indicate it's moving
-    // char msgtosend[MAXBBCMESSAGELENGTH];
-    // sprintf(msgtosend, "F3,%i", pin);
-    // sendToMicrobit(msgtosend);
+    //set starting position (from degree PWM mapped)
+    setServoPWM(pin, fromDegreeMapped);
 
     for (int i = 0; i <= durationMillis; i = i + 20)
     {
@@ -529,12 +530,10 @@ void ServoEasingTaskV2(void *pvParameter)
         }
     }
 
-    // Serial.print("pin: ");
-    // Serial.print(pin);
-    // Serial.print(" loop completed in: ");
-    // Serial.print(millis() - startTime);
-    // Serial.print(" @ ");
-    // Serial.println(millis());
+    //set starting position (from degree PWM mapped)
+    setServoPWM(pin, PWM);
+
+    Serial << "ServoEasing pin:" << pin << " loop completed in:" << millis() - startTime << "ms. Final PWM:" << PWM << endl;
 
     /* The task is going to be deleted. Set the handle to NULL. */
     servos[pin].taskHandle = NULL;

@@ -127,7 +127,7 @@ void POST(uint8_t flashes)
 
 void checkI2Cerrors(std::string area)
 {
-  if (Wire.lastError() != 0)
+  if (Wire.getWriteError() != 0)
   {
     //Serial << "i2C error @ " << area.c_str() << ":" << Wire.getErrorText(Wire.lastError()) << endl;
 
