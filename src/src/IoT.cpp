@@ -103,9 +103,9 @@ void checkMQTTconnection()
 
 void setupSubscriptions()
 {
- // Serial.print(F("setupSubscriptions"));
+  // Serial.print(F("setupSubscriptions"));
 
- // Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+  // Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
   for (int i = 0; i < SubscribedTopics.size(); i++)
   {
@@ -133,7 +133,7 @@ void MQTT_Publish_task(void *pvParameter)
   {
     if (WiFi.isConnected() == false)
     {
-    //  Serial.println("WiFi.isConnected() == false");
+      //  Serial.println("WiFi.isConnected() == false");
 
       delay(500);
     }
@@ -141,7 +141,7 @@ void MQTT_Publish_task(void *pvParameter)
     {
       if (MQTTClient.connected() == false)
       {
-       // Serial.println("checkMQTTconnection");
+        // Serial.println("checkMQTTconnection");
 
         checkMQTTconnection();
       }
@@ -150,7 +150,7 @@ void MQTT_Publish_task(void *pvParameter)
         //check to see if we need to remake the subscriptions
         if (ConnectSubscriptions == true)
         {
-       //   Serial.println("ConnectSubscriptions == true");
+          //   Serial.println("ConnectSubscriptions == true");
 
           //set up subscription topics
           setupSubscriptions();
@@ -163,12 +163,12 @@ void MQTT_Publish_task(void *pvParameter)
         //check the message queue and if empty just proceed passed
         if (xQueueReceive(MQTT_Publish_Queue, &msg, 0) == pdTRUE)
         {
-          Serial.print("publish topic:");
-          Serial.print(msg.topic);
-          Serial.print("\t\t");
-          Serial.print("payload:");
-          Serial.print(msg.payload);
-          Serial.println("");
+          // Serial.print("publish topic:");
+          // Serial.print(msg.topic);
+          // Serial.print("\t");
+          // Serial.print("payload:");
+          // Serial.print(msg.payload);
+          // Serial.println("");
 
           MQTTClient.publish(msg.topic, msg.payload);
         }
@@ -207,15 +207,28 @@ void MQTT_command_task(void *pvParameter)
     if (identifier.compare("PUBLISH") == 0)
     {
       struct MessageToPublish msg;
-      strcpy(msg.topic, parts.part1);
-      strcpy(msg.payload, parts.part2);
+      std::istringstream f(parts.part1);
+      std::string part;
+      int index = 0;
 
-      Serial.print("queue message:");
-      Serial.print(msg.topic);
-      Serial.print("\t\t");
-      Serial.print("payload:");
-      Serial.print(msg.payload);
-      Serial.println("");
+      while (std::getline(f, part, '|'))
+      {
+        if (index == 0)
+        {
+          strcpy(msg.topic, part.c_str());
+        }
+        if (index == 1)
+        {
+          strcpy(msg.payload, part.c_str());
+        }
+        index++;
+      }
+
+      // Serial.print("queue message:");
+      // Serial.print(msg.topic);
+      // Serial.print("\t");
+      // Serial.print("payload:");
+      // Serial.println(msg.payload);
 
       xQueueSend(MQTT_Publish_Queue, &msg, portMAX_DELAY);
     }
@@ -254,7 +267,7 @@ void unsubscribe(std::string topic)
 
 void subscribe(std::string topic)
 {
-  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+  //Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
   // char t[100];
 
@@ -262,7 +275,7 @@ void subscribe(std::string topic)
 
   SubscribedTopics.push_back(topic);
 
-  Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+  // Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
   //set to true to get the subscriptions setup again
   ConnectSubscriptions = true;

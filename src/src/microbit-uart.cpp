@@ -76,7 +76,7 @@ void microbit_receive_task(void *pvParameters)
                     receivedMsg += c;
                 }
 
-#if SHOW_SERIAL 
+#if SHOW_SERIAL
                 Serial << "RX:" << receivedMsg.c_str() << endl;
 #endif
 
@@ -156,7 +156,7 @@ void microbit_transmit_task(void *pvParameters)
 
         if (xQueueReceive(Microbit_Transmit_Queue, &msg, portMAX_DELAY))
         {
-#if SHOW_SERIAL 
+#if SHOW_SERIAL
             Serial << "TX:" << msg << endl;
 #endif
 

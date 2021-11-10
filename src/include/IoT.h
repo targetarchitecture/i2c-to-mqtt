@@ -4,6 +4,9 @@
 #include <PubSubClient.h>
 #include "messaging.h"
 #include "esp_wifi.h"
+#include <Streaming.h>
+#include <Stream.h>
+#include <sstream>
 
 void MQTT_setup(std::string RainbowSparkleUnicornName);
 void checkMQTTconnection();
