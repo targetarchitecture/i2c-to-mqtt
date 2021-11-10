@@ -21,17 +21,18 @@ struct servo
 
 struct servoPWM
 {
-  int pwm;
-  int pin;
+  uint16_t pwm;
+  uint16_t pin;
 };
 
+void ServoEasingTaskV3(void *pvParameter);
 void ServoEasingTaskV2(void *pvParameter);
 void ServoEasingTaskV1(void *pvParameter);
 double mapAngles(double x, double in_min, double in_max, double out_min, double out_max);
-void setServoAngle(const int16_t pin, const int16_t angle, const int16_t minPulse, const int16_t maxPulse);
-void stopServo(const int16_t pin);
-void setServoPWM(const int16_t pin, const int16_t PWM);
-void setServoEase(const int16_t pin, easingCurves easingCurve, const int16_t toDegree, const int16_t fromDegree, const int16_t duration, const int16_t minPulse, const int16_t maxPulse);
+void setServoAngle(const uint16_t pin, const uint16_t angle, const uint16_t minPulse, const uint16_t maxPulse);
+void stopServo(const uint16_t pin);
+void setServoPWM(const uint16_t pin, const uint16_t PWM);
+void setServoEase(const uint16_t pin, easingCurves easingCurve, const uint16_t toDegree, const uint16_t fromDegree, const uint16_t duration, const uint16_t minPulse, const uint16_t maxPulse);
 void movement_setup();
 void movement_task(void *pvParameter);
 void movement_i2c_task(void *pvParameter);
