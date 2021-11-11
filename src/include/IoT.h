@@ -8,7 +8,7 @@
 #include <Stream.h>
 #include <sstream>
 
-void MQTT_setup(std::string RainbowSparkleUnicornName);
+void MQTT_setup();
 void checkMQTTconnection();
 
 void subscribe(std::string topic);

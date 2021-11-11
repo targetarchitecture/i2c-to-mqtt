@@ -37,7 +37,7 @@ std::string wifi_password = "derwenthorpe";
 
 void WiFiEvent(WiFiEvent_t event)
 {
-    Serial.printf("[WiFi-event] event: %d\n", event);
+    //Serial.printf("[WiFi-event] event: %d\n", event);
 
     switch (event)
     {
@@ -68,9 +68,9 @@ void WiFiEvent(WiFiEvent_t event)
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
         Serial.print("Obtained IP address: ");
-        Serial.println(WiFi.localIP());
+        Serial.print(WiFi.localIP());
 
-        Serial.print("in ");
+        Serial.print(" in ");
         Serial.print(millis());
         Serial.println("ms");
 
@@ -137,7 +137,4 @@ void Wifi_setup()
     WiFi.onEvent(WiFiEvent);
 
     WiFi.begin(ssid.c_str(), wifi_password.c_str());
-
-    Serial.println();
-    Serial.println("Wait for WiFi... ");
 }

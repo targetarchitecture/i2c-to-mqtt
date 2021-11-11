@@ -37,8 +37,6 @@ extern std::string requestMessage;
 
 extern void dealWithMessage(std::string message);
 
-std::string RainbowSparkleUnicornName;
-
 void setup()
 {
   //stop bluetooth
@@ -53,7 +51,7 @@ void setup()
   Wire.begin(SDA, SCL);
 
   Serial.begin(115200);
-  //Serial.setDebugOutput(true);
+  Serial.setDebugOutput(true);
   Serial.println("");
   Serial.println("");
 
@@ -67,11 +65,6 @@ void setup()
   Light_Queue = xQueueCreate(30, sizeof(messageParts));
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
   MQTT_Command_Queue = xQueueCreate(30, sizeof(messageParts));
-
-  //get the unique id into a variable (once)
-  std::ostringstream getEfuseMac;
-  getEfuseMac << "SN9_" << ESP.getEfuseMac();
-  RainbowSparkleUnicornName = getEfuseMac.str();
 
   //call the feature setup methods
   microbit_setup();
@@ -95,7 +88,7 @@ void setup()
 
   movement_setup();
 
-  MQTT_setup(RainbowSparkleUnicornName);
+  MQTT_setup();
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;
 

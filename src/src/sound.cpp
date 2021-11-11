@@ -17,10 +17,21 @@ const int commandPause = 50;
 
 void sound_setup()
 {
+    //Configure serial port pins and busy pin
+    pinMode(DFPLAYER_BUSY, INPUT);
+
+    //set up UART
+    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
+
+    //Configure serial port pins and busy pin
+    sound.begin(Serial1, true, true);
+    sound.setTimeOut(750); //Set serial communication time out 750ms
+    sound.outputDevice(DFPLAYER_DEVICE_SD);
+
     xTaskCreatePinnedToCore(
         sound_task,          /* Task function. */
         "Sound Task",        /* name of task. */
-        12000,               /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
+        3000,               /* Stack size of task (uxTaskGetStackHighWaterMark:11708) */
         NULL,                /* parameter of the task */
         sound_task_Priority, /* priority of the task */
         &SoundTask, 1);      /* Task handle to keep track of created task */
@@ -28,7 +39,7 @@ void sound_setup()
     xTaskCreatePinnedToCore(
         sound_busy_task,
         "Busy Task",
-        4096,
+        3000,
         NULL,
         sound_busy_task_Priority,
         &SoundBusyTask,
@@ -37,13 +48,10 @@ void sound_setup()
 
 void sound_busy_task(void *pvParameter)
 {
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("busy_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
-
-    //Configure serial port pins and busy pin
-    pinMode(DFPLAYER_BUSY, INPUT);
+    UBaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("busy_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
 
     int BusyPin = digitalRead(DFPLAYER_BUSY);
 
@@ -62,21 +70,11 @@ void sound_busy_task(void *pvParameter)
 
 void sound_task(void *pvParameters)
 {
-    //TODO: Ask Google if this is the best place to declare variables in an endless task
-    messageParts parts;
-
-    Serial1.begin(9600, SERIAL_8N1, DFPLAYER_RX, DFPLAYER_TX);
-
-    //Configure serial port pins and busy pin
-    sound.begin(Serial1, true, true);
-    sound.setTimeOut(750); //Set serial communication time out 750ms
-    sound.outputDevice(DFPLAYER_DEVICE_SD);
-
     /* Inspect our own high water mark on entering the task. */
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("music_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    UBaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("sound_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
 
     for (;;)
     {

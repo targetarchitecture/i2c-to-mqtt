@@ -7,7 +7,7 @@ PubSubClient MQTTClient;
 std::string mqtt_server = "192.168.1.189";
 std::string mqtt_user = "public";
 std::string mqtt_password = "public";
-std::string mqtt_client;
+//std::string mqtt_client;
 
 QueueHandle_t MQTT_Publish_Queue;
 
@@ -25,11 +25,9 @@ volatile bool ConnectSubscriptions = true;
 std::vector<std::string> SubscribedTopics;
 std::vector<std::string> UnsubscribedTopics;
 
-void MQTT_setup(std::string RainbowSparkleUnicornName)
+void MQTT_setup()
 {
   MQTT_Publish_Queue = xQueueCreate(10, sizeof(MessageToPublish));
-
-  mqtt_client = RainbowSparkleUnicornName;
 
   //set this up as early as possible
   MQTTClient.setClient(client);
@@ -78,7 +76,8 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
 
 void checkMQTTconnection()
 {
-  Serial.println(F("MQTTClient NOT Connected :("));
+  Serial.println("MQTTClient NOT Connected :(");
+  u_long startTime = millis();
 
   do
   {
@@ -89,13 +88,20 @@ void checkMQTTconnection()
 
     //Serial << mqtt_client.c_str() << mqtt_user.c_str() << mqtt_password.c_str();
 
+    //get the unique id into a variable
+    std::ostringstream getEfuseMac;
+    getEfuseMac << "SN9_" << ESP.getEfuseMac();
+    std::string mqtt_client = getEfuseMac.str();
+
     MQTTClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
 
     delay(500);
 
   } while (1);
 
-  Serial.println(F("MQTTClient now Connected :)"));
+  Serial << "MQTTClient now connected in " << millis() - startTime << "ms :)" << endl;
+
+  //Serial.println("MQTTClient now connected :)");
 
   //set to true to get the subscriptions setup again
   ConnectSubscriptions = true;
@@ -103,7 +109,7 @@ void checkMQTTconnection()
 
 void setupSubscriptions()
 {
-  // Serial.print(F("setupSubscriptions"));
+  // Serial.print("setupSubscriptions");
 
   // Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
 
@@ -124,10 +130,10 @@ void setupSubscriptions()
 
 void MQTT_Publish_task(void *pvParameter)
 {
-  UBaseType_t uxHighWaterMark;
-  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  Serial.print("MQTT_Publish_task uxTaskGetStackHighWaterMark:");
-  Serial.println(uxHighWaterMark);
+  // UBaseType_t uxHighWaterMark;
+  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+  // Serial.print("MQTT_Publish_task uxTaskGetStackHighWaterMark:");
+  // Serial.println(uxHighWaterMark);
 
   for (;;)
   {
@@ -187,10 +193,10 @@ void MQTT_Publish_task(void *pvParameter)
 
 void MQTT_command_task(void *pvParameter)
 {
-  UBaseType_t uxHighWaterMark;
-  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  Serial.print("MQTT_command_task uxTaskGetStackHighWaterMark:");
-  Serial.println(uxHighWaterMark);
+  // UBaseType_t uxHighWaterMark;
+  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+  // Serial.print("MQTT_command_task uxTaskGetStackHighWaterMark:");
+  // Serial.println(uxHighWaterMark);
 
   for (;;)
   {

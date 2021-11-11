@@ -35,7 +35,7 @@ void switch_setup()
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
         "Switch Task",        /* name of task. */
-        8500,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8204)   */
+        3000,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8204)   */
         NULL,                 /* parameter of the task */
         switch_task_Priority, /* priority of the task */
         &SwitchTask, 1);      /* Task handle to keep track of created task */
@@ -44,10 +44,10 @@ void switch_setup()
 void switch_task(void *pvParameters)
 {
     /* Inspect our own high water mark on entering the task. */
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    UBaseType_t uxHighWaterMark;
+    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+    Serial.println(uxHighWaterMark);
 
     previousSwitchStates = readAndSetSwitchArray();
 

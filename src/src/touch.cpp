@@ -27,8 +27,8 @@ void touch_setup()
     {
         Serial.println("MPR121 not found, check wiring?");
 
-        POST(3);    
-    } 
+        POST(3);
+    }
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
@@ -43,7 +43,6 @@ void touch_setup()
         1);
 }
 
-
 void touch_task(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
@@ -52,7 +51,7 @@ void touch_task(void *pvParameter)
     // Serial.println(uxHighWaterMark);
 
     //read once and set array as the baseline
-  lasttouched=  readAndSetTouchArray();
+    lasttouched = readAndSetTouchArray();
 
     for (;;)
     {
