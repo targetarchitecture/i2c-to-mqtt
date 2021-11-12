@@ -12,6 +12,24 @@ volatile byte switchArray[16] = {};
 
 void switch_setup()
 {
+
+    xTaskCreatePinnedToCore(
+        switch_task,          /* Task function. */
+        "Switch Task",        /* name of task. */
+        3000,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8204)   */
+        NULL,                 /* parameter of the task */
+        switch_task_Priority, /* priority of the task */
+        &SwitchTask, 1);      /* Task handle to keep track of created task */
+}
+
+void switch_task(void *pvParameters)
+{
+    /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("switch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
@@ -31,23 +49,6 @@ void switch_setup()
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
-
-    xTaskCreatePinnedToCore(
-        switch_task,          /* Task function. */
-        "Switch Task",        /* name of task. */
-        3000,                 /* Stack size of task (uxTaskGetStackHighWaterMark: 8204)   */
-        NULL,                 /* parameter of the task */
-        switch_task_Priority, /* priority of the task */
-        &SwitchTask, 1);      /* Task handle to keep track of created task */
-}
-
-void switch_task(void *pvParameters)
-{
-    /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("switch_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
 
     previousSwitchStates = readAndSetSwitchArray();
 

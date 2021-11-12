@@ -11,7 +11,25 @@ extern SemaphoreHandle_t i2cSemaphore;
 
 void light_setup()
 {
-    //wait for the i2c semaphore flag to become available
+
+    xTaskCreatePinnedToCore(
+        light_task,          /* Task function. */
+        "Light Task",        /* name of task. */
+        2048 * 4,            /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
+        NULL,                /* parameter of the task */
+        light_task_Priority, /* priority of the task */
+        &LightTask, 1);      /* Task handle to keep track of created task */
+}
+
+void light_task(void *pvParameters)
+{
+    /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("light_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+        //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     if (!lights.begin(0x3E))
@@ -49,23 +67,6 @@ void light_setup()
         //give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
     }
-
-    xTaskCreatePinnedToCore(
-        light_task,          /* Task function. */
-        "Light Task",        /* name of task. */
-        2048 * 4,            /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
-        NULL,                /* parameter of the task */
-        light_task_Priority, /* priority of the task */
-        &LightTask, 1);      /* Task handle to keep track of created task */
-}
-
-void light_task(void *pvParameters)
-{
-    /* Inspect our own high water mark on entering the task. */
-    UBaseType_t uxHighWaterMark;
-    uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    Serial.print("light_task uxTaskGetStackHighWaterMark:");
-    Serial.println(uxHighWaterMark);
 
     for (;;)
     {

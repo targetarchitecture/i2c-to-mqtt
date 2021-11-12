@@ -1,27 +1,27 @@
 #pragma once
 
-//RTOS task priorities (highest is 24)
-#define MQTT_task_Priority 10
-#define MQTT_client_task_Priority 10
+//RTOS task priorities (highest is 24) - getting these priorities wrong can make the differance from 1260ms to 347ms
+#define MQTT_task_Priority 2
+#define MQTT_client_task_Priority 6
 
-#define switch_task_Priority 10 
-#define touch_task_Priority 10
+#define switch_task_Priority 4
+#define touch_task_Priority 4
 
-#define MovementTask_Priority 12
-#define Movementi2cTask_Priority 14
-#define ServoEasingTask_Priority 10
+#define MovementTask_Priority 1
+#define Movementi2cTask_Priority 5
+#define ServoEasingTask_Priority 3
 
-#define LEDBlinkingTask_Priority 10
-#define LEDBreathingTask_Priority 10
+#define LEDBlinkingTask_Priority 5
+#define LEDBreathingTask_Priority 5
 
-#define DAC_task_Priority 10
-#define encoders_task_Priority 10 
-#define light_task_Priority 10
-#define sound_task_Priority 10
-#define sound_busy_task_Priority 10
+#define DAC_task_Priority 1
+#define encoders_task_Priority 1
+#define light_task_Priority 1
+#define sound_task_Priority 1
+#define sound_busy_task_Priority 1
 
-#define BBC_RX_Priority 15
-#define BBC_TX_Priority 15
+#define BBC_RX_Priority 10
+#define BBC_TX_Priority 2
 
 //UART variables
 #define BBC_UART_NUM UART_NUM_2
@@ -34,27 +34,3 @@
 
 #define RX_BUF_SIZE 1024
 #define TX_BUF_SIZE 1024  
-
-/*
-#define MQTT_task_Priority 12
-#define MQTT_client_task_Priority 12
-
-#define switch_task_Priority 5 
-#define touch_task_Priority 7
-
-#define MovementTask_Priority 14
-#define Movementi2cTask_Priority 15
-#define ServoEasingTask_Priority 14
-
-#define LEDBlinkingTask_Priority 10
-#define LEDBreathingTask_Priority 10
-
-#define DAC_task_Priority 5
-#define encoders_task_Priority 5 
-#define light_task_Priority 5
-#define sound_task_Priority 5
-#define sound_busy_task_Priority 5
-
-#define BBC_RX_Priority 20
-#define BBC_TX_Priority 19
-*/

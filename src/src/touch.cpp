@@ -19,20 +19,6 @@ volatile int touchArray[12] = {};
 
 void touch_setup()
 {
-    //wait for the i2c semaphore flag to become available
-    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-    // Default address is 0x5A
-    if (!cap.begin(0x5A))
-    {
-        Serial.println("MPR121 not found, check wiring?");
-
-        POST(3);
-    }
-
-    //give back the i2c flag for the next task
-    xSemaphoreGive(i2cSemaphore);
-
     xTaskCreatePinnedToCore(
         &touch_task,
         "Touch Task",
@@ -49,6 +35,20 @@ void touch_task(void *pvParameter)
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
+
+        //wait for the i2c semaphore flag to become available
+    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+    // Default address is 0x5A
+    if (!cap.begin(0x5A))
+    {
+        Serial.println("MPR121 not found, check wiring?");
+
+        POST(3);
+    }
+
+    //give back the i2c flag for the next task
+    xSemaphoreGive(i2cSemaphore);
 
     //read once and set array as the baseline
     lasttouched = readAndSetTouchArray();
