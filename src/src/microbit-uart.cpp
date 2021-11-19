@@ -7,7 +7,7 @@ TaskHandle_t MicrobitTXTask;
 QueueHandle_t Microbit_Receive_Queue;
 QueueHandle_t Microbit_Transmit_Queue;
 
-//#define SHOW_SERIAL 1
+#define SHOW_SERIAL 1
 
 void microbit_setup()
 {
@@ -28,12 +28,9 @@ void microbit_setup()
     //Install UART driver, and get the queue (buffer size = 1024)
     uart_driver_install(BBC_UART_NUM, RX_BUF_SIZE, TX_BUF_SIZE, 50, &Microbit_Receive_Queue, 0);
 
-    //define the pattern (0x7f) to look for in the UART RX buffer
-    //uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0);
+   // uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN,0,0,0); // 9, 0, 0);
 
-    uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0);
-
-    uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
+    //uart_pattern_queue_reset(UART_NUM_2, 10); //used to be 20 , 50
 
     //Create a task to handler UART event from ISR
     xTaskCreate(microbit_receive_task, "Microbit RX Task", 4096, NULL, BBC_RX_Priority, &MicrobitRXTask);
@@ -60,6 +57,8 @@ void microbit_receive_task(void *pvParameters)
     {
         if (xQueueReceive(Microbit_Receive_Queue, &uart_event, portMAX_DELAY))
         {
+            Serial << uart_event.type << uart_event.size << endl;
+
             switch (uart_event.type)
             {
             case UART_DATA:
@@ -126,6 +125,22 @@ void microbit_receive_task(void *pvParameters)
                 memset(pat, 0, sizeof(pat));
                 uart_read_bytes(BBC_UART_NUM, pat, PATTERN_LEN, pdMS_TO_TICKS(100));
                 printf("data: %.*s === pattern: %s\n", datalen - PATTERN_LEN, received_buffer, pat);
+
+                //added this extra place to catch UART messages
+                receivedMsg.clear();
+
+                for (size_t i = 0; i < uart_event.size; i++)
+                {
+                    char c = received_buffer[i]; // receive byte as a character
+
+                    receivedMsg += c;
+                }
+
+#if SHOW_SERIAL
+                Serial << "RX:" << receivedMsg.c_str() << endl;
+#endif
+
+                dealWithMessage(receivedMsg);
             }
             break;
             default:

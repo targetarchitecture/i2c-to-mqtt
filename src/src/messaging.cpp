@@ -100,33 +100,33 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(swithStates);
     }
-    else if (identifier.compare("TSTATE") == 0)
-    {
-        std::string touchStates = "TSTATE:";
+    // else if (identifier.compare("TSTATE") == 0)
+    // {
+    //     std::string touchStates = "TSTATE:";
 
-        for (uint8_t i = 0; i < 12; i++)
-        {
-            if (touchArray[i] == 1)
-            {
-                touchStates.append("H");
-            }
-            else
-            {
-                touchStates.append("L");
-            }
-        }
+    //     for (uint8_t i = 0; i < 12; i++)
+    //     {
+    //         if (touchArray[i] == 1)
+    //         {
+    //             touchStates.append("H");
+    //         }
+    //         else
+    //         {
+    //             touchStates.append("L");
+    //         }
+    //     }
 
-        //Serial << "touchStates:" << touchStates.c_str() << endl;
+    //     //Serial << "touchStates:" << touchStates.c_str() << endl;
 
-        sendToMicrobit(touchStates);
-    }
+    //     sendToMicrobit(touchStates);
+    //}
     else if (identifier.compare("TTHRSLD") == 0)
     {
         touch_deal_with_message(queuedMsg);
     }
     else if (identifier.compare("DEBUG") == 0)
     {
-        Serial << queuedMsg.part1 << queuedMsg.value1 << endl;
+        Serial << queuedMsg.part1 << " " << queuedMsg.value1 << endl;
     }
 }
 

@@ -16,6 +16,11 @@ const int commandPause = 50;
 
 void sound_setup()
 {
+    //set-up the interupt
+    pinMode(DFPLAYER_BUSY, INPUT);
+    //attachInterrupt(DFPLAYER_BUSY, handleFallingInterupt, FALLING);
+    //attachInterrupt(DFPLAYER_BUSY, handleRisingInterupt, RISING);
+
     xTaskCreatePinnedToCore(
         sound_task,          /* Task function. */
         "Sound Task",        /* name of task. */
@@ -25,7 +30,7 @@ void sound_setup()
         &SoundTask, 1);      /* Task handle to keep track of created task */
 
     xTaskCreatePinnedToCore(
-        sound_busy_task,
+        sound_busy_taskV1,
         "Busy Task",
         3000,
         NULL,
@@ -34,21 +39,70 @@ void sound_setup()
         1);
 }
 
-void sound_busy_task(void *pvParameter)
+// void IRAM_ATTR handleFallingInterupt()
+// {
+//     xTaskNotify(SoundBusyTask, 1, eSetValueWithOverwrite);
+// }
+
+// void IRAM_ATTR handleRisingInterupt()
+// {
+//     xTaskNotify(SoundBusyTask, 0, eSetValueWithOverwrite);
+// }
+
+// void sound_busy_taskV2(void *pvParameter)
+// {
+//     UBaseType_t uxHighWaterMark;
+//     uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+//     Serial.print("busy_task uxTaskGetStackHighWaterMark:");
+//     Serial.println(uxHighWaterMark);
+
+//     uint32_t busy = 2;
+
+//     for (;;)
+//     {
+//         BaseType_t xResult = xTaskNotifyWait(0X00, 0x00, &busy, portMAX_DELAY);
+
+//         Serial << "sound_busy_taskV2" << busy << endl;
+
+//         std::string requestMessage = "SBUSY:";
+//         requestMessage.append(std::to_string(busy));
+
+//         sendToMicrobit(requestMessage);
+//     }
+
+//     vTaskDelete(NULL);
+// }
+
+void sound_busy_taskV1(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
     // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("busy_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    int BusyPin = digitalRead(DFPLAYER_BUSY);
+    //int BusyPin = digitalRead(DFPLAYER_BUSY);
+
+    int PreviousBusy = 1;
 
     for (;;)
     {
-        std::string requestMessage = "SBUSY:";
-        requestMessage.append(std::to_string(digitalRead(DFPLAYER_BUSY)));
+        int BusyPin = digitalRead(DFPLAYER_BUSY);
 
-        sendToMicrobit(requestMessage);
+        if (BusyPin != PreviousBusy)
+        {
+            // Serial << "BusyPin=" << BusyPin << endl;
+
+            if (BusyPin == LOW)
+            {
+                sendToMicrobit("SBUSY:1");
+            }
+            else
+            {
+                sendToMicrobit("SBUSY:0");
+            }
+        }
+
+        PreviousBusy = BusyPin;
 
         delay(500);
     }

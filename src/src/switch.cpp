@@ -12,7 +12,6 @@ volatile byte switchArray[16] = {};
 
 void switch_setup()
 {
-
     xTaskCreatePinnedToCore(
         switch_task,          /* Task function. */
         "Switch Task",        /* name of task. */

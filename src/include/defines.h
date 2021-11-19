@@ -21,7 +21,7 @@
 #define sound_busy_task_Priority 1
 
 #define BBC_RX_Priority 10
-#define BBC_TX_Priority 2
+#define BBC_TX_Priority 10 // used to be 2
 
 //UART variables
 #define BBC_UART_NUM UART_NUM_2
@@ -30,7 +30,7 @@
 #define MAXBBCMESSAGELENGTH 128
  
 #define PATTERN_LEN 1
-#define PATTERN_FROM_MICROBIT 13 //0x7f
+#define PATTERN_FROM_MICROBIT 0x0D //Carriage Return
 
 #define RX_BUF_SIZE 1024
 #define TX_BUF_SIZE 1024  

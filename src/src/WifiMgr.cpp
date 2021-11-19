@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "WifiMgr.h"
 
-std::string ssid = "152 2.4GHz";
-std::string wifi_password = "derwenthorpe";
+String storedSSID;
+String storedWifiPassword;
 
 /*
   WiFi Events
@@ -58,10 +58,8 @@ void WiFiEvent(WiFiEvent_t event)
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
         Serial.println("Disconnected from WiFi access point");
-
         Serial.println("Reconnecting...");
-        WiFi.begin(ssid.c_str(), wifi_password.c_str());
-
+        WiFi.begin(storedSSID.c_str(), storedWifiPassword.c_str());
         break;
     case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
         Serial.println("Authentication mode of access point has changed");
@@ -133,8 +131,15 @@ void WiFiEvent(WiFiEvent_t event)
 
 void Wifi_setup()
 {
+    // get the values out of NVM
+    storedSSID = preferences.getString("ssid", "");
+    storedWifiPassword = preferences.getString("password", "");
+
+    Serial.print("SSID From NVM:");
+    Serial.println(storedSSID.c_str());
+
     // Examples of different ways to register wifi events
     WiFi.onEvent(WiFiEvent);
 
-    WiFi.begin(ssid.c_str(), wifi_password.c_str());
+    WiFi.begin(storedSSID.c_str(), storedWifiPassword.c_str());
 }

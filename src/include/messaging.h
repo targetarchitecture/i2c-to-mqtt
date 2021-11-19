@@ -33,7 +33,7 @@ extern QueueHandle_t MQTT_Command_Queue;
 extern volatile int32_t encoder1Count;
 extern volatile int32_t encoder2Count;
 extern volatile byte switchArray[16];
-extern volatile int touchArray[12];
+//extern volatile int touchArray[12];
 
 extern void touch_deal_with_message(messageParts message);
 void sendToMicrobit(std::string msg);

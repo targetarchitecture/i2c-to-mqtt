@@ -7,6 +7,8 @@
 
 Adafruit_MPR121 cap = Adafruit_MPR121();
 
+//#define UseTouchInterupt 0
+
 // Keeps track of the last pins touched, so we know when buttons are 'released'
 volatile uint16_t lasttouched = 0;
 //volatile uint16_t currtouched = 0;
@@ -15,32 +17,25 @@ TaskHandle_t TouchTask;
 
 //volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
 
-volatile int touchArray[12] = {};
+//volatile int touchArray[12] = {};
 
 void touch_setup()
 {
-    xTaskCreatePinnedToCore(
-        &touch_task,
-        "Touch Task",
-        2000, //uxTaskGetStackHighWaterMark = 1750
-        NULL,
-        touch_task_Priority,
-        &TouchTask,
-        1);
-}
+#ifdef UseTouchInterupt
+    //set-up the interupt
+    pinMode(TOUCH_INT, INPUT_PULLUP);
+    attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
+#endif
 
-void touch_task(void *pvParameter)
-{
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
+    // obtain previous threshold limits
+    uint8_t touchThreshold = preferences.getUShort("tch_threshold", 12U);
+    uint8_t releaseThreshold = preferences.getUShort("tch_release", 6U);
 
-        //wait for the i2c semaphore flag to become available
+    //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     // Default address is 0x5A
-    if (!cap.begin(0x5A))
+    if (!cap.begin(0x5A, &Wire, touchThreshold, releaseThreshold))
     {
         Serial.println("MPR121 not found, check wiring?");
 
@@ -53,32 +48,67 @@ void touch_task(void *pvParameter)
     //read once and set array as the baseline
     lasttouched = readAndSetTouchArray();
 
+    xTaskCreatePinnedToCore(
+        &touch_task,
+        "Touch Task",
+        2000, //uxTaskGetStackHighWaterMark = 1750
+        NULL,
+        touch_task_Priority,
+        &TouchTask,
+        1);
+}
+
+void IRAM_ATTR handleTouchInterupt()
+{
+#ifdef UseTouchInterupt
+    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
+#endif
+}
+
+void touch_task(void *pvParameter)
+{
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
+    uint32_t ulNotifiedValue = 0;
+
     for (;;)
     {
+#ifdef UseTouchInterupt
+
+        //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
+        BaseType_t xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
+#else
         delay(100);
+
+#endif
 
         //read and set array returning the current touched
         auto currtouched = readAndSetTouchArray();
 
-        //only bother sending a touch update command if the touch changed
-        if (currtouched != lasttouched)
-        {
-            std::string touchStates = "TUPDATE:";
+    //     //only bother sending a touch update command if the touch changed
+    //     if (currtouched != lasttouched)
+    //     {
+    //  //   Serial << "touch:" << currtouched << endl;
 
-            for (uint8_t i = 0; i < 12; i++)
-            {
-                if (touchArray[i] == 1)
-                {
-                    touchStates.append("H");
-                }
-                else
-                {
-                    touchStates.append("L");
-                }
-            }
+    //         std::string touchStates = "TUPDATE:";
 
-            sendToMicrobit(touchStates);
-        }
+    //         for (uint8_t i = 0; i < 12; i++)
+    //         {
+    //             if (touchArray[i] == 1)
+    //             {
+    //                 touchStates.append("H");
+    //             }
+    //             else
+    //             {
+    //                 touchStates.append("L");
+    //             }
+    //         }
+
+    //         sendToMicrobit(touchStates);
+    //     }
 
         //remember last touch
         lasttouched = currtouched;
@@ -95,7 +125,20 @@ void touch_deal_with_message(messageParts message)
         auto touchThreshold = message.value1;
         auto releaseThreshold = message.value2;
 
+        //store these in the NVM
+        preferences.putUShort("tch_threshold", touchThreshold);
+        preferences.putUShort("tch_release", releaseThreshold);
+
+        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+        checkI2Cerrors("Touch (touch_deal_with_message)");
+
         cap.setThresholds(touchThreshold, releaseThreshold);
+
+        checkI2Cerrors("Touch (touch_deal_with_message)");
+
+        //give back the i2c flag for the next task
+        xSemaphoreGive(i2cSemaphore);
     }
 }
 
@@ -105,12 +148,12 @@ uint16_t readAndSetTouchArray()
     //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
-    checkI2Cerrors("Touch (start)");
+    checkI2Cerrors("Touch (readAndSetTouchArray)");
 
     // Get the currently touched pads
     uint16_t currtouched = cap.touched();
 
-    checkI2Cerrors("Touch (end)");
+    checkI2Cerrors("Touch (readAndSetTouchArray)");
 
     //give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
@@ -121,13 +164,23 @@ uint16_t readAndSetTouchArray()
         // it if *is* touched and *wasnt* touched before, alert!
         if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
         {
-            touchArray[i] = 1;
+            //touchArray[i] = 1;
+
+             std::string touchStates = "TTOUCHED:";
+             touchStates.append(std::to_string(i));
+
+             sendToMicrobit(touchStates);
         }
 
         // if it *was* touched and now *isnt*, alert!
         if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
         {
-            touchArray[i] = 0;
+            //touchArray[i] = 0;
+
+            std::string touchStates = "TRELEASED:" ;
+            touchStates.append(std::to_string(i));
+
+            sendToMicrobit(touchStates);
         }
     }
 

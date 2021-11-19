@@ -7,6 +7,7 @@
 #include <Streaming.h>
 #include <Stream.h>
 #include <sstream>
+#include <Preferences.h>
 
 void MQTT_setup();
 void checkMQTTconnection();
@@ -30,3 +31,5 @@ extern char TXtoBBCmessage[MAXBBCMESSAGELENGTH];
 extern char RXfromBBCmessage[UARTMESSAGELENGTH];
 
 extern std::string RainbowSparkleUnicornName;
+
+extern Preferences preferences;

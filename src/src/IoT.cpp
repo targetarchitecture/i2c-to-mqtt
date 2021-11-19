@@ -4,10 +4,9 @@
 WiFiClient client;
 PubSubClient MQTTClient;
 
-std::string mqtt_server = "192.168.1.189";
-std::string mqtt_user = "public";
-std::string mqtt_password = "public";
-//std::string mqtt_client;
+std::string mqtt_server;   //= "192.168.1.189";
+std::string mqtt_user;     // = "public";
+std::string mqtt_password; // = "public";
 
 QueueHandle_t MQTT_Publish_Queue;
 
@@ -28,6 +27,14 @@ std::vector<std::string> UnsubscribedTopics;
 void MQTT_setup()
 {
   MQTT_Publish_Queue = xQueueCreate(10, sizeof(MessageToPublish));
+
+  //read from NVM
+  //preferences.putString("mqtt_server", "robotmqtt");
+  mqtt_server = preferences.getString("mqtt_server", "").c_str();
+  mqtt_user = preferences.getString("mqtt_user", "public").c_str();
+  mqtt_password = preferences.getString("mqtt_password", "public").c_str();
+
+  Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << endl;
 
   //set this up as early as possible
   MQTTClient.setClient(client);
@@ -86,12 +93,12 @@ void checkMQTTconnection()
       break;
     }
 
-    //Serial << mqtt_client.c_str() << mqtt_user.c_str() << mqtt_password.c_str();
-
     //get the unique id into a variable
     std::ostringstream getEfuseMac;
     getEfuseMac << "SN9_" << ESP.getEfuseMac();
     std::string mqtt_client = getEfuseMac.str();
+
+    Serial << mqtt_client.c_str() << ":" << mqtt_user.c_str() << ":" << mqtt_password.c_str() << endl;
 
     MQTTClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
 
