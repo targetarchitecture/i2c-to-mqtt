@@ -7,26 +7,13 @@
 
 Adafruit_MPR121 cap = Adafruit_MPR121();
 
-//#define UseTouchInterupt 0
-
 // Keeps track of the last pins touched, so we know when buttons are 'released'
 volatile uint16_t lasttouched = 0;
-//volatile uint16_t currtouched = 0;
 
 TaskHandle_t TouchTask;
 
-//volatile uint8_t debounceDelay = 0; // the debounce time; increase if the output flickers
-
-//volatile int touchArray[12] = {};
-
 void touch_setup()
 {
-#ifdef UseTouchInterupt
-    //set-up the interupt
-    pinMode(TOUCH_INT, INPUT_PULLUP);
-    attachInterrupt(TOUCH_INT, handleTouchInterupt, FALLING);
-#endif
-
     // obtain previous threshold limits
     uint8_t touchThreshold = preferences.getUShort("tch_threshold", 12U);
     uint8_t releaseThreshold = preferences.getUShort("tch_release", 6U);
@@ -58,13 +45,6 @@ void touch_setup()
         1);
 }
 
-void IRAM_ATTR handleTouchInterupt()
-{
-#ifdef UseTouchInterupt
-    xTaskNotify(TouchTask, 0, eSetValueWithoutOverwrite);
-#endif
-}
-
 void touch_task(void *pvParameter)
 {
     // UBaseType_t uxHighWaterMark;
@@ -76,43 +56,15 @@ void touch_task(void *pvParameter)
 
     for (;;)
     {
-#ifdef UseTouchInterupt
-
-        //SN7 there will be an wait for interupt here to prevent scanning if there's no event occured
-        BaseType_t xResult = xTaskNotifyWait(0X00, 0x00, &ulNotifiedValue, portMAX_DELAY);
-#else
         delay(100);
-
-#endif
 
         //read and set array returning the current touched
         auto currtouched = readAndSetTouchArray();
 
-    //     //only bother sending a touch update command if the touch changed
-    //     if (currtouched != lasttouched)
-    //     {
-    //  //   Serial << "touch:" << currtouched << endl;
-
-    //         std::string touchStates = "TUPDATE:";
-
-    //         for (uint8_t i = 0; i < 12; i++)
-    //         {
-    //             if (touchArray[i] == 1)
-    //             {
-    //                 touchStates.append("H");
-    //             }
-    //             else
-    //             {
-    //                 touchStates.append("L");
-    //             }
-    //         }
-
-    //         sendToMicrobit(touchStates);
-    //     }
-
         //remember last touch
         lasttouched = currtouched;
     }
+
     vTaskDelete(NULL);
 }
 
@@ -166,10 +118,10 @@ uint16_t readAndSetTouchArray()
         {
             //touchArray[i] = 1;
 
-             std::string touchStates = "TTOUCHED:";
-             touchStates.append(std::to_string(i));
+            std::string touchStates = "TTOUCHED:";
+            touchStates.append(std::to_string(i));
 
-             sendToMicrobit(touchStates);
+            sendToMicrobit(touchStates);
         }
 
         // if it *was* touched and now *isnt*, alert!
@@ -177,7 +129,7 @@ uint16_t readAndSetTouchArray()
         {
             //touchArray[i] = 0;
 
-            std::string touchStates = "TRELEASED:" ;
+            std::string touchStates = "TRELEASED:";
             touchStates.append(std::to_string(i));
 
             sendToMicrobit(touchStates);

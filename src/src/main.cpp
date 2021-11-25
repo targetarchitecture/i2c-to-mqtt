@@ -71,50 +71,17 @@ void setup()
   Movement_Queue = xQueueCreate(30, sizeof(messageParts));
   MQTT_Command_Queue = xQueueCreate(30, sizeof(messageParts));
 
-  //Serial << "Step 1 completed in " << millis() << "ms" << endl;
-
-  //call the feature setup methods
+  //call the microbit first and then the other setup methods
   microbit_setup();
-
-  //  Serial << "Step 2 completed in " << millis() << "ms" << endl;
-
-  //get wifi going first as this seems to be problematic
   Wifi_setup();
-
-  // Serial << "Step 3 completed in " << millis() << "ms" << endl;
-
   sound_setup();
-
-  // Serial << "Step 4 completed in " << millis() << "ms" << endl;
-
   touch_setup();
-
-  //  Serial << "Step 5 completed in " << millis() << "ms" << endl;
-
   encoders_setup();
-
-  //  Serial << "Step 6 completed in " << millis() << "ms" << endl;
-
   DAC_setup();
-
-  //  Serial << "Step 7 completed in " << millis() << "ms" << endl;
-
   ADC_setup();
-
-  //  Serial << "Step 8 completed in " << millis() << "ms" << endl;
-
   light_setup();
-
-  //  Serial << "Step 9 completed in " << millis() << "ms" << endl;
-
   switch_setup();
-
-  //  Serial << "Step 10 completed in " << millis() << "ms" << endl;
-
   movement_setup();
-
-  //  Serial << "Step 11 completed in " << millis() << "ms" << endl;
-
   MQTT_setup();
 
   Serial << "SN9 completed in " << millis() << "ms" << endl;

@@ -3,8 +3,6 @@
 
 void dealWithMessage(std::string message)
 {
-    //Serial << "RX: " << message.c_str() << endl;
-
     message = message.substr(0, message.length() - 1);
 
     messageParts queuedMsg = processQueueMessage(message);
@@ -12,7 +10,7 @@ void dealWithMessage(std::string message)
     std::string identifier = queuedMsg.identifier;
 
     //Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
-    //Serial << "identifier.compare('SFILECOUNT'): " << identifier.compare("SFILECOUNT") << endl;
+    //Serial << "identifier.compare('LLEDALLON'): " << identifier.compare("LLEDALLON") << endl;
 
     if (identifier.compare("RESTART") == 0)
     {
@@ -42,7 +40,7 @@ void dealWithMessage(std::string message)
         xQueueSend(Light_Queue, &queuedMsg, portMAX_DELAY);
     }
     else if (identifier.compare("PUBLISH") == 0 || identifier.compare("SUBSCRIBE") == 0 ||
-             identifier.compare("UNSUBSCRIBE")== 0)
+             identifier.compare("UNSUBSCRIBE") == 0)
     {
         xQueueSend(MQTT_Command_Queue, &queuedMsg, portMAX_DELAY);
     }
@@ -100,26 +98,6 @@ void dealWithMessage(std::string message)
 
         sendToMicrobit(swithStates);
     }
-    // else if (identifier.compare("TSTATE") == 0)
-    // {
-    //     std::string touchStates = "TSTATE:";
-
-    //     for (uint8_t i = 0; i < 12; i++)
-    //     {
-    //         if (touchArray[i] == 1)
-    //         {
-    //             touchStates.append("H");
-    //         }
-    //         else
-    //         {
-    //             touchStates.append("L");
-    //         }
-    //     }
-
-    //     //Serial << "touchStates:" << touchStates.c_str() << endl;
-
-    //     sendToMicrobit(touchStates);
-    //}
     else if (identifier.compare("TTHRSLD") == 0)
     {
         touch_deal_with_message(queuedMsg);
