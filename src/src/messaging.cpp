@@ -106,6 +106,26 @@ void dealWithMessage(std::string message)
     {
         Serial << queuedMsg.part1 << " " << queuedMsg.value1 << endl;
     }
+    else if (identifier.compare("NVMSSID") == 0)
+    {
+        preferences.putString("ssid", queuedMsg.part1);
+    }
+    else if (identifier.compare("NVMPASSWORD") == 0)
+    {
+        preferences.putString("password",queuedMsg.part1);
+    }
+    else if (identifier.compare("NVMMQTTSERVER") == 0)
+    {
+        preferences.putString("mqtt_server", queuedMsg.part1);
+    }
+    else if (identifier.compare("NVMMQTTUSER") == 0)
+    {
+        preferences.putString("mqtt_user", queuedMsg.part1);
+    }
+    else if (identifier.compare("NVMMQTTPASSWORD") == 0)
+    {
+        preferences.putString("mqtt_password", queuedMsg.part1);
+    }
 }
 
 messageParts processQueueMessage(std::string msg)

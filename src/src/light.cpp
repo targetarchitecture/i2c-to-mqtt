@@ -12,24 +12,7 @@ extern SemaphoreHandle_t i2cSemaphore;
 void light_setup()
 {
 
-    xTaskCreatePinnedToCore(
-        light_task,          /* Task function. */
-        "Light Task",        /* name of task. */
-        2048 * 4,            /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
-        NULL,                /* parameter of the task */
-        light_task_Priority, /* priority of the task */
-        &LightTask, 1);      /* Task handle to keep track of created task */
-}
-
-void light_task(void *pvParameters)
-{
-    /* Inspect our own high water mark on entering the task. */
-    // UBaseType_t uxHighWaterMark;
-    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("light_task uxTaskGetStackHighWaterMark:");
-    // Serial.println(uxHighWaterMark);
-
-        //wait for the i2c semaphore flag to become available
+    //wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     if (!lights.begin(0x3E))
@@ -68,6 +51,23 @@ void light_task(void *pvParameters)
         xSemaphoreGive(i2cSemaphore);
     }
 
+    xTaskCreatePinnedToCore(
+        light_task,          /* Task function. */
+        "Light Task",        /* name of task. */
+        2048 * 4,            /* Stack size of task (uxTaskGetStackHighWaterMark:??) */
+        NULL,                /* parameter of the task */
+        light_task_Priority, /* priority of the task */
+        &LightTask, 1);      /* Task handle to keep track of created task */
+}
+
+void light_task(void *pvParameters)
+{
+    /* Inspect our own high water mark on entering the task. */
+    // UBaseType_t uxHighWaterMark;
+    // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("light_task uxTaskGetStackHighWaterMark:");
+    // Serial.println(uxHighWaterMark);
+
     for (;;)
     {
         messageParts parts;
@@ -79,21 +79,21 @@ void light_task(void *pvParameters)
 
         //Serial << identifier.c_str() << endl;
 
-        if (identifier.compare(0, 6, "LBLINK") == 0)
+        //put a delay in to let the queue catch up
+        delay(10);
+
+        if (identifier.compare("LBLINK") == 0)
         {
             //stop any previous tasks
-            if (LEDs[parts.value1].taskHandle != NULL)
-            {
-                vTaskDelete(LEDs[parts.value1].taskHandle);
-                delay(1);
-                LEDs[parts.value1].taskHandle = NULL;
-            }
+            stopCurrentTaskOnPin(parts.value1);
 
             LEDs[parts.value1].OnTimeMS = parts.value2;
             LEDs[parts.value1].OffTimeMS = parts.value3;
 
             //set method for the pins so we can figure out how to turn it off
             LEDs[parts.value1].state = blink;
+
+            //Serial << identifier.c_str() << "," << parts.value1 << "," << parts.value2 << "," << parts.value3 << endl;
 
             const char *taskName = "LED Task " + parts.value1;
 
@@ -107,18 +107,11 @@ void light_task(void *pvParameters)
                 1);
 
             xTaskNotify(LEDs[parts.value1].taskHandle, parts.value1, eSetValueWithOverwrite);
-
-            delay(10);
         }
         else if (identifier.compare("LBREATHE") == 0)
         {
             //stop any previous tasks
-            if (LEDs[parts.value1].taskHandle != NULL)
-            {
-                vTaskDelete(LEDs[parts.value1].taskHandle);
-                delay(1);
-                LEDs[parts.value1].taskHandle = NULL;
-            }
+            stopCurrentTaskOnPin(parts.value1);
 
             LEDs[parts.value1].OnTimeMS = parts.value2;
             LEDs[parts.value1].OffTimeMS = parts.value3;
@@ -140,84 +133,78 @@ void light_task(void *pvParameters)
                 1);
 
             xTaskNotify(LEDs[parts.value1].taskHandle, parts.value1, eSetValueWithOverwrite);
-
-            delay(10);
         }
         else if (identifier.compare("LLEDONOFF") == 0)
         {
-            //stop any previous tasks
-            if (LEDs[parts.value1].taskHandle != NULL)
-            {
-                vTaskDelete(LEDs[parts.value1].taskHandle);
-                delay(1);
-                LEDs[parts.value1].taskHandle = NULL;
-            }
-
-            int tOnOff = parts.value2;
-
-            //see what state we need
-            if (tOnOff == 1)
-            {
-                //set method for the pins so we can figure out how to turn it off
-                LEDs[parts.value1].state = on;
-
-                //wait for the i2c semaphore flag to become available
-                xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-                lights.analogWrite(parts.value1, LEDON); //set to ON for Ada!
-
-                checkI2Cerrors("light on/off");
-
-                //give back the i2c flag for the next task
-                xSemaphoreGive(i2cSemaphore);
-            }
-            else
-            {
-                //set method for the pins so we can figure out how to turn it off
-                LEDs[parts.value1].state = off;
-
-                //wait for the i2c semaphore flag to become available
-                xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
-
-                lights.analogWrite(parts.value1, LEDOFF); //set to ON for Ada!
-
-                    checkI2Cerrors("light on/off");
-
-                //give back the i2c flag for the next task
-                xSemaphoreGive(i2cSemaphore);
-            }
+            TurnLEDOnOff(parts.value1, parts.value2);
         }
         else if (identifier.compare("LLEDALLOFF") == 0)
         {
             //turn on all LEDs - using the queue
-            for (int i = 0; i <= 15; i++)
+            for (uint32_t i = 0; i <= 15; i++)
             {
-                messageParts msgtosend = {};
-
-                strcpy(msgtosend.identifier, "LLEDONOFF");
-                msgtosend.value1 = i;
-                msgtosend.value2 = 0;
-
-                xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
+                TurnLEDOnOff(i, 0);
             }
         }
         else if (identifier.compare("LLEDALLON") == 0)
         {
             //turn on all LEDs - using the queue
-            for (int i = 0; i <= 15; i++)
+            for (uint32_t i = 0; i <= 15; i++)
             {
-                messageParts msgtosend = {};
-
-                strcpy(msgtosend.identifier, "LLEDONOFF");
-                msgtosend.value1 = i;
-                msgtosend.value2 = 1;
-
-                xQueueSend(Light_Queue, &msgtosend, portMAX_DELAY);
+                TurnLEDOnOff(i, 1);
             }
         }
     }
 
     vTaskDelete(NULL);
+}
+
+void stopCurrentTaskOnPin(uint32_t pin)
+{ //stop any previous tasks
+    if (LEDs[pin].taskHandle != NULL)
+    {
+        vTaskDelete(LEDs[pin].taskHandle);
+        delay(1);
+        LEDs[pin].taskHandle = NULL;
+    }
+}
+
+void TurnLEDOnOff(uint32_t pin, int OnOff)
+{
+    //stop any previous tasks
+    stopCurrentTaskOnPin(pin);
+
+    //see what state we need
+    if (OnOff == 1)
+    {
+        //set method for the pins so we can figure out how to turn it off
+        LEDs[pin].state = on;
+
+        //wait for the i2c semaphore flag to become available
+        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+        lights.analogWrite(pin, LEDON); //set to ON for Ada!
+
+        checkI2Cerrors("light on/off");
+
+        //give back the i2c flag for the next task
+        xSemaphoreGive(i2cSemaphore);
+    }
+    else
+    {
+        //set method for the pins so we can figure out how to turn it off
+        LEDs[pin].state = off;
+
+        //wait for the i2c semaphore flag to become available
+        xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+        lights.analogWrite(pin, LEDOFF); //set to ON for Ada!
+
+        checkI2Cerrors("light on/off");
+
+        //give back the i2c flag for the next task
+        xSemaphoreGive(i2cSemaphore);
+    }
 }
 
 void LEDBlinkingTask(void *pvParameter)

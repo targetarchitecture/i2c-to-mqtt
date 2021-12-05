@@ -7,6 +7,7 @@
 #include <Streaming.h>
 #include <Stream.h>
 #include <sstream>
+#include <Preferences.h>
 
 typedef struct
 {
@@ -34,6 +35,8 @@ extern volatile int32_t encoder1Count;
 extern volatile int32_t encoder2Count;
 extern volatile byte switchArray[16];
 //extern volatile int touchArray[12];
+
+extern Preferences preferences;
 
 extern void touch_deal_with_message(messageParts message);
 void sendToMicrobit(std::string msg);

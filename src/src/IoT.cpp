@@ -36,6 +36,12 @@ void MQTT_setup()
 
   Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << endl;
 
+  //if value not set then just bail out
+  if (mqtt_server == "")
+  {
+    return;
+  }
+
   //set this up as early as possible
   MQTTClient.setClient(client);
   MQTTClient.setServer(mqtt_server.c_str(), 1883);

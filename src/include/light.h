@@ -8,6 +8,8 @@
 
 void light_setup();
 void light_task(void *pvParameter);
+void TurnLEDOnOff(uint32_t pin, int OnOff);
+void stopCurrentTaskOnPin(uint32_t pin);
 
 void LEDBlinkingTask(void *pvParameter);
 void LEDBreathingTask(void *pvParameter);

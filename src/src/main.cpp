@@ -139,5 +139,9 @@ void runTests()
   // dealWithMessage("STARTING ");
   // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
 
+// dealWithMessage("LLEDALLON ");
+// dealWithMessage("LBLINK,0,1000,1000 ");
+// dealWithMessage("LBREATHE,7,1000,1000,500,500 ");
+
   // dealWithMessage("MPWM,8,500 ");
 }

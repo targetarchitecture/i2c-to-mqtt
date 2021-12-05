@@ -138,7 +138,13 @@ void Wifi_setup()
     Serial.print("SSID From NVM:");
     Serial.println(storedSSID.c_str());
 
-    // Examples of different ways to register wifi events
+    //if value not set then just bail out
+    if (storedSSID == "")
+    {
+        return;
+    }
+
+    //register wifi events
     WiFi.onEvent(WiFiEvent);
 
     WiFi.begin(storedSSID.c_str(), storedWifiPassword.c_str());
