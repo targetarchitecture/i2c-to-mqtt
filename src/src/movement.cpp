@@ -242,7 +242,7 @@ void setServoEase(const uint8_t pin, easingCurves easingCurve, const uint16_t to
         &servos[pin].taskHandle,
         1);
 
-            delay(10);
+    delay(10);
 
     xTaskNotify(servos[pin].taskHandle, pin, eSetValueWithOverwrite);
 
