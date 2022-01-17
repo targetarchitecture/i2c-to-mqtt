@@ -1,5 +1,5 @@
 /* 
-Rainbow Sparkle Unicorn - SN9
+Rainbow Sparkle Unicorn - SN10
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -42,13 +42,13 @@ extern void dealWithMessage(std::string message);
 
 void setup()
 {
-  preferences.begin("SN9", false);
+  preferences.begin( BOARDNAME, false);
 
   //stop bluetooth
   btStop();
 
   //Set UART log level
-  esp_log_level_set("SN9", ESP_LOG_VERBOSE);
+  esp_log_level_set(BOARDNAME, ESP_LOG_VERBOSE);
 
   pinMode(ONBOARDLED, OUTPUT);
 
@@ -84,7 +84,7 @@ void setup()
   movement_setup();
   MQTT_setup();
 
-  Serial << "SN9 completed in " << millis() << "ms" << endl;
+  Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 
   //runTests();
 }
@@ -134,14 +134,14 @@ void loop()
 
 void runTests()
 {
-  //dealWithMessage("SUBSCRIBE,ps2/buttons ");
+    //dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
-  // dealWithMessage("STARTING ");
-  // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
+    // dealWithMessage("STARTING ");
+    // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
 
-// dealWithMessage("LLEDALLON ");
-// dealWithMessage("LBLINK,0,1000,1000 ");
-// dealWithMessage("LBREATHE,7,1000,1000,500,500 ");
+    // dealWithMessage("LLEDALLON ");
+    // dealWithMessage("LBLINK,0,1000,1000 ");
+    // dealWithMessage("LBREATHE,7,1000,1000,500,500 ");
 
-  // dealWithMessage("MPWM,8,500 ");
+    // dealWithMessage("MPWM,8,500 ");
 }

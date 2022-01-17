@@ -101,7 +101,7 @@ void checkMQTTconnection()
 
     //get the unique id into a variable
     std::ostringstream getEfuseMac;
-    getEfuseMac << "SN9_" << ESP.getEfuseMac();
+    getEfuseMac << BOARDNAME << "_" << ESP.getEfuseMac();
     std::string mqtt_client = getEfuseMac.str();
 
     Serial << mqtt_client.c_str() << ":" << mqtt_user.c_str() << ":" << mqtt_password.c_str() << endl;

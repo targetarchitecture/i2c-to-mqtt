@@ -5,9 +5,9 @@ Preferences preferences;
 
 void setup()
 {
-Serial.begin(9600);
+  Serial.begin(9600);
 
-  preferences.begin("SN9", false);
+  preferences.begin("SN10", false);
 
   preferences.putString("ssid", "the robot network");
   preferences.putString("password", "isaacasimov");
