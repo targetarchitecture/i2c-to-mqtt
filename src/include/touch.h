@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include "messaging.h"
 #include "defines.h"
-#include "SN9 pins.h"
+#include "pins.h"
 #include "Adafruit_MPR121.h"
 #include <Preferences.h>
 

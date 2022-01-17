@@ -10,8 +10,8 @@
 #define DFPLAYER_BUSY 17
 
 //BBC Microbit pins
-#define ESP_TX_MICROBIT_RX 12
-#define ESP_RX_MICROBIT_TX 13
+#define ESP_TX_MICROBIT_RX 18
+#define ESP_RX_MICROBIT_TX 5
 
 //ADC pins
 #define ADC1 35
@@ -34,4 +34,5 @@
 
 //interupts
 #define TOUCH_INT 36
-#define SWITCH_INT 34
+#define SWITCH_INT 13
+#define BBC_INT 39

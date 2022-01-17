@@ -2,7 +2,7 @@
 
 #include <string>
 #include "defines.h"
-#include "SN9 pins.h"
+#include "pins.h"
 #include <vector>
 #include <Streaming.h>
 #include <Stream.h>

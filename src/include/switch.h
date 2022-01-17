@@ -2,7 +2,7 @@
 
 #include <Wire.h>
 #include "defines.h"
-#include "SN9 pins.h"
+#include "pins.h"
 #include "messaging.h"
 
 void switch_setup();
