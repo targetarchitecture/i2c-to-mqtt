@@ -35,7 +35,7 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("LBLINK") == 0 || identifier.compare("LBREATHE") == 0 ||
              identifier.compare("LLEDONOFF") == 0 || identifier.compare("LLEDALLOFF") == 0 ||
-             identifier.compare("LLEDALLON") == 0)
+             identifier.compare("LLEDALLON") == 0 || identifier.compare("LLEDINTENSITY") == 0)
     {
         xQueueSend(Light_Queue, &queuedMsg, portMAX_DELAY);
     }

@@ -138,6 +138,10 @@ void light_task(void *pvParameters)
         {
             TurnLEDOnOff(parts.value1, parts.value2);
         }
+        else if (identifier.compare("LLEDINTENSITY") == 0)
+        {
+            TurnLEDOnWithIntensity(parts.value1, parts.value2);
+        }        
         else if (identifier.compare("LLEDALLOFF") == 0)
         {
             //turn on all LEDs - using the queue
@@ -168,6 +172,26 @@ void stopCurrentTaskOnPin(uint32_t pin)
         LEDs[pin].taskHandle = NULL;
     }
 }
+
+void TurnLEDOnWithIntensity(uint32_t pin, int intensity)
+{
+    //stop any previous tasks
+    stopCurrentTaskOnPin(pin);
+
+    //set method for the pins so we can figure out how to turn it off
+    LEDs[pin].state = on;
+
+    //wait for the i2c semaphore flag to become available
+    xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
+
+    lights.analogWrite(pin, intensity); //new funciton on 19/1/22
+
+    checkI2Cerrors("light on with intensity");
+
+    //give back the i2c flag for the next task
+    xSemaphoreGive(i2cSemaphore);
+}
+
 
 void TurnLEDOnOff(uint32_t pin, int OnOff)
 {

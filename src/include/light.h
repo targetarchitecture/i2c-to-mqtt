@@ -9,6 +9,7 @@
 void light_setup();
 void light_task(void *pvParameter);
 void TurnLEDOnOff(uint32_t pin, int OnOff);
+void TurnLEDOnWithIntensity(uint32_t pin, int intensity);
 void stopCurrentTaskOnPin(uint32_t pin);
 
 void LEDBlinkingTask(void *pvParameter);

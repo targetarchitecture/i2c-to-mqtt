@@ -86,7 +86,7 @@ void setup()
 
   Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 
-  //runTests();
+ // runTests();
 }
 
 void POST(uint8_t flashes)
@@ -134,6 +134,13 @@ void loop()
 
 void runTests()
 {
+
+//  dealWithMessage("LLEDINTENSITY,0,0 ");
+//  dealWithMessage("LLEDINTENSITY,1,0 ");
+//  dealWithMessage("LLEDINTENSITY,2,0 ");
+
+
+
     //dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
     // dealWithMessage("STARTING ");
