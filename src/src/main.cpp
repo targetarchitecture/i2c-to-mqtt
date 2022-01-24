@@ -20,6 +20,7 @@ Rainbow Sparkle Unicorn - SN10
 #include "movement.h"
 #include "IoT.h"
 #include "WifiMgr.h"
+#include "controller.h"
 
 void checkI2Cerrors(std::string area);
 void runTests();
@@ -71,6 +72,7 @@ void setup()
   //call the microbit first and then the other setup methods
   microbit_setup();
   Wifi_setup();
+  controller_setup();
   sound_setup();
   touch_setup();
   encoders_setup();
