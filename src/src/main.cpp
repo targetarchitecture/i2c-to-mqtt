@@ -44,9 +44,6 @@ void setup()
 {
   preferences.begin( BOARDNAME, false);
 
-  //stop bluetooth
-  btStop();
-
   //Set UART log level
   esp_log_level_set(BOARDNAME, ESP_LOG_VERBOSE);
 
