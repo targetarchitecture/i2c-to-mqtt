@@ -43,7 +43,9 @@ extern void dealWithMessage(std::string message);
 
 void setup()
 {
-  preferences.begin( BOARDNAME, false);
+  btStart();
+
+  preferences.begin(BOARDNAME, false);
 
   //Set UART log level
   esp_log_level_set(BOARDNAME, ESP_LOG_VERBOSE);
@@ -71,8 +73,8 @@ void setup()
 
   //call the microbit first and then the other setup methods
   microbit_setup();
+  controller_setup();
   Wifi_setup();
-  //controller_setup();
   sound_setup();
   touch_setup();
   encoders_setup();
@@ -81,11 +83,11 @@ void setup()
   light_setup();
   switch_setup();
   movement_setup();
-  MQTT_setup();    
+  MQTT_setup();
 
   Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 
- // runTests();
+  // runTests();
 }
 
 void POST(uint8_t flashes)
@@ -134,20 +136,18 @@ void loop()
 void runTests()
 {
 
-//  dealWithMessage("LLEDINTENSITY,0,0 ");
-//  dealWithMessage("LLEDINTENSITY,1,0 ");
-//  dealWithMessage("LLEDINTENSITY,2,0 ");
+  //  dealWithMessage("LLEDINTENSITY,0,0 ");
+  //  dealWithMessage("LLEDINTENSITY,1,0 ");
+  //  dealWithMessage("LLEDINTENSITY,2,0 ");
 
+  //dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
+  // dealWithMessage("STARTING ");
+  // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
 
-    //dealWithMessage("SUBSCRIBE,ps2/buttons ");
+  // dealWithMessage("LLEDALLON ");
+  // dealWithMessage("LBLINK,0,1000,1000 ");
+  // dealWithMessage("LBREATHE,7,1000,1000,500,500 ");
 
-    // dealWithMessage("STARTING ");
-    // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
-
-    // dealWithMessage("LLEDALLON ");
-    // dealWithMessage("LBLINK,0,1000,1000 ");
-    // dealWithMessage("LBREATHE,7,1000,1000,500,500 ");
-
-    // dealWithMessage("MPWM,8,500 ");
+  // dealWithMessage("MPWM,8,500 ");
 }
