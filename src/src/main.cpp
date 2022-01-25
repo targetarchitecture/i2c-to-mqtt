@@ -43,8 +43,6 @@ extern void dealWithMessage(std::string message);
 
 void setup()
 {
-  btStart();
-
   preferences.begin(BOARDNAME, false);
 
   //Set UART log level
@@ -73,7 +71,7 @@ void setup()
 
   //call the microbit first and then the other setup methods
   microbit_setup();
-  controller_setup();
+ // controller_setup();
   Wifi_setup();
   sound_setup();
   touch_setup();
@@ -83,7 +81,7 @@ void setup()
   light_setup();
   switch_setup();
   movement_setup();
-  MQTT_setup();
+   MQTT_setup();
 
   Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 
