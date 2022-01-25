@@ -6,6 +6,9 @@
 #include "pins.h"
 #include "Adafruit_MPR121.h"
 #include <Preferences.h>
+#include <Streaming.h>
+#include <Stream.h>
+#include <sstream>
 
 void touch_setup();
 void touch_task(void *pvParameter);
