@@ -72,7 +72,7 @@ void setup()
   //call the microbit first and then the other setup methods
   microbit_setup();
   Wifi_setup();
-  controller_setup();
+  //controller_setup();
   sound_setup();
   touch_setup();
   encoders_setup();
@@ -81,7 +81,7 @@ void setup()
   light_setup();
   switch_setup();
   movement_setup();
-  MQTT_setup();
+  MQTT_setup();    
 
   Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 

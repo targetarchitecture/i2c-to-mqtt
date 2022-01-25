@@ -183,7 +183,8 @@ void microbit_transmit_task(void *pvParameters)
             //append # to the end so the microbit knows the end of the line
             strcat(msg, "\n");
 
-            int bytes = uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
+            //int bytes = 
+            uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
 
             //Added on 1/12/20 to try to stop flooding
             delay(5);

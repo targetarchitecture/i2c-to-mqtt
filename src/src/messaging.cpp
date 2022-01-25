@@ -1,5 +1,25 @@
 #include <Arduino.h>
 #include "messaging.h"
+#include <sstream>
+#include <string>
+
+//https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
+template <class T>
+std::string toString(const T &value)
+{
+    std::ostringstream os;
+    os << value;
+    return os.str();
+}
+
+template <class T>
+uint32_t stoi(const T &value)
+{
+    std::ostringstream os;
+    os << value;
+
+    return atoi(os.str().c_str());
+}
 
 void dealWithMessage(std::string message)
 {
@@ -29,7 +49,7 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("SBUSY") == 0)
     {
-        std::string requestMessage = "SBUSY:" + std::to_string(digitalRead(DFPLAYER_BUSY));
+        std::string requestMessage = "SBUSY:" + toString(digitalRead(DFPLAYER_BUSY));
 
         sendToMicrobit(requestMessage);
     }
@@ -56,25 +76,25 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("ROTARY1") == 0)
     {
-        std::string requestMessage = "ROTARY1:" + std::to_string(encoder1Count);
+        std::string requestMessage = "ROTARY1:" + toString(encoder1Count);
 
         sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("ROTARY2") == 0)
     {
-        std::string requestMessage = "ROTARY2:" + std::to_string(encoder2Count);
+        std::string requestMessage = "ROTARY2:" + toString(encoder2Count);
 
         sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("SLIDER1") == 0)
     {
-        std::string requestMessage = "SLIDER1:" + std::to_string(analogRead(ADC1));
+        std::string requestMessage = "SLIDER1:" + toString(analogRead(ADC1));
 
         sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("SLIDER2") == 0)
     {
-        std::string requestMessage = "SLIDER2:" + std::to_string(analogRead(ADC2));
+        std::string requestMessage = "SLIDER2:" + toString(analogRead(ADC2));
 
         sendToMicrobit(requestMessage);
     }
@@ -112,7 +132,7 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("NVMPASSWORD") == 0)
     {
-        preferences.putString("password",queuedMsg.part1);
+        preferences.putString("password", queuedMsg.part1);
     }
     else if (identifier.compare("NVMMQTTSERVER") == 0)
     {
@@ -151,7 +171,7 @@ messageParts processQueueMessage(std::string msg)
                 // Serial << msg.c_str() << endl;
                 // Serial << part.c_str() << endl;
 
-                mParts.value1 = std::stoi(part);
+                mParts.value1 = stoi(part.c_str());
             }
             catch (const std::exception &e)
             {
@@ -164,7 +184,7 @@ messageParts processQueueMessage(std::string msg)
         {
             try
             {
-                mParts.value2 = std::stoi(part);
+                mParts.value2 = stoi(part);
             }
             catch (const std::exception &e)
             {
@@ -175,23 +195,23 @@ messageParts processQueueMessage(std::string msg)
         }
         if (index == 3)
         {
-            mParts.value3 = std::stoi(part);
+            mParts.value3 = stoi(part);
         }
         if (index == 4)
         {
-            mParts.value4 = std::stoi(part);
+            mParts.value4 = stoi(part);
         }
         if (index == 5)
         {
-            mParts.value5 = std::stoi(part);
+            mParts.value5 = stoi(part);
         }
         if (index == 6)
         {
-            mParts.value6 = std::stoi(part);
+            mParts.value6 = stoi(part);
         }
         if (index == 7)
         {
-            mParts.value7 = std::stoi(part);
+            mParts.value7 = stoi(part);
         }
 
         index++;
