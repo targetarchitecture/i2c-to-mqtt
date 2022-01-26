@@ -3,24 +3,6 @@
 #include <sstream>
 #include <string>
 
-//https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
-// template <class T>
-// std::string toString(const T &value)
-// {
-//     std::ostringstream os;
-//     os << value;
-//     return os.str();
-// }
-
-template <class T>
-uint32_t stoi(const T &value)
-{
-    std::ostringstream os;
-    os << value;
-
-    return atoi(os.str().c_str());
-}
-
 void dealWithMessage(std::string message)
 {
     message = message.substr(0, message.length() - 1);
@@ -187,7 +169,7 @@ messageParts processQueueMessage(std::string msg)
                 // Serial << msg.c_str() << endl;
                 // Serial << part.c_str() << endl;
 
-                mParts.value1 = stoi(part.c_str());
+                mParts.value1 = atoi(part.c_str());
             }
             catch (const std::exception &e)
             {
@@ -200,7 +182,7 @@ messageParts processQueueMessage(std::string msg)
         {
             try
             {
-                mParts.value2 = stoi(part);
+                mParts.value2 = atoi(part.c_str());
             }
             catch (const std::exception &e)
             {
@@ -211,23 +193,23 @@ messageParts processQueueMessage(std::string msg)
         }
         if (index == 3)
         {
-            mParts.value3 = stoi(part);
+            mParts.value3 = atoi(part.c_str());
         }
         if (index == 4)
         {
-            mParts.value4 = stoi(part);
+            mParts.value4 = atoi(part.c_str());
         }
         if (index == 5)
         {
-            mParts.value5 = stoi(part);
+            mParts.value5 = atoi(part.c_str());
         }
         if (index == 6)
         {
-            mParts.value6 = stoi(part);
+            mParts.value6 = atoi(part.c_str());
         }
         if (index == 7)
         {
-            mParts.value7 = stoi(part);
+            mParts.value7 = atoi(part.c_str());
         }
 
         index++;
