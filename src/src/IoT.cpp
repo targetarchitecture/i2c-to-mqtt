@@ -256,6 +256,8 @@ void MQTT_command_task(void *pvParameter)
       std::string topic = parts.part1;
       //  strcpy(topic, parts.part1);
 
+      Serial << "Subscribe topic:" << topic.c_str() << endl;
+
       subscribe(topic);
     }
     else if (identifier.compare("UNSUBSCRIBE") == 0)
@@ -286,7 +288,7 @@ void unsubscribe(std::string topic)
 
 void subscribe(std::string topic)
 {
-  //Serial << "SubscribedTopics =" << SubscribedTopics.size() << endl;
+  Serial << "Subscribe cmd:" << topic.c_str() << endl;
 
   // char t[100];
 
