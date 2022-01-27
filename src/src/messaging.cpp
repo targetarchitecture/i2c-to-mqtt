@@ -169,18 +169,22 @@ messageParts processQueueMessage(std::string msg)
                 // Serial << msg.c_str() << endl;
                 // Serial << part.c_str() << endl;
 
-                Serial << "part.c_str():" << part.c_str() << endl;
+                //Serial << "part.c_str():" << part.c_str() << endl;
 
                 mParts.value1 = atoi(part.c_str());
 
-                Serial << "mParts.value1:" << mParts.value1 << endl;
+                //Serial << "mParts.value1:" << mParts.value1 << endl;
             }
             catch (const std::exception &e)
             {
-                Serial << "part1 exception:" << mParts.part1 << endl;
-
-                strcpy(mParts.part1, part.c_str());
+                //Serial << "part1 exception:" << mParts.part1 << endl;
+                //strcpy(mParts.part1, part.c_str());
             }
+
+            //always store the value as a string
+            strcpy(mParts.part1, part.c_str());
+
+            //Serial << "mParts.part1:" << mParts.part1 << endl;
         }
         if (index == 2)
         {
@@ -190,10 +194,13 @@ messageParts processQueueMessage(std::string msg)
             }
             catch (const std::exception &e)
             {
-                strcpy(mParts.part2, part.c_str());
-
-                Serial << "part2 exception:" << mParts.part2 << endl;
+                // strcpy(mParts.part2, part.c_str());
+                // Serial << "part2 exception:" << mParts.part2 << endl;
             }
+
+            strcpy(mParts.part2, part.c_str());
+
+            //Serial << "mParts.part2:" << mParts.part2 << endl;
         }
         if (index == 3)
         {
