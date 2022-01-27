@@ -256,7 +256,7 @@ void MQTT_command_task(void *pvParameter)
       std::string topic = parts.part1;
       //  strcpy(topic, parts.part1);
 
-      Serial << "Subscribe topic:" << topic.c_str() << endl;
+      //Serial << "Subscribe topic:" << topic.c_str() << endl;
 
       subscribe(topic);
     }
@@ -273,14 +273,14 @@ void MQTT_command_task(void *pvParameter)
 
 void unsubscribe(std::string topic)
 {
-  Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
+  //Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
 
   // char t[100];
   // strcpy(t, topic);
 
   UnsubscribedTopics.push_back(topic);
 
-  Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
+  //Serial << "UnsubscribedTopics =" << SubscribedTopics.size() << endl;
 
   //set to true to get the subscriptions setup again
   ConnectSubscriptions = true;
@@ -288,7 +288,7 @@ void unsubscribe(std::string topic)
 
 void subscribe(std::string topic)
 {
-  Serial << "Subscribe cmd:" << topic.c_str() << endl;
+  //Serial << "Subscribe cmd:" << topic.c_str() << endl;
 
   // char t[100];
 
