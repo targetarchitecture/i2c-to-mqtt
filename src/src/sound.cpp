@@ -14,15 +14,6 @@ TaskHandle_t SoundBusyTask;
 
 const int commandPause = 50;
 
-//https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
-// template <class T>
-// std::string toString(const T &value)
-// {
-//     std::ostringstream os;
-//     os << value;
-//     return os.str();
-// }
-
 void sound_setup()
 {
     //set-up the interupt
@@ -135,9 +126,6 @@ void sound_task(void *pvParameters)
             delay(commandPause);
 
             std::string requestMessage = "FILECOUNT:" + std::to_string(fileCount);
-
-            // std::ostringstream requestMessage;
-            // requestMessage << "FILECOUNT:" << fileCount;
 
             sendToMicrobit(requestMessage);
         }

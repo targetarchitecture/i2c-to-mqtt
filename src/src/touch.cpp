@@ -12,15 +12,6 @@ volatile uint16_t lasttouched = 0;
 
 TaskHandle_t TouchTask;
 
-// https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
-//  template <class T>
-//  std::string toString(const T &value)
-//  {
-//      std::ostringstream os;
-//      os << value;
-//      return os.str();
-//  }
-
 void touch_setup()
 {
     // obtain previous threshold limits
