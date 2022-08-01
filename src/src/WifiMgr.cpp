@@ -37,7 +37,7 @@ String storedWifiPassword;
 
 void WiFiEvent(WiFiEvent_t event)
 {
-    //Serial.printf("[WiFi-event] event: %d\n", event);
+    // Serial.printf("[WiFi-event] event: %d\n", event);
 
     switch (event)
     {
@@ -138,13 +138,15 @@ void Wifi_setup()
     Serial.print("SSID From NVM:");
     Serial.println(storedSSID.c_str());
 
-    //if value not set then just bail out
+    // if value not set then just bail out
     if (storedSSID == "")
     {
+        Serial << "SSID not set" << endl;
+
         return;
     }
 
-    //register wifi events
+    // register wifi events
     WiFi.onEvent(WiFiEvent);
 
     WiFi.begin(storedSSID.c_str(), storedWifiPassword.c_str());

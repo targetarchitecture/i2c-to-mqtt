@@ -39,6 +39,8 @@ void MQTT_setup()
   //if value not set then just bail out
   if (mqtt_server == "")
   {
+     Serial << "MQTT Server not set" << endl;
+
     return;
   }
 

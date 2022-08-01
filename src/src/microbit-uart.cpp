@@ -7,7 +7,7 @@ TaskHandle_t MicrobitTXTask;
 QueueHandle_t Microbit_Receive_Queue;
 QueueHandle_t Microbit_Transmit_Queue;
 
-//#define SHOW_SERIAL 1
+#define SHOW_SERIAL 1
 
 void microbit_setup()
 {
