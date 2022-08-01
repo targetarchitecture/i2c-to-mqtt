@@ -31,13 +31,13 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("SBUSY") == 0)
     {
-        std::ostringstream requestMessage;
-        requestMessage << "SBUSY:" << digitalRead(DFPLAYER_BUSY);
+        //std::ostringstream requestMessage;
+        //requestMessage << "SBUSY:" << digitalRead(DFPLAYER_BUSY);
         //  return os.str();
 
-        //std::string requestMessage = "SBUSY:" + toString(digitalRead(DFPLAYER_BUSY));
+        std::string requestMessage = "SBUSY:" + std::to_string(digitalRead(DFPLAYER_BUSY));
 
-        sendToMicrobit(requestMessage.str());
+        sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("LBLINK") == 0 || identifier.compare("LBREATHE") == 0 ||
              identifier.compare("LLEDONOFF") == 0 || identifier.compare("LLEDALLOFF") == 0 ||
@@ -62,39 +62,39 @@ void dealWithMessage(std::string message)
     }
     else if (identifier.compare("ROTARY1") == 0)
     {
-        //std::string requestMessage = "ROTARY1:" + toString(encoder1Count);
+        std::string requestMessage = "ROTARY1:" + std::to_string(encoder1Count);
 
-        std::ostringstream requestMessage;
-        requestMessage << "ROTARY1:" << encoder1Count;
+        // std::ostringstream requestMessage;
+        // requestMessage << "ROTARY1:" << encoder1Count;
 
-        sendToMicrobit(requestMessage.str());
+        sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("ROTARY2") == 0)
     {
-        std::ostringstream requestMessage;
-        requestMessage << "ROTARY2:" << encoder2Count;
+        //std::ostringstream requestMessage;
+        //requestMessage << "ROTARY2:" << encoder2Count;
 
-        //std::string requestMessage = "ROTARY2:" + toString(encoder2Count);
+        std::string requestMessage = "ROTARY2:" + std::to_string(encoder2Count);
 
-        sendToMicrobit(requestMessage.str());
+        sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("SLIDER1") == 0)
     {
-        std::ostringstream requestMessage;
-        requestMessage << "SLIDER1:" << analogRead(ADC1);
+        //std::ostringstream requestMessage;
+        //requestMessage << "SLIDER1:" << analogRead(ADC1);
 
-        //std::string requestMessage = "SLIDER1:" + toString(analogRead(ADC1));
+        std::string requestMessage = "SLIDER1:" + std::to_string(analogRead(ADC1));
 
-        sendToMicrobit(requestMessage.str());
+        sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("SLIDER2") == 0)
     {
-        std::ostringstream requestMessage;
-        requestMessage << "SLIDER2:" << analogRead(ADC2);
+        // std::ostringstream requestMessage;
+        // requestMessage << "SLIDER2:" << analogRead(ADC2);
 
-        //std::string requestMessage = "SLIDER2:" + toString(analogRead(ADC2));
+        std::string requestMessage = "SLIDER2:" + std::to_string(analogRead(ADC2));
 
-        sendToMicrobit(requestMessage.str());
+        sendToMicrobit(requestMessage);
     }
     else if (identifier.compare("SSTATE") == 0)
     {

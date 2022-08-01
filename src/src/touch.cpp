@@ -12,14 +12,14 @@ volatile uint16_t lasttouched = 0;
 
 TaskHandle_t TouchTask;
 
-//https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
-// template <class T>
-// std::string toString(const T &value)
-// {
-//     std::ostringstream os;
-//     os << value;
-//     return os.str();
-// }
+// https://stackoverflow.com/questions/32140018/why-is-this-program-giving-an-error-to-string-is-not-a-member-of-std-why/32140400
+//  template <class T>
+//  std::string toString(const T &value)
+//  {
+//      std::ostringstream os;
+//      os << value;
+//      return os.str();
+//  }
 
 void touch_setup()
 {
@@ -27,7 +27,7 @@ void touch_setup()
     uint8_t touchThreshold = preferences.getUShort("tch_threshold", 12U);
     uint8_t releaseThreshold = preferences.getUShort("tch_release", 6U);
 
-    //wait for the i2c semaphore flag to become available
+    // wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     // Default address is 0x5A
@@ -38,16 +38,16 @@ void touch_setup()
         POST(3);
     }
 
-    //give back the i2c flag for the next task
+    // give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    //read once and set array as the baseline
+    // read once and set array as the baseline
     lasttouched = readAndSetTouchArray();
 
     xTaskCreatePinnedToCore(
         &touch_task,
         "Touch Task",
-        2000, //uxTaskGetStackHighWaterMark = 1750
+        2000, // uxTaskGetStackHighWaterMark = 1750
         NULL,
         touch_task_Priority,
         &TouchTask,
@@ -61,16 +61,16 @@ void touch_task(void *pvParameter)
     // Serial.print("touch_task uxTaskGetStackHighWaterMark:");
     // Serial.println(uxHighWaterMark);
 
-    //uint32_t ulNotifiedValue = 0;
+    // uint32_t ulNotifiedValue = 0;
 
     for (;;)
     {
         delay(100);
 
-        //read and set array returning the current touched
+        // read and set array returning the current touched
         auto currtouched = readAndSetTouchArray();
 
-        //remember last touch
+        // remember last touch
         lasttouched = currtouched;
     }
 
@@ -86,7 +86,7 @@ void touch_deal_with_message(messageParts message)
         auto touchThreshold = message.value1;
         auto releaseThreshold = message.value2;
 
-        //store these in the NVM
+        // store these in the NVM
         preferences.putUShort("tch_threshold", touchThreshold);
         preferences.putUShort("tch_release", releaseThreshold);
 
@@ -98,15 +98,15 @@ void touch_deal_with_message(messageParts message)
 
         checkI2Cerrors("Touch (touch_deal_with_message)");
 
-        //give back the i2c flag for the next task
+        // give back the i2c flag for the next task
         xSemaphoreGive(i2cSemaphore);
     }
 }
 
-//function to set the device and set the array
+// function to set the device and set the array
 uint16_t readAndSetTouchArray()
 {
-    //wait for the i2c semaphore flag to become available
+    // wait for the i2c semaphore flag to become available
     xSemaphoreTake(i2cSemaphore, portMAX_DELAY);
 
     checkI2Cerrors("Touch (readAndSetTouchArray)");
@@ -116,38 +116,26 @@ uint16_t readAndSetTouchArray()
 
     checkI2Cerrors("Touch (readAndSetTouchArray)");
 
-    //give back the i2c flag for the next task
+    // give back the i2c flag for the next task
     xSemaphoreGive(i2cSemaphore);
 
-    //always update the array for the touch state command
+    // always update the array for the touch state command
     for (uint8_t i = 0; i < 12; i++)
     {
         // it if *is* touched and *wasnt* touched before, alert!
         if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)))
         {
-            //touchArray[i] = 1;
+            std::string touchStates = "TTOUCHED:" + std::to_string(i);
 
-            std::ostringstream touchStates;
-            touchStates << "TTOUCHED:" << i;
-
-            // std::string touchStates = "TTOUCHED:" << i;
-            // touchStates.append(toString(i));
-
-            sendToMicrobit(touchStates.str());
+            sendToMicrobit(touchStates);
         }
 
         // if it *was* touched and now *isnt*, alert!
         if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)))
         {
-            //touchArray[i] = 0;
+            std::string touchStates = "TRELEASED:" + std::to_string(i);
 
-            // std::string touchStates = "TRELEASED:";
-            // touchStates.append(toString(i));
-
-            std::ostringstream touchStates;
-            touchStates << "TRELEASED:" << i;
-
-            sendToMicrobit(touchStates.str());
+            sendToMicrobit(touchStates);
         }
     }
 

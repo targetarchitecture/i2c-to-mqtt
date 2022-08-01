@@ -5,8 +5,6 @@
 #include "messaging.h"
 #include "esp_wifi.h"
 #include <Streaming.h>
-#include <Stream.h>
-#include <sstream>
 #include <Preferences.h>
 
 void MQTT_setup();

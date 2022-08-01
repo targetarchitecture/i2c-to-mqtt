@@ -134,12 +134,12 @@ void sound_task(void *pvParameters)
             auto fileCount = sound.readFileCounts();
             delay(commandPause);
 
-            //std::string requestMessage = "FILECOUNT:" + toString(fileCount);
+            std::string requestMessage = "FILECOUNT:" + std::to_string(fileCount);
 
-            std::ostringstream requestMessage;
-            requestMessage << "FILECOUNT:" << fileCount;
+            // std::ostringstream requestMessage;
+            // requestMessage << "FILECOUNT:" << fileCount;
 
-            sendToMicrobit(requestMessage.str());
+            sendToMicrobit(requestMessage);
         }
         else if (identifier.compare("SPLAY") == 0)
         {

@@ -34,7 +34,7 @@ void MQTT_setup()
   mqtt_user = preferences.getString("mqtt_user", "public").c_str();
   mqtt_password = preferences.getString("mqtt_password", "public").c_str();
 
-  Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << endl;
+  Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << "\r\n"; //endl;
 
   //if value not set then just bail out
   if (mqtt_server == "")
@@ -102,9 +102,9 @@ void checkMQTTconnection()
     }
 
     //get the unique id into a variable
-    std::ostringstream getEfuseMac;
-    getEfuseMac << BOARDNAME << "_" << ESP.getEfuseMac();
-    std::string mqtt_client = getEfuseMac.str();
+    String wifiMacString = WiFi.macAddress();
+    std::string mqtt_client = BOARDNAME; 
+    mqtt_client = mqtt_client + "_" + wifiMacString.c_str();
 
     Serial << mqtt_client.c_str() << ":" << mqtt_user.c_str() << ":" << mqtt_password.c_str() << endl;
 
