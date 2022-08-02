@@ -1,4 +1,4 @@
-# Ada' Super Computer (SN8)
+# Ada' Super Computer (SN10)
 
-This is the eigth version of Ada's Super Computer to be built on a PCB board.
+This is the tenth version of Ada's Super Computer to be built on a PCB board.
 
