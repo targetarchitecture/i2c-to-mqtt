@@ -28,10 +28,10 @@ void microbit_setup()
     //Install UART driver, and get the queue (buffer size = 1024)
     uart_driver_install(BBC_UART_NUM, RX_BUF_SIZE, TX_BUF_SIZE, 50, &Microbit_Receive_Queue, 0);
 
-    //uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0,0);
+    uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0,0);
 
     //The one below doesn't seem super reliable
-     uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0); 
+     //uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0); 
 
     uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
 
@@ -79,7 +79,7 @@ void microbit_receive_task(void *pvParameters)
                 }
 
 #if SHOW_SERIAL
-                Serial << "RX:" << receivedMsg.c_str() << endl;
+                Serial << "RX (UART_DATA):" << receivedMsg.c_str() << endl;
 #endif
 
                 dealWithMessage(receivedMsg);
@@ -142,7 +142,7 @@ void microbit_receive_task(void *pvParameters)
                 }
 
 #if SHOW_SERIAL
-                Serial << "RX:" << receivedMsg.c_str() << endl;
+                Serial << "RX (UART_PATTERN_DET):" << receivedMsg.c_str() << endl;
 #endif
 
                 dealWithMessage(receivedMsg);

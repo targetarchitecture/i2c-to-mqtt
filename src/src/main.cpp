@@ -83,7 +83,7 @@ void setup()
 
   Serial << BOARDNAME << " completed in " << millis() << "ms" << endl;
 
-  // runTests();
+  runTests();
 }
 
 void POST(uint8_t flashes)
@@ -138,7 +138,7 @@ void runTests()
 
   //dealWithMessage("SUBSCRIBE,ps2/buttons ");
 
-  // dealWithMessage("STARTING ");
+  //dealWithMessage("STARTING ");
   // dealWithMessage("MLINEAR,8,0,180,10,100,500 ");
 
   // dealWithMessage("LLEDALLON ");
