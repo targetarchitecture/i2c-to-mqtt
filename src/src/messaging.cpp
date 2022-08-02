@@ -11,21 +11,21 @@ void dealWithMessage(std::string message)
 
     std::string identifier = queuedMsg.identifier;
 
-    //Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
-    //Serial << "identifier.compare('LLEDALLON'): " << identifier.compare("LLEDALLON") << endl;
+    // Serial << "dealWithMessage identifier: " << identifier.c_str() << endl;
+    // Serial << "identifier.compare('LLEDALLON'): " << identifier.compare("LLEDALLON") << endl;
 
     if (identifier.compare("RESTART") == 0)
     {
-        //Serial << "ESP.restart()" << endl;
+        // Serial << "ESP.restart()" << endl;
 
-        //reboot ESP32...
+        // reboot ESP32...
         ESP.restart();
     }
     else if (identifier.compare("SVOL") == 0 || identifier.compare("SFILECOUNT") == 0 ||
              identifier.compare("SPLAY") == 0 || identifier.compare("SPAUSE") == 0 ||
              identifier.compare("SRESUME") == 0 || identifier.compare("SSTOP") == 0)
     {
-        //Serial << "Sound_Queue" << endl;
+        // Serial << "Sound_Queue" << endl;
 
         xQueueSend(Sound_Queue, &queuedMsg, portMAX_DELAY);
     }
@@ -97,7 +97,7 @@ void dealWithMessage(std::string message)
             }
         }
 
-        //Serial << swithStates.c_str() << endl;
+        // Serial << swithStates.c_str() << endl;
 
         sendToMicrobit(swithStates);
     }
@@ -133,7 +133,7 @@ void dealWithMessage(std::string message)
 
 messageParts processQueueMessage(std::string msg)
 {
-    //Serial << msg.length() << endl;
+    // Serial << msg.length() << endl;
 
     std::istringstream f(msg);
     std::string part;
@@ -154,22 +154,22 @@ messageParts processQueueMessage(std::string msg)
                 // Serial << msg.c_str() << endl;
                 // Serial << part.c_str() << endl;
 
-                //Serial << "part.c_str():" << part.c_str() << endl;
+                // Serial << "part.c_str():" << part.c_str() << endl;
 
                 mParts.value1 = atoi(part.c_str());
 
-                //Serial << "mParts.value1:" << mParts.value1 << endl;
+                // Serial << "mParts.value1:" << mParts.value1 << endl;
             }
             catch (const std::exception &e)
             {
-                //Serial << "part1 exception:" << mParts.part1 << endl;
-                //strcpy(mParts.part1, part.c_str());
+                // Serial << "part1 exception:" << mParts.part1 << endl;
+                // strcpy(mParts.part1, part.c_str());
             }
 
-            //always store the value as a string
+            // always store the value as a string
             strcpy(mParts.part1, part.c_str());
 
-            //Serial << "mParts.part1:" << mParts.part1 << endl;
+            // Serial << "mParts.part1:" << mParts.part1 << endl;
         }
         if (index == 2)
         {
@@ -185,7 +185,7 @@ messageParts processQueueMessage(std::string msg)
 
             strcpy(mParts.part2, part.c_str());
 
-            //Serial << "mParts.part2:" << mParts.part2 << endl;
+            // Serial << "mParts.part2:" << mParts.part2 << endl;
         }
         if (index == 3)
         {

@@ -22,23 +22,24 @@ void microbit_setup()
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
     uart_param_config(UART_NUM_2, &uart_config);
 
-    //Set UART pins to the BBC Microbit (UART2)
+    // Set UART pins to the BBC Microbit (UART2)
     uart_set_pin(BBC_UART_NUM, ESP_TX_MICROBIT_RX, ESP_RX_MICROBIT_TX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-    //Install UART driver, and get the queue (buffer size = 1024)
+    // Install UART driver, and get the queue (buffer size = 1024)
     uart_driver_install(BBC_UART_NUM, RX_BUF_SIZE, TX_BUF_SIZE, 50, &Microbit_Receive_Queue, 0);
 
-    uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0,0);
+    // apparently pattern detection not actually needed! (2.8.22)
+    // uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0,0);
 
-    //The one below doesn't seem super reliable
-     //uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0); 
+    // The one below doesn't seem super reliable
+    // uart_enable_pattern_det_baud_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0, 0);
 
-    uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
+    // uart_pattern_queue_reset(UART_NUM_2, 50); //used to be 20
 
-    //Create a task to handler UART event from ISR
+    // Create a task to handler UART event from ISR
     xTaskCreate(microbit_receive_task, "Microbit RX Task", 4096, NULL, BBC_RX_Priority, &MicrobitRXTask);
 
-    //Create a task to handle send UART data to Microbit
+    // Create a task to handle send UART data to Microbit
     xTaskCreatePinnedToCore(microbit_transmit_task, "Microbit TX Task", 2048, NULL, BBC_TX_Priority, &MicrobitTXTask, 1);
 }
 
@@ -64,7 +65,7 @@ void microbit_receive_task(void *pvParameters)
             {
             case UART_DATA:
             {
-                //Serial << " UART_DATA uart_event.size:" << uart_event.size << endl;
+                // Serial << " UART_DATA uart_event.size:" << uart_event.size << endl;
 
                 ESP_LOGI(TAG, "UART_DATA");
                 uart_read_bytes(UART_NUM_2, received_buffer, uart_event.size, portMAX_DELAY);
@@ -119,7 +120,7 @@ void microbit_receive_task(void *pvParameters)
             break;
             case UART_PATTERN_DET:
             {
-                //Serial << " UART_PATTERN_DET uart_event.size:" << uart_event.size << endl;
+                // Serial << " UART_PATTERN_DET uart_event.size:" << uart_event.size << endl;
 
                 ESP_LOGI(TAG, "UART_PATTERN_DET");
                 uart_get_buffered_data_len(BBC_UART_NUM, &datalen);
@@ -129,9 +130,9 @@ void microbit_receive_task(void *pvParameters)
                 uint8_t pat[PATTERN_LEN + 1];
                 memset(pat, 0, sizeof(pat));
                 uart_read_bytes(BBC_UART_NUM, pat, PATTERN_LEN, pdMS_TO_TICKS(100));
-                //printf("data: %.*s === pattern: %s\n", datalen - PATTERN_LEN, received_buffer, pat);
+                // printf("data: %.*s === pattern: %s\n", datalen - PATTERN_LEN, received_buffer, pat);
 
-                //added this extra place to catch UART messages
+                // added this extra place to catch UART messages
                 receivedMsg.clear();
 
                 for (size_t i = 0; i < uart_event.size; i++)
@@ -161,7 +162,7 @@ void microbit_receive_task(void *pvParameters)
 
 void sendToMicrobit(std::string msg)
 {
-    //the queue needs to work with a copy
+    // the queue needs to work with a copy
     char queuedMsg[MAXBBCMESSAGELENGTH];
     strcpy(queuedMsg, msg.c_str());
 
@@ -180,13 +181,13 @@ void microbit_transmit_task(void *pvParameters)
             Serial << "TX:" << msg << endl;
 #endif
 
-            //append # to the end so the microbit knows the end of the line
+            // append # to the end so the microbit knows the end of the line
             strcat(msg, "\n");
 
-            //int bytes = 
+            // int bytes =
             uart_write_bytes(BBC_UART_NUM, msg, strlen(msg));
 
-            //Added on 1/12/20 to try to stop flooding
+            // Added on 1/12/20 to try to stop flooding
             delay(5);
         }
     }

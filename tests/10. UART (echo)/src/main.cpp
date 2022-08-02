@@ -9,12 +9,20 @@
 
 #define TAG "UART"
 
-#define TXD_PIN 12
-#define RXD_PIN 13
+#define TXD_PIN 18
+#define RXD_PIN 5
 
 #define RX_BUF_SIZE 1024
 #define TX_BUF_SIZE 1024
-#define PATTERN_LEN 3
+#define PATTERN_LEN 1
+
+
+#define UARTMESSAGELENGTH 128
+#define MAXBBCMESSAGELENGTH 128
+ 
+#define PATTERN_FROM_MICROBIT 0x0D //Carriage Return
+
+
 
 QueueHandle_t uart_queue;
 
@@ -117,7 +125,9 @@ void setup()
   uart_set_pin(UART_NUM_2, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
   uart_driver_install(UART_NUM_2, RX_BUF_SIZE, TX_BUF_SIZE, 20, &uart_queue, 0);
 
-  uart_enable_pattern_det_intr(UART_NUM_2, 0x7f, 1, 0, 0, 0);
+  //uart_enable_pattern_det_intr(UART_NUM_2, 0x7f, 1, 0, 0, 0);
+
+    uart_enable_pattern_det_intr(UART_NUM_2, PATTERN_FROM_MICROBIT, PATTERN_LEN, 0, 0,0);
 
   uart_pattern_queue_reset(UART_NUM_2, 20);
   xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 10, NULL);
@@ -129,5 +139,5 @@ void loop()
 
   String msg = "1\n";
 
-  int bytes = uart_write_bytes(UART_NUM_2, msg.c_str(), strlen(msg.c_str()));
+ // int bytes = uart_write_bytes(UART_NUM_2, msg.c_str(), strlen(msg.c_str()));
 }
