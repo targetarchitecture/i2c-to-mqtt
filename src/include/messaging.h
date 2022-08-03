@@ -5,8 +5,8 @@
 #include "pins.h"
 #include <vector>
 #include <Streaming.h>
- #include <Stream.h>
- #include <sstream>
+#include <Stream.h>
+#include <sstream>
 #include <Preferences.h>
 
 typedef struct
@@ -34,7 +34,7 @@ extern QueueHandle_t MQTT_Command_Queue;
 extern volatile int32_t encoder1Count;
 extern volatile int32_t encoder2Count;
 extern volatile byte switchArray[16];
-//extern volatile int touchArray[12];
+// extern volatile int touchArray[12];
 
 extern Preferences preferences;
 
