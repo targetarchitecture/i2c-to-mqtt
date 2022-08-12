@@ -1,3 +1,4 @@
+#pragma once
 
 //i2c pins
 #define SDA 27
@@ -9,8 +10,8 @@
 #define DFPLAYER_BUSY 17
 
 //BBC Microbit pins
-#define MICROBIT_SCL 18
-#define MICROBIT_SDA 5
+#define ESP_TX_MICROBIT_RX 18
+#define ESP_RX_MICROBIT_TX 5
 
 //ADC pins
 #define ADC1 35
@@ -30,3 +31,8 @@
 
 //LED
 #define ONBOARDLED 2
+
+//interupts
+#define TOUCH_INT 36
+#define SWITCH_INT 13
+#define BBC_INT 39

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "Adafruit_MPR121.h"
-#include "SN7 pins.h"
+#include "SN10 pins.h"
 
 void i2cScan();
 
