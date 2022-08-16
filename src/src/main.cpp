@@ -7,6 +7,7 @@ Rainbow Sparkle Unicorn - SN10
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include <Preferences.h>
+#include "defines.h"
 
 #include "messaging.h"
 #include "microbit-uart.h"

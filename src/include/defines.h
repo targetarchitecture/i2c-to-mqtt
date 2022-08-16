@@ -2,6 +2,8 @@
 
 #define BOARDNAME "SN10"
 
+#include "pin layouts\SN10 pins.h"
+
 //RTOS task priorities (highest is 24) - getting these priorities wrong can make the differance from 1260ms to 347ms
 #define MQTT_task_Priority 2
 #define MQTT_client_task_Priority 6

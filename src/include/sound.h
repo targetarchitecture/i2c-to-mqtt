@@ -2,7 +2,7 @@
 
 #include "messaging.h"
 #include "defines.h"
-#include "pins.h"
+//#include "pins.h"
 #include "DFRobotDFPlayerMini.h"
 
 void sound_setup();

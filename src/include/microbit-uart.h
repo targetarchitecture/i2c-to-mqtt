@@ -2,7 +2,7 @@
 
 #include "driver/uart.h"
 #include "defines.h"
-#include "pins.h"
+//#include "pins.h"
 #include "messaging.h"
 
 extern QueueHandle_t Microbit_Transmit_Queue;
