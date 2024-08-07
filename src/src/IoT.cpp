@@ -21,8 +21,8 @@ TaskHandle_t MQTTPublishTask;
 
 volatile bool ConnectSubscriptions = true;
 
-std::vector<std::string> SubscribedTopics;
-std::vector<std::string> UnsubscribedTopics;
+//std::vector<std::string> SubscribedTopics;
+//std::vector<std::string> UnsubscribedTopics;
 
 void MQTT_setup()
 {
@@ -34,12 +34,12 @@ void MQTT_setup()
   mqtt_user = preferences.getString("mqtt_user", "public").c_str();
   mqtt_password = preferences.getString("mqtt_password", "public").c_str();
 
-  Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << "\r\n"; //endl;
+  //Serial << "MQTT Server from NVM:" << mqtt_server.c_str() << "\r\n"; //endl;
 
   //if value not set then just bail out
   if (mqtt_server == "")
   {
-     Serial << "MQTT Server not set" << endl;
+   //  Serial << "MQTT Server not set" << endl;
 
     return;
   }
@@ -49,23 +49,23 @@ void MQTT_setup()
   MQTTClient.setServer(mqtt_server.c_str(), 1883);
   MQTTClient.setCallback(recieveMessage);
 
-  xTaskCreatePinnedToCore(
-      MQTT_command_task,   /* Task function. */
-      "MQTT Command Task", /* name of task. */
-      2046,                /* Stack size of task (uxTaskGetStackHighWaterMark:1336) */
-      NULL,                /* parameter of the task */
-      MQTT_task_Priority,  /* priority of the task */
-      &MQTTCommandTask,    /* Task handle to keep track of created task */
-      1);
+  // xTaskCreatePinnedToCore(
+  //     MQTT_command_task,   /* Task function. */
+  //     "MQTT Command Task", /* name of task. */
+  //     2046,                /* Stack size of task (uxTaskGetStackHighWaterMark:1336) */
+  //     NULL,                /* parameter of the task */
+  //     MQTT_task_Priority,  /* priority of the task */
+  //     &MQTTCommandTask,    /* Task handle to keep track of created task */
+  //     1);
 
-  xTaskCreatePinnedToCore(
-      MQTT_Publish_task,         /* Task function. */
-      "MQTT Publish Task",       /* name of task. */
-      5000,                      /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
-      NULL,                      /* parameter of the task */
-      MQTT_client_task_Priority, /* priority of the task */
-      &MQTTPublishTask,          /* Task handle to keep track of created task */
-      1);
+  // xTaskCreatePinnedToCore(
+  //     MQTT_Publish_task,         /* Task function. */
+  //     "MQTT Publish Task",       /* name of task. */
+  //     5000,                      /* Stack size of task (uxTaskGetStackHighWaterMark:16084) */
+  //     NULL,                      /* parameter of the task */
+  //     MQTT_client_task_Priority, /* priority of the task */
+  //     &MQTTPublishTask,          /* Task handle to keep track of created task */
+  //     1);
 }
 
 void recieveMessage(char *topic, byte *payload, unsigned int length)
@@ -84,9 +84,9 @@ void recieveMessage(char *topic, byte *payload, unsigned int length)
   }
   //Serial.println();
 
-  char msgtosend[MAXBBCMESSAGELENGTH];
-  sprintf(msgtosend, "MQTT:'%s','%s'", topic, receivedMsg.c_str());
-  sendToMicrobit(msgtosend);
+ // char msgtosend[MAXBBCMESSAGELENGTH];
+ // sprintf(msgtosend, "MQTT:'%s','%s'", topic, receivedMsg.c_str());
+ // sendToMicrobit(msgtosend);
 }
 
 void checkMQTTconnection()
