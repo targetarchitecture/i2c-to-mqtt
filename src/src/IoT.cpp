@@ -3,7 +3,7 @@
 #include "defines.h"
 
 WiFiClient client;
-PubSubClient MQTTClient;
+PubSubClient mqttClient;
 
 std::string mqtt_server;   //= "192.168.1.189";
 std::string mqtt_user;     // = "public";
@@ -30,12 +30,12 @@ void MQTT_setup()
   }
 
   // set this up as early as possible
-  MQTTClient.setClient(client);
-  MQTTClient.setServer(mqtt_server.c_str(), 1883);
-  MQTTClient.setCallback(recieveMessage);
+  mqttClient.setClient(client);
+  mqttClient.setServer(mqtt_server.c_str(), 1883);
+  mqttClient.setCallback(mqttMessageReceived);
 }
 
-void recieveMessage(char *topic, byte *payload, unsigned int length)
+void mqttMessageReceived(char *topic, byte *payload, unsigned int length)
 {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -84,7 +84,7 @@ void checkMQTTconnection()
     Serial.print(":");
     Serial.println(mqtt_password.c_str());
 
-    MQTTClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
+    mqttClient.connect(mqtt_client.c_str(), mqtt_user.c_str(), mqtt_password.c_str());
 
     delay(500);
 
@@ -97,7 +97,7 @@ void checkMQTTconnection()
   // set to true to get the subscriptions setup again
   mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
 
-  MQTTClient.subscribe(mqtt_topic.c_str());
+  mqttClient.subscribe(mqtt_topic.c_str());
 
   Serial.print("MQTTClient now subscribed to ");
   Serial.println(mqtt_topic.c_str());

@@ -7,6 +7,6 @@
 
 void MQTT_setup();
 void checkMQTTconnection();
-void recieveMessage(char *topic, byte *payload, unsigned int length);
+void mqttMessageReceived(char *topic, byte *payload, unsigned int length);
 
 extern Preferences preferences;
