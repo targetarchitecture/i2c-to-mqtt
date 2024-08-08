@@ -141,7 +141,7 @@ void Wifi_setup()
     // if value not set then just bail out
     if (storedSSID == "")
     {
-    //    Serial << "SSID not set" << endl;
+        Serial.println("SSID not set");
 
         return;
     }

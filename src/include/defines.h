@@ -1,5 +1,4 @@
 #pragma once
 
- #define BOARDNAME "DOODLE"
-// #include "pin layouts\SN10 pins.h"
-
+#define BOARDNAME "DOODLE"
+#define ONBOARDLED 2
