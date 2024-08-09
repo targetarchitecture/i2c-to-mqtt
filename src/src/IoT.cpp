@@ -5,18 +5,15 @@
 WiFiClient client;
 PubSubClient mqttClient;
 
-std::string mqtt_server;   //= "192.168.1.189";
-std::string mqtt_user;     // = "public";
-std::string mqtt_password; // = "public";
-std::string mqtt_topic;
-
 void MQTT_setup()
 {
   // read from NVM
+  preferences.begin(BOARDNAME, false);
   mqtt_server = preferences.getString("mqtt_server", "").c_str();
   mqtt_user = preferences.getString("mqtt_user", "public").c_str();
   mqtt_password = preferences.getString("mqtt_password", "public").c_str();
   mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
+  preferences.end();
 
   Serial.print("MQTT Server from NVM:");
   Serial.println(mqtt_server.c_str());
@@ -47,18 +44,11 @@ void mqttMessageReceived(char *topic, byte *payload, unsigned int length)
   {
     char c = payload[i];
 
-    // Serial.print(c);
-
     receivedMsg += c;
   }
-  // Serial.println();
 
   Serial.print("Message:");
   Serial.println(receivedMsg.c_str());
-
-  // char msgtosend[MAXBBCMESSAGELENGTH];
-  // sprintf(msgtosend, "MQTT:'%s','%s'", topic, receivedMsg.c_str());
-  // sendToMicrobit(msgtosend);
 }
 
 void checkMQTTconnection()
@@ -95,11 +85,10 @@ void checkMQTTconnection()
   Serial.println("ms :)");
 
   // set to true to get the subscriptions setup again
-  mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
+  //mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
 
   mqttClient.subscribe(mqtt_topic.c_str());
 
   Serial.print("MQTTClient now subscribed to ");
   Serial.println(mqtt_topic.c_str());
 }
-

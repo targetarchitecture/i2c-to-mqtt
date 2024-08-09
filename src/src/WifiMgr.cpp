@@ -1,8 +1,6 @@
 #include <Arduino.h>
+#include "defines.h"
 #include "WifiMgr.h"
-
-String storedSSID;
-String storedWifiPassword;
 
 /*
   WiFi Events
