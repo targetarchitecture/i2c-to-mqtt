@@ -68,7 +68,7 @@ void checkMQTTconnection()
 
   do
   {
-    if (MQTTClient.connected() == true)
+    if (mqttClient.connected() == true)
     {
       break;
     }

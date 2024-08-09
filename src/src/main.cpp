@@ -15,6 +15,18 @@ void setup()
 {
   preferences.begin(BOARDNAME, false);
 
+/*
+  preferences.putString("ssid", "the robot network");
+  preferences.putString("password", "isaacasimov");
+
+  preferences.putString("mqtt_server", "192.168.1.189");
+  preferences.putString("mqtt_user", "public");
+  preferences.putString("mqtt_password", "public");
+
+  preferences.putUShort("tch_threshold", 12);
+  preferences.putUShort("tch_release", 6);
+*/
+
   // Set UART log level
   esp_log_level_set(BOARDNAME, ESP_LOG_VERBOSE);
 
@@ -28,8 +40,8 @@ void setup()
   // call the microbit first and then the other setup methods
 
   i2c_setup();
-  Wifi_setup();
-  MQTT_setup();
+  //Wifi_setup();
+  //MQTT_setup();
 
   Serial.print(BOARDNAME);
   Serial.print(" completed in ");

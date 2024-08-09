@@ -6,6 +6,7 @@ void ReceivedCommand(int howMany)
 {
     String command;
     String cmdValue = "";
+    String returnValue = "";
 
     Serial.println("ReceivedCommand:");
 
@@ -18,6 +19,7 @@ void ReceivedCommand(int howMany)
     Serial.println(command.c_str());
 
     int index = command.indexOf(':');
+
     if (index > 0)
     {
         cmdValue = command.substring(index + 1);
@@ -54,14 +56,37 @@ void ReceivedCommand(int howMany)
     }
 }
 
-void SendData()
+volatile uint32_t i = 0;
+
+void onRequest()
 {
+    Serial.println("onRequest");
+}
+
+void onReceive(int len)
+{
+    Serial.printf("onReceive[%d]: ", len);
+    while (Wire.available())
+    {
+        Serial.write(Wire.read());
+    }
+    Serial.println();
+
+    // #if CONFIG_IDF_TARGET_ESP32
+    char message[64];
+    snprintf(message, 64, "%lu", i);
+    Wire.slaveWrite((uint8_t *)message, strlen(message));
+    Serial.print("Buffer ready with:");
+    Serial.println(message);
+    // #endif
+
+    i = i + 1;
 }
 
 void i2c_setup()
 {
     // start i2c
-    Wire.begin(121);                 // Join I2C bus as the slave with address 121
-    Wire.onReceive(ReceivedCommand); // When the data transmission is detected call receiveEvent function
-    Wire.onRequest(SendData);
+    Wire.onReceive(onReceive); // When the data transmission is detected call receiveEvent function
+    Wire.onRequest(onRequest);
+    Wire.begin(121); // Join I2C bus as the slave with address 121
 }
