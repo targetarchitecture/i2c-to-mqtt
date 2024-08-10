@@ -130,8 +130,8 @@ void WiFiEvent(WiFiEvent_t event)
 void Wifi_setup()
 {
     // get the values out of NVM
-    storedSSID = preferences.getString("ssid", "");
-    storedWifiPassword = preferences.getString("password", "");
+    storedSSID = preferences.getString("ssid", "").c_str();
+    storedWifiPassword = preferences.getString("password", "").c_str();
 
     Serial.print("SSID From NVM:");
     Serial.println(storedSSID.c_str());

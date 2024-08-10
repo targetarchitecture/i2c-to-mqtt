@@ -3,6 +3,7 @@ MQTT to i2c
 */
 #include <Arduino.h>
 #include <Wire.h>
+#include <map>
 #include <Preferences.h>
 #include "defines.h"
 #include "IoT.h"
@@ -11,18 +12,20 @@ MQTT to i2c
 
 Preferences preferences;
 
-String storedSSID;
-String storedWifiPassword;
+std::string storedSSID;
+std::string storedWifiPassword;
 
-std::string mqtt_server;   //= "192.168.1.189";
-std::string mqtt_user;     // = "public";
-std::string mqtt_password; // = "public";
-std::string mqtt_topic;
+std::string mqtt_server;
+std::string mqtt_user;
+std::string mqtt_password;
+
+std::map<std::string, std::string> mqtt_topics;
+
+// std::string mqtt_topic;
+// std::string mqtt_topic_value;
 
 void setup()
 {
-
-
   /*
     preferences.putString("ssid", "the robot network");
     preferences.putString("password", "isaacasimov");

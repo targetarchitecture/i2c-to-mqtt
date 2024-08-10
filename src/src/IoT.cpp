@@ -49,6 +49,8 @@ void mqttMessageReceived(char *topic, byte *payload, unsigned int length)
 
   Serial.print("Message:");
   Serial.println(receivedMsg.c_str());
+
+   mqtt_topic_value = receivedMsg.c_str();
 }
 
 void checkMQTTconnection()

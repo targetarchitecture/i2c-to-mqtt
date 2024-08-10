@@ -70,11 +70,18 @@ void onReceive(int len)
     }
     else if (command.startsWith("mqtt_topic"))
     {
-        preferences.begin(BOARDNAME, false);
-        preferences.putString("mqtt_topic", cmdValue.c_str());
-        preferences.end();
-        mqtt_topic = cmdValue.c_str();
-        returnValue = "6";
+        //subscribe to topic
+        auto it = mqtt_topics.find(cmdValue.c_str());
+        
+        if (it == mqtt_topics.end())
+        {
+            mqtt_topics[cmdValue.c_str()] = cmdValue.c_str();
+
+            mqttClient.subscribe(mqtt_topic.c_str());
+        } else {
+
+        }
+        returnValue = mqtt_topic_value.c_str();
     }
 
 #if CONFIG_IDF_TARGET_ESP32

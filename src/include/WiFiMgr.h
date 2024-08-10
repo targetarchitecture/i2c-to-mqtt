@@ -8,5 +8,5 @@ void WiFiEvent(WiFiEvent_t event);
 
 extern Preferences preferences;
 
-extern String storedSSID;
-extern String storedWifiPassword;
+extern std::string storedSSID;
+extern std::string storedWifiPassword;
