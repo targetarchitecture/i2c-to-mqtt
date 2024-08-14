@@ -70,18 +70,19 @@ void onReceive(int len)
     }
     else if (command.startsWith("mqtt_topic"))
     {
-        //subscribe to topic
+        // subscribe to topic
         auto it = mqtt_topics.find(cmdValue.c_str());
-        
+
         if (it == mqtt_topics.end())
         {
             mqtt_topics[cmdValue.c_str()] = cmdValue.c_str();
 
-            mqttClient.subscribe(mqtt_topic.c_str());
-        } else {
-
+            mqttClient.subscribe(cmdValue.c_str());
         }
-        returnValue = mqtt_topic_value.c_str();
+        // else
+        // {
+        // }
+        returnValue = mqtt_topics[cmdValue.c_str()].c_str();
     }
 
 #if CONFIG_IDF_TARGET_ESP32
@@ -102,7 +103,7 @@ void i2c_setup()
     //    preferences.end();
 
     // start i2c
+    Wire.begin(121);           // Join I2C bus as the slave with address 121
     Wire.onReceive(onReceive); // When the data transmission is detected call receiveEvent function
     Wire.onRequest(onRequest);
-    Wire.begin(121); // Join I2C bus as the slave with address 121
 }

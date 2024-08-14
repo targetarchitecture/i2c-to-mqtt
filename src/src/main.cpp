@@ -48,8 +48,17 @@ void setup()
   Serial.println("");
   Serial.println("");
 
-  // call the microbit first and then the other setup methods
-  preferences.begin(BOARDNAME, false);
+  bool success = preferences.begin(BOARDNAME, false);
+
+  preferences.putString("ssid", "the robot network");
+  preferences.putString("password", "isaacasimov");
+
+  preferences.putString("mqtt_server", "192.168.1.189");
+  preferences.putString("mqtt_user", "public");
+  preferences.putString("mqtt_password", "public");
+
+  Serial.print("NVM success:");
+  Serial.println(success);
   Serial.print("NVM ssid:");
   Serial.println(preferences.getString("ssid", ""));
   Serial.print("NVM password:");
@@ -60,8 +69,8 @@ void setup()
   Serial.println(preferences.getString("mqtt_user", ""));
   Serial.print("NVM mqtt_password:");
   Serial.println(preferences.getString("mqtt_password", ""));
-  Serial.print("NVM mqtt_topic:");
-  Serial.println(preferences.getString("mqtt_topic", ""));
+  // Serial.print("NVM mqtt_topic:");
+  // Serial.println(preferences.getString("mqtt_topic", ""));
   preferences.end();
 
   i2c_setup();

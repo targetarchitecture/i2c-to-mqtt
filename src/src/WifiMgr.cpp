@@ -57,6 +57,24 @@ void WiFiEvent(WiFiEvent_t event)
     case SYSTEM_EVENT_STA_DISCONNECTED:
         Serial.println("Disconnected from WiFi access point");
         Serial.println("Reconnecting...");
+
+        // get the values out of NVM
+         preferences.begin(BOARDNAME, false);
+        storedSSID = preferences.getString("ssid", "").c_str();
+        storedWifiPassword = preferences.getString("password", "").c_str();
+        preferences.end();
+
+        Serial.print("SSID From NVM:");
+        Serial.println(storedSSID.c_str());
+
+        // if value not set then just bail out
+        if (storedSSID == "")
+        {
+            Serial.println("SSID not set");
+
+            break;
+        }
+
         WiFi.begin(storedSSID.c_str(), storedWifiPassword.c_str());
         break;
     case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
@@ -130,8 +148,10 @@ void WiFiEvent(WiFiEvent_t event)
 void Wifi_setup()
 {
     // get the values out of NVM
+    bool success = preferences.begin(BOARDNAME, false);
     storedSSID = preferences.getString("ssid", "").c_str();
     storedWifiPassword = preferences.getString("password", "").c_str();
+    preferences.end();
 
     Serial.print("SSID From NVM:");
     Serial.println(storedSSID.c_str());

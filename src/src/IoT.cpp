@@ -12,7 +12,7 @@ void MQTT_setup()
   mqtt_server = preferences.getString("mqtt_server", "").c_str();
   mqtt_user = preferences.getString("mqtt_user", "public").c_str();
   mqtt_password = preferences.getString("mqtt_password", "public").c_str();
-  mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
+  // mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
   preferences.end();
 
   Serial.print("MQTT Server from NVM:");
@@ -50,7 +50,7 @@ void mqttMessageReceived(char *topic, byte *payload, unsigned int length)
   Serial.print("Message:");
   Serial.println(receivedMsg.c_str());
 
-   mqtt_topic_value = receivedMsg.c_str();
+  mqtt_topics[topic] = receivedMsg.c_str();
 }
 
 void checkMQTTconnection()
@@ -87,10 +87,11 @@ void checkMQTTconnection()
   Serial.println("ms :)");
 
   // set to true to get the subscriptions setup again
-  //mqtt_topic = preferences.getString("mqtt_topic", "").c_str();
+  for (auto const &x : mqtt_topics)
+  {
+    mqttClient.subscribe(x.first.c_str());
 
-  mqttClient.subscribe(mqtt_topic.c_str());
-
-  Serial.print("MQTTClient now subscribed to ");
-  Serial.println(mqtt_topic.c_str());
+    Serial.print("MQTTClient now subscribed to ");
+    Serial.println(x.first.c_str());
+  }
 }
